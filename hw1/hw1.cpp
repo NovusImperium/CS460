@@ -23,6 +23,12 @@ bool operator>(const fraction &lhs, const fraction &rhs) { return lhs.dnum > rhs
 // equality operator overide for the fraction struct
 bool operator==(const fraction &lhs, const fraction &rhs) { return lhs.dnum == rhs.dnum; }
 
+struct tree{
+    tree * r;
+    tree * l;
+    fraction f;
+};
+
 /* Misc functions for dealing with math and fractions */
 // find and return the greatest common divisor of ints a and b
 unsigned int gcd(unsigned int u, unsigned int v);
@@ -32,6 +38,14 @@ void reduce(fraction &f);
 /* Functions for handling console IO */
 // read and parse a line from stdin, return true/false if read was possible
 bool readline(fraction &f);
+// Print all fractions to the console
+void print_fractions(std::vector<fraction> &fs);
+
+int main(void) {
+    std::vector<fraction> fs;
+
+    return 0;
+}
 
 // iterative Stein's Algorithm borrowed from Wikipedia
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm#Iterative_version_in_C
@@ -73,6 +87,12 @@ unsigned int gcd(unsigned int u, unsigned int v) {
     return u << shift;
 }
 
+// insert the fraction into bst, insertion code borrowed from SO
+// http://stackoverflow.com/questions/18774858/using-binary-search-with-vectors
+void insert(tree * fs, fraction &f) {
+    // step thru tree and insert
+}
+
 void reduce(fraction &f) {
     if (f.num >= f.den) {
         f.whole += f.num / f.den;
@@ -102,7 +122,13 @@ bool readline(fraction &f) {
         int whole, num, den;
         char div;
         if ((ss >> whole) && (ss >> num) && (ss >> div) && (ss >> den)) {
-            
+            if (whole < 0 || (whole == 0 && num < 0)) {
+                f.neg = true;
+            }
+            f.whole = (unsigned int) whole;
+            f.num = (unsigned int) num;
+            f.den = (unsigned int) den;
+            reduce(f);
             return true;
         }
         else {
