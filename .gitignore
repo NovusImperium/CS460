@@ -1,3 +1,4 @@
 *.o
 *.sw[po]
-
+*.out
+*.prof
