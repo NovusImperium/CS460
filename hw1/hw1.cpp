@@ -9,10 +9,10 @@
 /* struct to hold the logical representation of the fraction */
 typedef struct {
     bool neg;   // flag set to 'true' if the number is negative
-    unsigned int whole;
-    unsigned int num;
-    unsigned int den;
-    double dnum;
+    int whole;
+    int num;
+    int den;
+    float dnum;
 } fraction;
 // Convert the fraction into a string for output
 std::string print_fraction(const fraction &f);
@@ -35,7 +35,7 @@ void insert(tree * root, fraction &f);
 
 /* Misc functions for dealing with math and fractions */
 // find and return the greatest common divisor of ints a and b
-unsigned int gcd(unsigned int u, unsigned int v);
+int gcd(int u, int v);
 // reduce the number to a proper fraction
 void reduce(fraction &f);
 
@@ -45,6 +45,7 @@ bool readline(fraction &f);
 // Print all fractions to the console
 void print_fractions(tree * root);
 
+//* debug */ static int lnum = 0;
 int main(void) {
     // default fraction
     fraction d;
@@ -56,6 +57,7 @@ int main(void) {
     tree * fs = new tree;
     fraction tmp = d;
     if (readline(tmp)) {
+        //* debug */ ++lnum;
         fs->f = tmp;
         fs->l = NULL;
         fs->r = NULL;
@@ -63,6 +65,7 @@ int main(void) {
         while (true) {
             fraction f = d;
             if (readline(f)) {
+                //* debug */ ++lnum;
                 insert(fs, f);
             }
             else {
@@ -78,7 +81,7 @@ int main(void) {
 
 // iterative Stein's Algorithm borrowed from Wikipedia
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm#Iterative_version_in_C
-unsigned int gcd(unsigned int u, unsigned int v) {
+int gcd(int u, int v) {
     int shift;
 
     /* GCD(0,v) == v; GCD(u,0) == u, GCD(0,0) == 0 */
@@ -107,7 +110,7 @@ unsigned int gcd(unsigned int u, unsigned int v) {
          * swapping is just pointer movement, and the subtraction
          * can be done in-place. */
         if (u > v) {
-            unsigned int t = v; v = u; u = t;  // Swap u and v.
+            int t = v; v = u; u = t;  // Swap u and v.
         }
         v = v - u;  // Here v >= u.
     } while (v != 0);
@@ -153,7 +156,7 @@ void reduce(fraction &f) {
     }
 
     if (f.num > 0) {
-        unsigned int d = gcd(f.num, f.den);
+        int d = gcd(f.num, f.den);
         f.num /= d;
         f.den /= d;
     }
@@ -165,7 +168,7 @@ void reduce(fraction &f) {
         f.neg = f.whole != 0 || f.num != 0;
     }
 
-    f.dnum = (f.neg ? -1 : 1) * (f.whole + f.num / f.den);
+    f.dnum = (f.neg ? -1 : 1) * (((float) f.whole) + f.num / ((float)f.den));
 }
 
 bool readline(fraction &f) {
@@ -196,14 +199,16 @@ bool readline(fraction &f) {
             }
             //* debug */ std::cout << (f.neg ? '-' : ' ') << f.whole << ' ' << f.num << '/' << f.den << std::endl;
             reduce(f);
-            //* debug */ std::cout << (f.neg ? '-' : ' ') << f.whole << ' ' << f.num << '/' << f.den << std::endl << std::endl;;
+            //* debug */ std::cout << (f.neg ? '-' : ' ') << f.whole << ' ' << f.num << '/' << f.den << std::endl << std::endl;
             return true;
         }
         else {
+            //* debug */ std::cout << "parse failed on line#" << lnum << std::endl;
             return false;
         }
     }
     else {
+        //* debug */ std::cout << "getline failed on line#" << lnum << std::endl;
         return false;
     }
 }
@@ -222,7 +227,7 @@ std::string print_fraction(const fraction &f) {
     else {
         s << f.whole << " " << f.num << "/" << f.den;
     }
-    /* debug */ s << " : " << f.dnum;
+    //* debug */ s << " : " << f.dnum;
     return s.str();
 }
 
