@@ -4,7 +4,7 @@
 
 #include <sstream>
 #include <iostream>
-#include <vector>
+#include <cstdlib>
 
 /* struct to hold the logical representation of the fraction */
 typedef struct {
@@ -23,11 +23,15 @@ bool operator>(const fraction &lhs, const fraction &rhs) { return lhs.dnum > rhs
 // equality operator overide for the fraction struct
 bool operator==(const fraction &lhs, const fraction &rhs) { return lhs.dnum == rhs.dnum; }
 
-struct tree{
-    tree * r;
-    tree * l;
+struct tree_node {
+    struct tree_node * r;
+    struct tree_node * l;
     fraction f;
 };
+// typedef to avoid writing 'struct' everywhere
+typedef struct tree_node tree;
+// insert the fraction into the bst
+void insert(tree * root, fraction &f);
 
 /* Misc functions for dealing with math and fractions */
 // find and return the greatest common divisor of ints a and b
@@ -39,10 +43,35 @@ void reduce(fraction &f);
 // read and parse a line from stdin, return true/false if read was possible
 bool readline(fraction &f);
 // Print all fractions to the console
-void print_fractions(std::vector<fraction> &fs);
+void print_fractions(tree * root);
 
 int main(void) {
-    std::vector<fraction> fs;
+    // default fraction
+    fraction d;
+    d.neg = false;
+    d.whole = 0;
+    d.num = 0;
+    d.den = 0;
+
+    tree * fs = new tree;
+    fraction tmp = d;
+    if (readline(tmp)) {
+        fs->f = tmp;
+        fs->l = NULL;
+        fs->r = NULL;
+
+        while (true) {
+            fraction f = d;
+            if (readline(f)) {
+                insert(fs, f);
+            }
+            else {
+                break;
+            }
+        }
+
+        print_fractions(fs);
+    }
 
     return 0;
 }
@@ -87,10 +116,34 @@ unsigned int gcd(unsigned int u, unsigned int v) {
     return u << shift;
 }
 
-// insert the fraction into bst, insertion code borrowed from SO
-// http://stackoverflow.com/questions/18774858/using-binary-search-with-vectors
-void insert(tree * fs, fraction &f) {
+void insert(tree * root, fraction &f) {
     // step thru tree and insert
+    while (root != NULL) {
+        if (f < root->f) {
+            if (root->l == NULL) {
+                root->l = new tree;
+                root->l->f = f;
+                root->l->l = NULL;
+                root->l->r = NULL;
+                return;
+            }
+            else {
+                root = root->l;
+            }
+        }
+        else {
+            if (root->r == NULL) {
+                root->r = new tree;
+                root->r->f = f;
+                root->r->l = NULL;
+                root->r->r = NULL;
+                return;
+            }
+            else {
+                root = root->r;
+            }
+        }
+    }
 }
 
 void reduce(fraction &f) {
@@ -117,18 +170,33 @@ void reduce(fraction &f) {
 
 bool readline(fraction &f) {
     std::string line;
+    //* debug */ std::cout << (f.neg ? '-' : ' ') << f.whole << ' ' << f.num << '/' << f.den << std::endl;
     if (getline(std::cin, line)) {
         std::stringstream ss(line);
         int whole, num, den;
         char div;
         if ((ss >> whole) && (ss >> num) && (ss >> div) && (ss >> den)) {
-            if (whole < 0 || (whole == 0 && num < 0)) {
+            //* debug */ std::cout << whole << ' ' << num << '/' << den << std::endl;
+            if (whole < 0) {
                 f.neg = true;
+                f.whole = std::abs(whole);
+                f.num = num;
+                f.den = den;
             }
-            f.whole = (unsigned int) whole;
-            f.num = (unsigned int) num;
-            f.den = (unsigned int) den;
+            else if (num < 0) {
+                f.neg = true;
+                f.whole = whole;
+                f.num = std::abs(num);
+                f.den = den;
+            }
+            else {
+                f.whole = whole;
+                f.num = num;
+                f.den = den;
+            }
+            //* debug */ std::cout << (f.neg ? '-' : ' ') << f.whole << ' ' << f.num << '/' << f.den << std::endl;
             reduce(f);
+            //* debug */ std::cout << (f.neg ? '-' : ' ') << f.whole << ' ' << f.num << '/' << f.den << std::endl << std::endl;;
             return true;
         }
         else {
@@ -154,12 +222,14 @@ std::string print_fraction(const fraction &f) {
     else {
         s << f.whole << " " << f.num << "/" << f.den;
     }
-
+    /* debug */ s << " : " << f.dnum;
     return s.str();
 }
 
-void print_fractions(std::vector<fraction> &fs) {
-    for (unsigned int i = 0; i < fs.size(); i++) {
-        std::cout << print_fraction(fs[i]) << std::endl;
+void print_fractions(tree * root) {
+    if (root != NULL) {
+        print_fractions(root->l);
+        std::cout << print_fraction(root->f) << std::endl;
+        print_fractions(root->r);
     }
 }
