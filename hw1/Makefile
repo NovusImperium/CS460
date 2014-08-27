@@ -14,6 +14,9 @@ MKI_OBJECTS=$(HW1_MAIN:.cpp=.o)
 MKI_DEPS=$(HW1_OBJECTS:.o=.d)
 MKI_EXE=mkinput.bin 
 
+INPUT=input
+OUTPUT=output
+
 all: $(HW1_MAIN) $(HW1_EXE)
 
 $(HW1_EXE): $(HW1_OBJECTS)
@@ -21,6 +24,7 @@ $(HW1_EXE): $(HW1_OBJECTS)
 -include $(HW1_DEPS)
 
 input: $(MKI_MAIN) $(MKI_EXE)
+#./$(MKI_EXE) > $(INPUT)
 
 $(MKI_EXE): $(MKI_OBJECTS)
 	$(CXX) $(MKI_OBJECTS) -o $@
@@ -35,5 +39,9 @@ $(HW1_PROF): $(HW1_OBJECTS)
 .cpp.o:
 	$(CXX) $(CFLAGS) -MF $(patsubst %.o,%.d,$@) $< -o $@
 
+run: all
+	./$(HW1_EXE) < $(INPUT) > $(OUTPUT)
+
+
 clean:
-	$(RM) $(MKI_OBJECTS) $(MKI_DEPS) $(MKI_EXE) $(MKI_OBJECTS) $(MKI_DEPS) $(MKI_EXE)
+	$(RM) $(INPUT) $(OUTPUT) $(HW1_OBJECTS) $(HW1_DEPS) $(HW1_EXE) $(MKI_OBJECTS) $(MKI_DEPS) $(MKI_EXE) $(HW1_PROF)
