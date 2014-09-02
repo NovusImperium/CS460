@@ -30,7 +30,7 @@ fraction * pop(heap *h);
 
 fraction * reduce(fraction *f);
 bool comp(fraction *lhs, fraction *rhs);
-unsigned int gcd(unsigned int u, unsigned int v);
+int gcd(int u, int v);
 
 fraction * parse_line(char c);
 void print_fs(heap *h);
@@ -58,7 +58,7 @@ int main(void) {
 }
 
 heap * build_heap(size_t size) {
-    heap *h;
+    heap *h = malloc(sizeof(heap));
     h->num_fs = 0;
     h->size = size;
     h->fs = malloc(size * f_ptr);
@@ -157,7 +157,6 @@ fraction * parse_line(char c) {
         }
     }
     else {
-        c = getc(stdin);
         while (c >= '0' && c <= '9') {
             f->whole = f->whole * 10 + (c - '0');
             c = getc(stdin);
@@ -216,8 +215,8 @@ fraction * reduce(fraction *f) {
     return f;
 }
 
-unsigned int gcd(unsigned int u, unsigned int v) {
-    unsigned int shift;
+int gcd(int u, int v) {
+    int shift;
 
     /* GCD(0,v) == v; GCD(u,0) == u, GCD(0,0) == 0 */
     if (u == 0) return v;
@@ -245,7 +244,7 @@ unsigned int gcd(unsigned int u, unsigned int v) {
          * swapping is just pointer movement, and the subtraction
          * can be done in-place. */
         if (u > v) {
-            unsigned int t = v; v = u; u = t;  // Swap u and v.
+            int t = v; v = u; u = t;  // Swap u and v.
         }
         v = v - u;  // Here v >= u.
     } while (v != 0);
