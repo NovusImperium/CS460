@@ -51,6 +51,7 @@ int main(void) {
             return -1;
         }
         push(h, f);
+        char c = getc(stdin);
     }
     print_fs(h);
 
