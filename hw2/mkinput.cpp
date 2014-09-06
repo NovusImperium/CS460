@@ -20,7 +20,7 @@ static const int min = 1;
 static const int max = 499;
 static const int mod = min + max - 1;
 static const int mid = (int) ((min + max) / 2);
-static const int num = 1 << 24;
+static const int num = 1 << 10;
 
 int rand(void) {
     return (xorshf96() % mod) + 1;

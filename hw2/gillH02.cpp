@@ -20,14 +20,23 @@ bool operator<(const FWrap &lhs, const FWrap &rhs) {
 int main() {
     std::multiset<FWrap> fs;
     
-    Fraction in;
     Fraction sum;
-    while (std::cin >> in) {
-        FWrap fw;
-        fw.f = new Fraction(in);
-        sum += *fw.f;
-        //std::cout << *fw.f << std::endl;
-        fs.insert(fw);
+    while (std::cin.good()) {
+        //std::cout << (char)std::cin.peek() << std::endl;
+        Fraction in;
+        if (std::cin >> in) {
+            FWrap fw;
+            fw.f = new Fraction(in);
+            sum += *fw.f;
+            //std::cout << *fw.f << std::endl;
+            fs.insert(fw);
+        }
+        else if (std::cin.eof()) {
+            break;
+        }
+        else {
+            return -1;
+        }
     }
 
     std::cout << "The sum of the fractions is: " << sum << std::endl;
@@ -35,4 +44,6 @@ int main() {
     for (auto fw : fs) {
         std::cout << *fw.f << std::endl;
     }
+
+    return 0;
 }

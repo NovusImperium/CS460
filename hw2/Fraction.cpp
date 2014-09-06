@@ -17,9 +17,8 @@ bool Fraction::operator<(const Fraction &f) {
 }
 
 Fraction & Fraction::operator+=(const Fraction &f) {
-    int d = denom * f.denom;
-    numer = numer * d + f.numer * d;
-    denom = d;
+    numer = numer * f.denom + f.numer * denom;
+    denom = denom * f.denom;
     reduce();
 
     return *this;
@@ -71,14 +70,7 @@ std::ostream & operator<<(std::ostream &output, Fraction &f) {
 }
 
 void Fraction::reduce() {
-    if (numer < 0) {
-        int g = gcd(-1 * numer, denom);
-        numer /= g;
-        denom /= g;
-    }
-    else {
-        int g = gcd(numer, denom);
-        numer /= g;
-        denom /= g;
-    }
+    int d = gcd(std::abs(numer), denom);
+    numer /= d;
+    denom /= d;
 }
