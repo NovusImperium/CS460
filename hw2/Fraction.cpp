@@ -17,9 +17,13 @@ bool Fraction::operator<(const Fraction &f) {
 }
 
 Fraction & Fraction::operator+=(const Fraction &f) {
+    std::cout << numer << "/" << denom << " + " << f.numer << "/" << f.denom << std::endl;
+    std::cout << "\t == " << numer * f.denom << " + " << f.numer * denom << " / " 
+              << denom * f.denom << std::endl;
     numer = numer * f.denom + f.numer * denom;
     denom = denom * f.denom;
     reduce();
+    std::cout << "\t == " << *this << std::endl;
 
     return *this;
 }
