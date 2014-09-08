@@ -13,19 +13,18 @@ Fraction::Fraction(const Fraction &f) {
 }
 
 bool Fraction::operator<(const Fraction &f) {
-    return numer * f.denom < f.numer * denom;
+    int tn = numer;
+    int td = denom;
+    int fn = f.numer;
+    int fd = f.denom;
+
+    return tn * fd < fn * td;
 }
 
 Fraction & Fraction::operator+=(const Fraction &f) {
-    std::cout << numer << "/" << denom << " + " << f.numer << "/" << f.denom << std::endl;
-    std::cout << "\t == " << numer * f.denom << " + " << f.numer * denom << " / " 
-              << denom * f.denom << std::endl;
     numer = numer * f.denom + f.numer * denom;
     denom = denom * f.denom;
-    if (numer >> 32 != 0) {
-        reduce();
-    }
-    std::cout << "\t == " << *this << std::endl;
+    reduce();
 
     return *this;
 }
@@ -49,7 +48,7 @@ std::istream & operator>>(std::istream &input, Fraction &f) {
 
             f.numer = (neg ? -1 : 1) * (whole * denom + numer);
             f.denom = denom;
-            //f.reduce();
+            f.reduce();
         }
     }
     return input;
