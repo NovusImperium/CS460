@@ -3,7 +3,7 @@
 /* class declaration for Fraction */
 class Fraction {
     private:
-        int numer, denom;
+        long long numer, denom;
 
         // reduce the fraction into lowest form
         void reduce();

@@ -22,7 +22,9 @@ Fraction & Fraction::operator+=(const Fraction &f) {
               << denom * f.denom << std::endl;
     numer = numer * f.denom + f.numer * denom;
     denom = denom * f.denom;
-    reduce();
+    if (numer >> 32 != 0) {
+        reduce();
+    }
     std::cout << "\t == " << *this << std::endl;
 
     return *this;
@@ -47,7 +49,7 @@ std::istream & operator>>(std::istream &input, Fraction &f) {
 
             f.numer = (neg ? -1 : 1) * (whole * denom + numer);
             f.denom = denom;
-            f.reduce();
+            //f.reduce();
         }
     }
     return input;
@@ -74,7 +76,7 @@ std::ostream & operator<<(std::ostream &output, Fraction &f) {
 }
 
 void Fraction::reduce() {
-    int d = gcd(std::abs(numer), denom);
+    auto d = gcd((numer < 0 ? -1 * numer : numer), denom);
     numer /= d;
     denom /= d;
 }

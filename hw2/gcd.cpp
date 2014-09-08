@@ -37,3 +37,21 @@ int gcd(int u, int v) {
     /* restore common factors of 2 */
     return u << shift;
 }
+
+// code borrowed from:
+// http://www.mathblog.dk/gcd-faceoff/#comment-86852
+long long gcd(long long x, long long y) {
+    do {
+        if (x >= y){
+            x %= y;
+        }
+        else {
+            y %= x;
+        }
+        if(y==1 || x==1) {
+            return 1;
+        }
+    } while (x && y);
+
+    return x + y;
+}

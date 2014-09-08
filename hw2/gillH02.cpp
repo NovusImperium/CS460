@@ -41,11 +41,9 @@ int main() {
 
     std::cout << "The sum of the fractions is: " << sum << std::endl;
 
-    /*
     for (auto fw : fs) {
         std::cout << *fw.f << std::endl;
     }
-    */
 
     return 0;
 }
