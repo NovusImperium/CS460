@@ -115,7 +115,7 @@ $(DEBUG_EXE): $(COMMON_OBJECTS) $(TARGET_OBJECTS)
 
 ## recipe to compile 'all' and run target exe with input
 run: all
-	./$(EXECUTABLE) < $(INPUT) > $(OUTPUT)
+	./$(EXECUTABLE) $(INPUT) > $(OUTPUT)
 
 profile: debug
 	env CPUPROFILE=./$(DEBUG_PROF) ./$(DEBUG_EXE) < $(INPUT) > $(OUTPUT)

@@ -4,6 +4,7 @@
 // written in "idiomatic" c++
 
 #include <iostream>
+#include <fstream>
 #include <set>
 #include "Fraction.h"
 
@@ -17,21 +18,20 @@ bool operator<(const FWrap &lhs, const FWrap &rhs) {
 }
 
 /* main function */
-int main() {
+int main(int argc, const char* argv[]) {
     std::multiset<FWrap> fs;
-    
     Fraction sum;
-    while (std::cin.good()) {
-        //std::cout << (char)std::cin.peek() << std::endl;
+    
+    std::ifstream input(argv[1]);
+    while (input.good()) {
         Fraction in;
-        if (std::cin >> in) {
+        if (input >> in) {
             FWrap fw;
             fw.f = new Fraction(in);
             sum += *fw.f;
-            //std::cout << *fw.f << std::endl;
             fs.insert(fw);
         }
-        else if (std::cin.eof()) {
+        else if (input.eof()) {
             break;
         }
         else {
