@@ -10,3 +10,5 @@ output
 .idea/
 *.txt
 *.callgrind
+
+!CMakeLists.txt
