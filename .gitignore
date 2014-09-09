@@ -9,3 +9,4 @@ output
 *.tgz
 .idea/
 *.txt
+*.callgrind
