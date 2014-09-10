@@ -13,12 +13,13 @@ Fraction::Fraction(const Fraction &f) {
 }
 
 bool Fraction::operator<(const Fraction &f) {
+    /*
     int tn = numer;
     int td = denom;
     int fn = f.numer;
     int fd = f.denom;
-
-    return tn * fd < fn * td;
+    */
+    return numer * f.denom < f.numer * denom;
 }
 
 Fraction & Fraction::operator+=(const Fraction &f) {
