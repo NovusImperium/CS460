@@ -76,7 +76,11 @@ std::ostream & operator<<(std::ostream &output, Fraction &f) {
 }
 
 void Fraction::reduce() {
-    auto d = gcd((numer < 0 ? -1 * numer : numer), denom);
-    numer /= d;
-    denom /= d;
+    if (numer != 0) {
+        auto d = gcd((numer < 0 ? -1 * numer : numer), denom);
+        numer /= d;
+        denom /= d;
+    } else {
+        denom = 1;
+    }
 }
