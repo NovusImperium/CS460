@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "bst.h"
-#include "fraction.h"
 
 bn *bn_init(fraction *f) {
     bn *b = malloc(bn_size);
@@ -42,27 +41,23 @@ bool bst_push(bst *b, fraction *f) {
     while (curr < b->num_fs) {
         if (count < b->num_fs) {
             count++;
-        }
-        else {
+        } else {
             return false;
         }
         if (f_lt(f, b->bns[curr].f)) {
             if (b->bns[curr].l == 0) {
                 b->bns[curr].l = b->num_fs;
-                printf("depth = %u\tf = %d/%d\n", (unsigned int)count, f->n, f->d);
+                printf("depth = %u\tf = %d/%d\n", (unsigned int) count, f->n, f->d);
                 return true;
-            }
-            else {
+            } else {
                 curr = b->bns[curr].l;
             }
-        }
-        else {
+        } else {
             if (b->bns[curr].r == 0) {
                 b->bns[curr].r = b->num_fs;
-                printf("depth = %u\tf = %d/%d\n", (unsigned int)count, f->n, f->d);
+                printf("depth = %u\tf = %d/%d\n", (unsigned int) count, f->n, f->d);
                 return true;
-            }
-            else {
+            } else {
                 curr = b->bns[curr].r;
             }
         }

@@ -3,7 +3,7 @@
 // code borrowed from:
 // http://www.mathblog.dk/gcd-faceoff/#comment-86852
 int gcd(int x, int y) {
-     while (x && y) {
+    while (x && y) {
         if (x >= y) {
             x %= y;
         }

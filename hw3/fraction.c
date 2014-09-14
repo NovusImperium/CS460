@@ -7,7 +7,7 @@ void f_reduce(fraction *f) {
     int d = gcd((f->n < 0) ? -1 * f->n : f->n, f->d);
     f->n /= d;
     f->d /= d;
-    f->w = ((float)f->n)/f->d;
+    f->w = ((float) f->n) / f->d;
 }
 
 // add the right-hand fraction into the left-hand fraction
@@ -101,12 +101,10 @@ void f_print(fraction *f, FILE *out) {
     if (neg) {
         if (w == 0) {
             fprintf(out, "0 -%d/%d\n", n, d);
-        }
-        else {
+        } else {
             fprintf(out, "-%d %d/%d\n", w, n, d);
         }
-    }
-    else {
+    } else {
         fprintf(out, "%d %d/%d\n", w, n, d);
     }
 }

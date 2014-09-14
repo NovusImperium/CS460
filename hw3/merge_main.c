@@ -17,12 +17,10 @@ int main(int argc, char **argv) {
             if (f->d != 0) {
                 f_add(sum, f);
                 fa_push(fa, f);
-            }
-            else {
+            } else {
                 break;
             }
-        }
-        else {
+        } else {
             return -1;
         }
     }

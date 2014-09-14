@@ -66,14 +66,12 @@ fraction *h_pop(heap *h) {
             h->fs[curr] = h->fs[r];
             h->fs[r] = t;
             curr = r;
-        }
-        else if (l < h->num_fs && f_lt(h->fs[l], h->fs[curr])) {
+        } else if (l < h->num_fs && f_lt(h->fs[l], h->fs[curr])) {
             fraction *t = h->fs[curr];
             h->fs[curr] = h->fs[l];
             h->fs[l] = t;
             curr = l;
-        }
-        else {
+        } else {
             break;
         }
     }
