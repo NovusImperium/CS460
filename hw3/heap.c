@@ -14,6 +14,27 @@ heap *h_init() {
     return h;
 }
 
+heap *h_copy(heap *h, size_t s) {
+    heap *new_h = malloc(sizeof(heap));
+
+    new_h->max_fs = s;
+    new_h->fs = malloc(s * f_ptr);
+
+    if (h == null) {
+        new_h->num_fs = 0;
+    } else {
+        new_h->num_fs = h->num_fs > s ? s : h->num_fs;
+        memcpy(new_h->fs, h->fs, new_h->num_fs * f_ptr);
+    }
+
+    return new_h;
+}
+
+void h_free(heap *h) {
+    free(h->fs);
+    free(h);
+}
+
 // insert a fraction into the heap, return true if successful
 bool h_push(heap *h, fraction *f) {
     h->num_fs++;
@@ -43,6 +64,10 @@ bool h_push(heap *h, fraction *f) {
     }
 
     return true;
+}
+
+fraction *h_peek(heap *h) {
+    return h->num_fs == 0 ? null : h->fs[1];
 }
 
 // pop the top of the heap into the given pointer and remove it from the heap
