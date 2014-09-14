@@ -20,7 +20,7 @@ bool h_push(heap *h, fraction *f) {
     if (h->num_fs == h->max_fs) {
         size_t new_size = h->max_fs << 4;
         fraction **new_fs;
-        if ((new_fs = malloc(new_size * f_ptr)) == NULL) {
+        if ((new_fs = malloc(new_size * f_ptr)) == null) {
             return false;
         }
         memmove(new_fs, h->fs, h->max_fs * f_ptr);
@@ -33,7 +33,7 @@ bool h_push(heap *h, fraction *f) {
 
     size_t curr = h->num_fs;
     size_t half = h->num_fs >> 1;
-    while (half > 0 && f_lt(h->fs[half], h->fs[curr])) {
+    while (half > 0 && f_lt(h->fs[curr], h->fs[half])) {
         fraction *tmp = h->fs[half];
         h->fs[half] = h->fs[curr];
         h->fs[curr] = tmp;
@@ -47,36 +47,35 @@ bool h_push(heap *h, fraction *f) {
 
 // pop the top of the heap into the given pointer and remove it from the heap
 fraction *h_pop(heap *h) {
-    if (h->num_fs == 0) {
-        return null;
+    if (h->num_fs <= 1) {
+        size_t i = h->num_fs;
+        h->num_fs = 0;
+        return h->fs[i];
     }
 
     fraction *f = h->fs[1];
+    h->fs[1] = h->fs[h->num_fs];
+    h->fs[h->num_fs] = null;
 
     size_t curr = 1;
-    size_t l = 2;
-    size_t r = 3;
-    while (curr < h->num_fs) {
-        if (r < h->num_fs) {
-            if (f_lt(h->fs[l], h->fs[r])) {
-                h->fs[curr] = h->fs[r];
-                curr = r;
-            }
-            else {
-                h->fs[curr] = h->fs[l];
-                curr = l;
-            }
+    while (true) {
+        size_t l = curr << 1;
+        size_t r = l + 1;
+        if (r < h->num_fs && f_lt(h->fs[r], h->fs[l]) && f_lt(h->fs[r], h->fs[curr])) {
+            fraction *t = h->fs[curr];
+            h->fs[curr] = h->fs[r];
+            h->fs[r] = t;
+            curr = r;
         }
-        else if (l < h->num_fs) {
+        else if (l < h->num_fs && f_lt(h->fs[l], h->fs[curr])) {
+            fraction *t = h->fs[curr];
             h->fs[curr] = h->fs[l];
+            h->fs[l] = t;
             curr = l;
         }
         else {
             break;
         }
-
-        l = curr << 1;
-        r = l + 1;
     }
 
     h->num_fs--;

@@ -17,6 +17,6 @@ extern heap *h_init();
 extern bool h_push(heap *h, fraction *f);
 
 // pop the top of the heap into the given pointer and remove it from the heap
-extern fraction * h_pop(heap *h);
+extern fraction *h_pop(heap *h);
 
 #endif // HEAP

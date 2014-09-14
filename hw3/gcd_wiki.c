@@ -1,5 +1,3 @@
-#include "gcd.h"
-
 // iterative Stein's Algorithm borrowed from Wikipedia
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm#Iterative_version_in_C
 int gcd(int u, int v) {
