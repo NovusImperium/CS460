@@ -7,6 +7,7 @@
 typedef struct {
     int n;
     int d;
+    float w;
 } fraction;
 
 // size of a pointer to a fraction

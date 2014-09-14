@@ -50,6 +50,20 @@ set_target_properties(
     LINK_FLAGS "-lprofiler"
     )
 
+set(MERGE_SOURCES
+    ${COMMON_SOURCES}
+    farray.c
+    merge_main.c
+    )
+add_executable(merge.bin EXCLUDE_FROM_ALL ${MERGE_SOURCES})
+add_executable(merge.debug EXCLUDE_FROM_ALL ${MERGE_SOURCES})
+set_target_properties(
+    merge.debug
+    PROPERTIES
+    COMPILE_FLAGS "${COMPILE_FLAGS} -g -fno-omit-frame-pointer"
+    LINK_FLAGS "-lprofiler"
+    )
+
 set(INPUT_SOURCES
     mkinput.cpp
     )
