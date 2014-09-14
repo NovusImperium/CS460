@@ -20,7 +20,7 @@ static const int min = 1;
 static const int max = 19;
 static const int mod = min + max - 1;
 static const int mid = (min + max) / 2;
-static const int num = 1 << 24;
+static const int num = 1 << 5;
 
 int rand(void) {
     return (int) (xorshf96() % mod);
@@ -33,23 +33,23 @@ int drand(void) {
 int main(void) {
 
     for (int i = 0; i < num; ++i) {
-        bool neg = rand() < mid;
-        int w = rand();
-        int n = rand();
-        int d = drand();
-
+//        bool neg = rand() < mid;
+//        int w = rand();
 //        int n = rand();
-//        int w = 0;
-//        int d = 1;
+//        int d = drand();
 
-        if (neg) {
-            if (!w) {
-                n = -1 * n;
-            }
-            else {
-                w = -1 * w;
-            }
-        }
+        int w = rand();
+        int n = 0;
+        int d = 1;
+
+//        if (neg) {
+//            if (!w) {
+//                n = -1 * n;
+//            }
+//            else {
+//                w = -1 * w;
+//            }
+//        }
 
         std::cout << w << " " << n << "/" << d << std::endl;
     }

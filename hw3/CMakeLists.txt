@@ -53,15 +53,21 @@ set_target_properties(
 set(MERGE_SOURCES
     ${COMMON_SOURCES}
     farray.c
+    thread_sort.c
     merge_main.c
     )
 add_executable(merge.bin EXCLUDE_FROM_ALL ${MERGE_SOURCES})
+set_target_properties(
+    merge.bin
+    PROPERTIES
+    LINK_FLAGS "-pthread"
+    )
 add_executable(merge.debug EXCLUDE_FROM_ALL ${MERGE_SOURCES})
 set_target_properties(
     merge.debug
     PROPERTIES
     COMPILE_FLAGS "${COMPILE_FLAGS} -g -fno-omit-frame-pointer"
-    LINK_FLAGS "-lprofiler"
+    LINK_FLAGS "-pthread -lprofiler"
     )
 
 set(INPUT_SOURCES

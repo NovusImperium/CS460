@@ -25,6 +25,8 @@ int main(int argc, char **argv) {
         }
     }
 
+    fa_sort(fa);
+
     printf("The sum of the fractions is: ");
     f_print(sum, stdout);
     fa_print(fa, stdout);

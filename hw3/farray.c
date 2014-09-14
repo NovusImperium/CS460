@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "farray.h"
+#include "thread_sort.h"
 
 farray *fa_init() {
     farray *fa = malloc(sizeof(farray));
@@ -25,8 +26,7 @@ bool fa_push(farray *fa, fraction *f) {
         fa->max_fs = new_size;
     }
 
-    fa->fs[fa->num_fs] = f;
-    fa->num_fs++;
+    fa->fs[fa->num_fs++] = f;
     return true;
 }
 
@@ -38,5 +38,10 @@ void fa_print(farray *fa, FILE *out) {
 }
 
 void fa_sort(farray *fa) {
+    msg *m = malloc(sizeof(msg));
+    m->lo = 0;
+    m->hi = fa->num_fs - 1;
+    m->fs = fa->fs;
 
+    th_sort(m);
 }
