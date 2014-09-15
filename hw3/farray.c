@@ -3,17 +3,47 @@
 #include "farray.h"
 #include "thread_sort.h"
 
-farray *fa_init() {
-    farray *fa = malloc(sizeof(farray));
+farr *fa_init() {
+    farr *fa = malloc(sizeof(farr));
 
     fa->max_fs = 100;
     fa->num_fs = 0;
+    fa->curr = 0;
     fa->fs = malloc(fa->max_fs * f_ptr);
 
     return fa;
 }
 
-bool fa_push(farray *fa, fraction *f) {
+farr *fa_copy(farr *fa, size_t s) {
+    farr *new_fa = malloc(sizeof(farr));
+
+    new_fa->fs = malloc(s * f_ptr);
+    new_fa->max_fs = s;
+
+    if (fa == null) {
+        new_fa->curr = 0;
+        new_fa->num_fs = 0;
+    } else {
+
+    }
+
+    return new_fa;
+}
+
+void fa_free(farr *fa) {
+    free(fa->fs);
+    free(fa);
+}
+
+fraction *fa_peek(farr *fa) {
+    return fa->curr < fa->num_fs ? fa->fs[fa->curr] : null;
+}
+
+fraction *fa_pop(farr *fa) {
+    return fa->curr < fa->num_fs ? fa->fs[fa->curr++] : null;
+}
+
+bool fa_push(farr *fa, fraction *f) {
     if (fa->num_fs == fa->max_fs) {
         size_t new_size = fa->max_fs << 4;
         fraction **new_fs;
@@ -30,18 +60,21 @@ bool fa_push(farray *fa, fraction *f) {
     return true;
 }
 
-void fa_print(farray *fa, FILE *out) {
+void fa_print(farr *fa, FILE *out) {
     int i;
     for (i = 0; i < fa->num_fs; ++i) {
         f_print(fa->fs[i], out);
     }
 }
 
-void fa_sort(farray *fa) {
+void fa_sort(farr *fa) {
     msg *m = malloc(sizeof(msg));
     m->lo = 0;
     m->hi = fa->num_fs - 1;
     m->fs = fa->fs;
 
-    th_sort(m);
+    farr *sorted_fa = (farr *)th_sort(m);
+    fa_free(fa);
+    fa = sorted_fa;
 }
+

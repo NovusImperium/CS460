@@ -1,10 +1,11 @@
 #include <stdlib.h>
-#include <string.h>
+#include "defs.h"
 #include "thread_sort.h"
+#include "heap.h"
 
 void *th_sort(void *th_msg) {
     pthread_t th_lo, th_hi;
-    msg *m = (msg *)th_msg;
+    msg *m = (msg *) th_msg;
     size_t lo = m->lo;
     size_t hi = m->hi;
     size_t mid = (lo + hi) / 2;
@@ -24,66 +25,103 @@ void *th_sort(void *th_msg) {
 
         pthread_create(&th_hi, null, th_sort, lo_msg);
 
-        pthread_join(th_lo, null);
-        pthread_join(th_hi, null);
+        farr *lo_fa = malloc(sizeof(farr));
+        farr *hi_fa = malloc(sizeof(farr));
+        pthread_join(th_lo, (void **)lo_fa);
+        pthread_join(th_hi, (void **)hi_fa);
 
-        fraction **fs = malloc((hi - lo + 1) * f_ptr);
-        memcpy(fs, &(m->fs[lo]), (hi - lo + 1) * f_ptr);
+        free(lo_msg);
+        free(hi_msg);
 
-        size_t curr = lo;
-        size_t i = 0;
-        size_t j = mid - lo;
-        for (curr; curr <= hi; curr++) {
-            if (i <= mid - lo && f_lt(fs[i], fs[j])) {
-                m->fs[curr] = fs[i];
-                i++;
+        farr *fa = fa_copy(null, lo_fa->max_fs << 1);
+
+        while (true) {
+            fraction *lo_f = fa_peek(lo_fa);
+            fraction *hi_f = fa_peek(hi_fa);
+            if (lo_f != null && hi_f != null) {
+                if (f_lt(lo_f, hi_f)) {
+                    fa_push(fa, fa_pop(lo_fa));
+                } else {
+                    fa_push(fa, fa_pop(lo_fa));
+                }
+            } else if (lo_f != null) {
+                fa_push(fa, fa_pop(lo_fa));
+            } else if (hi_f != null) {
+                fa_push(fa, fa_pop(lo_fa));
             } else {
-                m->fs[curr] = fs[j];
-                j++;
+                break;
             }
         }
 
-        free(fs);
-    } else {
-        fraction **fs = malloc((hi - lo + 1) * f_ptr);
-        memcpy(fs, &(m->fs[lo]), (hi - lo + 1) * f_ptr);
+        fa_free(lo_fa);
+        fa_free(hi_fa);
 
+        return fa;
+    } else {
         msg *lo_msg = malloc(sizeof(msg));
         lo_msg->lo = lo;
         lo_msg->hi = mid;
-        lo_msg->fs = fs;
+        lo_msg->fs = m->fs;
 
-        pthread_create(&th_lo, null, ins_sort, lo_msg);
+        pthread_create(&th_lo, null, heap_sort, lo_msg);
 
         msg *hi_msg = malloc(sizeof(msg));
         hi_msg->lo = mid + 1;
         hi_msg->hi = hi;
-        hi_msg->fs = fs;
+        hi_msg->fs = m->fs;
 
-        pthread_create(&th_hi, null, ins_sort, lo_msg);
+        pthread_create(&th_hi, null, heap_sort, lo_msg);
 
-        pthread_join(th_lo, null);
-        pthread_join(th_hi, null);
+        heap *lo_h = malloc(sizeof(heap));
+        heap *hi_h = malloc(sizeof(heap));
+        pthread_join(th_lo, (void **)lo_h);
+        pthread_join(th_hi, (void **)hi_h);
 
-        size_t curr = lo;
-        size_t i = 0;
-        size_t j = mid - lo;
-        while (i <= mid - lo && j <= hi - mid) {
-            if (f_lt(fs[i], fs[j])) {
-                m->fs[curr++] = fs[i++];
+        free(lo_msg);
+        free(hi_msg);
+
+        farr *fa = fa_copy(null, lo_h->max_fs << 1);
+
+        while (true) {
+            fraction *lo_f = h_peek(lo_h);
+            fraction *hi_f = h_peek(hi_h);
+            if (lo_f != null && hi_f != null) {
+                if (f_lt(lo_f, hi_f)) {
+                    fa_push(fa, h_pop(lo_h));
+                } else {
+                    fa_push(fa, h_pop(lo_h));
+                }
+            } else if (lo_f != null) {
+                fa_push(fa, h_pop(lo_h));
+            } else if (hi_f != null) {
+                fa_push(fa, h_pop(lo_h));
             } else {
-                m->fs[curr++] = fs[j++];
+                break;
             }
         }
 
-        free(fs);
+        h_free(lo_h);
+        h_free(hi_h);
+
+        return fa;
     }
 }
 
+void *heap_sort(void *th_msg) {
+    heap *h = h_copy(null, ((msg *)th_msg)->hi - ((msg *)th_msg)->lo + 2);
+
+    size_t i;
+    for (i = ((msg *)th_msg)->lo; i <= ((msg *)th_msg)->hi; i++) {
+        h_push(h, ((msg *)th_msg)->fs[i]);
+    }
+
+    return h;
+}
+
 void *ins_sort(void *th_msg) {
-    size_t lo = ((msg *)th_msg)->lo;
-    size_t hi = ((msg *)th_msg)->hi;
-    fraction **fs = ((msg *)th_msg)->fs;
+    size_t lo = ((msg *) th_msg)->lo;
+    size_t hi = ((msg *) th_msg)->hi;
+    fraction **fs = ((msg *) th_msg)->fs;
 
     size_t curr;
     for (curr = lo; curr <= hi; curr++) {

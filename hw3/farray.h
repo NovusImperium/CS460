@@ -7,19 +7,32 @@
 typedef struct {
     size_t max_fs;
     size_t num_fs;
+    size_t curr;
     fraction **fs;
-} farray;
+} farr;
 
-// initialize the heap into the given pointer
-extern farray *fa_init();
+// initialize the fraction array into the given pointer
+extern farr *fa_init();
 
-// insert a fraction into the heap, return true if successful
-extern bool fa_push(farray *fa, fraction *f);
+// create and return a new copy of the fraction array with size 's', init new fraction array if 'fa' is null
+extern farr *fa_copy(farr *fa, size_t s);
 
-// print all the fractions in the farray
-extern void fa_print(farray *fa, FILE *out);
+// free the memory used by the fraction array
+extern void fa_free(farr *fa);
+
+// insert a fraction into the fraction array, return true if successful
+extern bool fa_push(farr *fa, fraction *f);
+
+// peek at the head of the fraction array
+extern fraction *fa_peek(farr *fa);
+
+// pop the head of the fraction array
+extern fraction *fa_pop(farr *fa);
+
+// print all the fractions in the fraction array
+extern void fa_print(farr *fa, FILE *out);
 
 // sort the fraction array
-extern void fa_sort(farray *fa);
+extern void fa_sort(farr *fa);
 
 #endif // FARRAY

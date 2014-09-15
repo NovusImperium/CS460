@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8.4)
 project(hw3)
 
 set(COMMON_SOURCES
-    defs.h
     fraction.c
     gcd.c
     )
@@ -52,6 +51,7 @@ set_target_properties(
 
 set(MERGE_SOURCES
     ${COMMON_SOURCES}
+    heap.c
     farray.c
     thread_sort.c
     merge_main.c

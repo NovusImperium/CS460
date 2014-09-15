@@ -11,10 +11,13 @@ typedef struct {
     fraction **fs;
 } msg;
 
-// sort function to handle sorting and merging subarrays
+// sort function to handle sorting and merging subarrays, returns sorted fraction array
 extern void *th_sort(void *th_msg);
 
 // insertion sort for arrays of size less than 100
 extern void *ins_sort(void *th_msg);
+
+// heap sort for arrays of size less than 1000, return heap
+extern void *heap_sort(void *tm_msg);
 
 #endif // THREAD_SORT
