@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
         f->d = 1;
         if (f_read(f, fd)) {
             if (f->d != 0) {
+                f_print(f, stdout);
                 f_add(sum, f);
                 fa_push(fa, f);
             } else {
@@ -25,7 +26,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    fa_sort(fa);
+    fa = fa_sort(fa);
 
     printf("The sum of the fractions is: ");
     f_print(sum, stdout);

@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
         f->d = 1;
         if (f_read(f, fd)) {
             if (f->d != 0) {
+                f_print(f, stdout);
                 f_add(sum, f);
                 bst_push(b, f);
             }

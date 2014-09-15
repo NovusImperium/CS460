@@ -33,6 +33,6 @@ extern fraction *fa_pop(farr *fa);
 extern void fa_print(farr *fa, FILE *out);
 
 // sort the fraction array
-extern void fa_sort(farr *fa);
+extern farr * fa_sort(farr *fa);
 
 #endif // FARRAY

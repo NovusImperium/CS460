@@ -10,7 +10,7 @@ void *th_sort(void *th_msg) {
     size_t hi = m->hi;
     size_t mid = (lo + hi) / 2;
 
-    if (hi - lo > 2000) {
+    if (hi - lo > 2048) {
         msg *lo_msg = malloc(sizeof(msg));
         lo_msg->lo = lo;
         lo_msg->hi = mid;
@@ -27,8 +27,8 @@ void *th_sort(void *th_msg) {
 
         farr *lo_fa = malloc(sizeof(farr));
         farr *hi_fa = malloc(sizeof(farr));
-        pthread_join(th_lo, (void **)lo_fa);
-        pthread_join(th_hi, (void **)hi_fa);
+        pthread_join(th_lo, (void **) &lo_fa);
+        pthread_join(th_hi, (void **) &hi_fa);
 
         free(lo_msg);
         free(hi_msg);
@@ -74,8 +74,8 @@ void *th_sort(void *th_msg) {
 
         heap *lo_h = malloc(sizeof(heap));
         heap *hi_h = malloc(sizeof(heap));
-        pthread_join(th_lo, (void **)lo_h);
-        pthread_join(th_hi, (void **)hi_h);
+        pthread_join(th_lo, (void **) &lo_h);
+        pthread_join(th_hi, (void **) &hi_h);
 
         free(lo_msg);
         free(hi_msg);
@@ -89,12 +89,12 @@ void *th_sort(void *th_msg) {
                 if (f_lt(lo_f, hi_f)) {
                     fa_push(fa, h_pop(lo_h));
                 } else {
-                    fa_push(fa, h_pop(lo_h));
+                    fa_push(fa, h_pop(hi_h));
                 }
             } else if (lo_f != null) {
                 fa_push(fa, h_pop(lo_h));
             } else if (hi_f != null) {
-                fa_push(fa, h_pop(lo_h));
+                fa_push(fa, h_pop(hi_h));
             } else {
                 break;
             }

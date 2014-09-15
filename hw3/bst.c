@@ -47,7 +47,6 @@ bool bst_push(bst *b, fraction *f) {
         if (f_lt(f, b->bns[curr].f)) {
             if (b->bns[curr].l == 0) {
                 b->bns[curr].l = b->num_fs;
-                printf("depth = %u\tf = %d/%d\n", (unsigned int) count, f->n, f->d);
                 return true;
             } else {
                 curr = b->bns[curr].l;
@@ -55,7 +54,6 @@ bool bst_push(bst *b, fraction *f) {
         } else {
             if (b->bns[curr].r == 0) {
                 b->bns[curr].r = b->num_fs;
-                printf("depth = %u\tf = %d/%d\n", (unsigned int) count, f->n, f->d);
                 return true;
             } else {
                 curr = b->bns[curr].r;

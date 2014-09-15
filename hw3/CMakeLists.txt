@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(hw3)
 
 set(COMMON_SOURCES
+    defs.h
     fraction.c
     gcd.c
     )

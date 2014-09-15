@@ -67,7 +67,7 @@ void fa_print(farr *fa, FILE *out) {
     }
 }
 
-void fa_sort(farr *fa) {
+farr * fa_sort(farr *fa) {
     msg *m = malloc(sizeof(msg));
     m->lo = 0;
     m->hi = fa->num_fs - 1;
@@ -75,6 +75,6 @@ void fa_sort(farr *fa) {
 
     farr *sorted_fa = (farr *)th_sort(m);
     fa_free(fa);
-    fa = sorted_fa;
+    return sorted_fa;
 }
 
