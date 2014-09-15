@@ -23,7 +23,7 @@ void *th_sort(void *th_msg) {
         hi_msg->hi = hi;
         hi_msg->fs = m->fs;
 
-        pthread_create(&th_hi, null, th_sort, lo_msg);
+        pthread_create(&th_hi, null, th_sort, hi_msg);
 
         farr *lo_fa = malloc(sizeof(farr));
         farr *hi_fa = malloc(sizeof(farr));
@@ -70,7 +70,7 @@ void *th_sort(void *th_msg) {
         hi_msg->hi = hi;
         hi_msg->fs = m->fs;
 
-        pthread_create(&th_hi, null, heap_sort, lo_msg);
+        pthread_create(&th_hi, null, heap_sort, hi_msg);
 
         heap *lo_h = malloc(sizeof(heap));
         heap *hi_h = malloc(sizeof(heap));
@@ -108,11 +108,12 @@ void *th_sort(void *th_msg) {
 }
 
 void *heap_sort(void *th_msg) {
-    heap *h = h_copy(null, ((msg *)th_msg)->hi - ((msg *)th_msg)->lo + 2);
+    msg *m = (msg *)th_msg;
+    heap *h = h_copy(null, m->hi - m->lo + 2);
 
     size_t i;
-    for (i = ((msg *)th_msg)->lo; i <= ((msg *)th_msg)->hi; i++) {
-        h_push(h, ((msg *)th_msg)->fs[i]);
+    for (i = m->lo; i <= m->hi; i++) {
+        h_push(h, m->fs[i]);
     }
 
     return h;
