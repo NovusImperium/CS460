@@ -3,7 +3,8 @@
 #include "farray.h"
 
 int main(int argc, char **argv) {
-    FILE *fd = fopen(argv[1], "r");
+    FILE *in = fopen(argv[1], "r");
+    FILE *out = argc > 2 ? fopen(argv[2], "w") : stdout;
     farr *fa = fa_init();
     fraction *sum = malloc(f_size);
     sum->n = 0;
@@ -13,7 +14,7 @@ int main(int argc, char **argv) {
         fraction *f = malloc(f_size);
         f->n = 0;
         f->d = 1;
-        if (f_read(f, fd)) {
+        if (f_read(f, in)) {
             if (f->d != 0) {
                 f_add(sum, f);
                 fa_push(fa, f);
@@ -28,8 +29,8 @@ int main(int argc, char **argv) {
     fa = fa_sort(fa);
 
     printf("The sum of the fractions is: ");
-    f_print(sum, stdout);
-    fa_print(fa, stdout);
+    f_print(sum, out);
+    fa_print(fa, out);
 
     return 0;
 }
