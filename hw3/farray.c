@@ -67,14 +67,44 @@ void fa_print(farr *fa, FILE *out) {
     }
 }
 
-farr * fa_sort(farr *fa) {
+void fa_sort(farr *fa) {
+    size_t len = fa->num_fs;
     msg *m = malloc(sizeof(msg));
+    m->hi = len - 1;
     m->lo = 0;
-    m->hi = fa->num_fs - 1;
     m->fs = fa->fs;
 
-    farr *sorted_fa = (farr *)th_sort(m);
-    fa_free(fa);
-    return sorted_fa;
+    size_t d = 0;
+    while (len > 2048) {
+        len = len >> d;
+        d++;
+    }
+
+    size_t jobs = (size_t)1 << d;
+    tpool *pool = tp_init(4);
+    msg *ms = mk_jobs(m, jobs);
+
+    size_t i;
+    for (i = 0; i < jobs; i++) {
+        tp_add(pool, heap_merge, &ms[i]);
+    }
+
+    tp_wait(pool);
+
+    ms = merge_jobs(ms, jobs);
+    jobs = jobs >> 1;
+
+    while (jobs > 0) {
+        for (i = 0; i < jobs; i++) {
+            tp_add(pool, th_merge, &ms[i]);
+        }
+
+        tp_wait(pool);
+
+        ms = merge_jobs(ms, jobs);
+        jobs = jobs >> 1;
+    }
+
+    tp_dest(pool, tpexit_graceful);
 }
 

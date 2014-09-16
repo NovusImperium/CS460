@@ -25,7 +25,7 @@ tpool *tp_init(size_t num_ts) {
     pool->ts = (pthread_t *)malloc(sizeof(pthread_t) * num_ts);
 
     // setup mutex and conditional notification
-    if((pthread_mutex_init(&(pool->lock), null) != 0) ||
+    if((pthread_mutex_init(&(pool->qlock), null) != 0) ||
        (pthread_cond_init(&(pool->notify), null) != 0) ||
        (pool->ts == null)) {
         goto err;
@@ -52,7 +52,7 @@ tpool *tp_init(size_t num_ts) {
     return null;
 }
 
-int th_add(tpool *pool, void *(*func)(void *), void *arg) {
+int tp_add(tpool *pool, void *(*func)(void *), void *arg) {
     int err = 0;
 
     if(pool == null || func == null) {
@@ -60,7 +60,7 @@ int th_add(tpool *pool, void *(*func)(void *), void *arg) {
     }
 
     // wait for lock on the queue, quit if lock fails
-    if (pthread_mutex_lock(&(pool->lock)) != 0) {
+    if (pthread_mutex_lock(&(pool->qlock)) != 0) {
         return tp_lockfail;
     }
 
@@ -92,7 +92,7 @@ int th_add(tpool *pool, void *(*func)(void *), void *arg) {
         }
     } while(0);
 
-    if(pthread_mutex_unlock(&pool->lock) != 0) {
+    if(pthread_mutex_unlock(&pool->qlock) != 0) {
         err = tp_lockfail;
     }
 
@@ -107,7 +107,7 @@ int tp_dest(tpool *pool, int flags)
         return tp_invalid;
     }
 
-    if(pthread_mutex_lock(&(pool->lock)) != 0) {
+    if(pthread_mutex_lock(&(pool->qlock)) != 0) {
         return tp_lockfail;
     }
 
@@ -123,7 +123,7 @@ int tp_dest(tpool *pool, int flags)
 
         // wakeup worker threads
         if((pthread_cond_broadcast(&(pool->notify)) != 0) ||
-           (pthread_mutex_unlock(&(pool->lock)) != 0)) {
+           (pthread_mutex_unlock(&(pool->qlock)) != 0)) {
             err = tp_lockfail;
             break;
         }
@@ -160,8 +160,8 @@ int tp_free(tpool *pool)
             pool->qhead = next;
         }
 
-        pthread_mutex_lock(&(pool->lock));
-        pthread_mutex_destroy(&(pool->lock));
+        pthread_mutex_lock(&(pool->qlock));
+        pthread_mutex_destroy(&(pool->qlock));
         pthread_cond_destroy(&(pool->notify));
     }
     free(pool);    
@@ -176,12 +176,12 @@ static void *tp_thread(void *tp)
 
     while(true) {
         // wait for the queue to be free and lock wil getting task
-        pthread_mutex_lock(&(pool->lock));
+        pthread_mutex_lock(&(pool->qlock));
 
         // wait on condition variable, check for spurious wakeups
         // we own the lock when returning from pthread_cond_wait
         while((pool->count == 0) && (!pool->shutdown)) {
-            pthread_cond_wait(&(pool->notify), &(pool->lock));
+            pthread_cond_wait(&(pool->notify), &(pool->qlock));
         }
 
         if((pool->shutdown == tpsdown_now) ||
@@ -205,7 +205,7 @@ static void *tp_thread(void *tp)
         }
 
         // release the lock on the queue
-        pthread_mutex_unlock(&(pool->lock));
+        pthread_mutex_unlock(&(pool->qlock));
 
         // run the task
         (*(task.func))(task.arg);
@@ -213,7 +213,18 @@ static void *tp_thread(void *tp)
 
     pool->started--;
 
-    pthread_mutex_unlock(&(pool->lock));
+    pthread_mutex_unlock(&(pool->qlock));
     pthread_exit(null);
     return(null);
+}
+
+void tp_wait(tpool *pool) {
+    while (true) {
+        pthread_mutex_lock(&pool->qlock);
+        if (pool->count == 0 || pool->shutdown) {
+            pthread_mutex_unlock(&pool->qlock);
+            return;
+        }
+        pthread_mutex_unlock(&pool->qlock);
+    }
 }

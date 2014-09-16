@@ -1,54 +1,110 @@
 #include <stdlib.h>
+#include <string.h>
 #include "defs.h"
 #include "thread_sort.h"
-#include "heap.h"
+#include "farray.h"
 
-void *th_sort_new(void *th_msg) {
-    msg *m = (msg *)th_msg;
+void * heap_merge(void *arg) {
+    pthread_t th_lo, th_hi;
+    msg *m = arg;
 
-    if (m->hi < 1024) {
-        return ins_sort(m);
-    }
+    msg *lo_msg = malloc(sizeof(msg));
+    lo_msg->lo = m->lo;
+    lo_msg->hi = m->mid;
+    lo_msg->fs = m->fs;
 
-    size_t n;
-    for (n = 1; n < 8 && m->hi >> n >= 1024; n++);
+    pthread_create(&th_lo, null, heap_sort, lo_msg);
 
-    thread_pool tp;
-    tp.num_ts = (size_t)1 << n;
-    tp.ts = malloc(tp.num_ts * sizeof(pthread_t));
+    msg *hi_msg = malloc(sizeof(msg));
+    hi_msg->lo = m->mid + 1;
+    hi_msg->hi = m->hi;
+    hi_msg->fs = m->fs;
 
-    size_t js = tp.num_ts;
-    msg *ms = mk_jobs(m, js);
+    pthread_create(&th_hi, null, heap_sort, hi_msg);
 
-    heap *hs = malloc(js * sizeof(heap));
+    heap *lo_h;
+    heap *hi_h;
+    pthread_join(th_lo, (void **) &lo_h);
+    pthread_join(th_hi, (void **) &hi_h);
 
-    size_t i;
-    for (i = 0; i < tp.num_ts; i++) {
-        pthread_create(&tp.ts[i], null, heap_sort, &ms[i]);
-    }
+    free(lo_msg);
+    free(hi_msg);
 
-    for (i = 0; i < tp.num_ts; i++) {
-        heap *h = &hs[i];
-        pthread_join(tp.ts[i], (void **) &h);
+    farr fa;
+    fa.max_fs = m->hi;
+    fa.curr = 0;
+    fa.num_fs = 0;
+    fa.fs = &m->fs[m->lo];
 
-        size_t j = ms[i].lo;
-        while (h_peek(&hs[i]) != null) {
-            m->fs[j] = h_pop(&hs[i]);
-            j++;
+    while (true) {
+        fraction *lo_f = h_peek(lo_h);
+        fraction *hi_f = h_peek(hi_h);
+        if (lo_f != null && hi_f != null) {
+            if (f_lt(lo_f, hi_f)) {
+                fa_push(&fa, h_pop(lo_h));
+            } else {
+                fa_push(&fa, h_pop(hi_h));
+            }
+        } else if (lo_f != null) {
+            fa_push(&fa, h_pop(lo_h));
+        } else if (hi_f != null) {
+            fa_push(&fa, h_pop(hi_h));
+        } else {
+            break;
         }
-
-        h_free(&hs[i]);
     }
 
-    do {
-        farr *fa = malloc(js * sizeof(farr));
-        for (i = 0; i < js; i++) {
-            
-        }
+    h_free(lo_h);
+    h_free(hi_h);
 
-        ms = merge_jobs(ms, js);
-        js = js >> 1;
-    } while (js > 1);
+    return null;
+}
+
+void * th_merge(void *arg) {
+    msg *m = arg;
+
+    farr fa;
+    fa.max_fs = m->hi;
+    fa.num_fs = 0;
+    fa.curr = 0;
+    fa.fs = &m->fs[m->lo];
+
+    farr lo_fa;
+    lo_fa.max_fs = m->hi;
+    lo_fa.curr = 0;
+    lo_fa.num_fs = m->mid - m->lo + 1;
+    lo_fa.fs = malloc(lo_fa.num_fs * f_ptr);
+    memcpy(lo_fa.fs, &m->fs[m->lo], lo_fa.num_fs * f_ptr);
+
+    farr hi_fa;
+    hi_fa.max_fs = m->hi;
+    hi_fa.curr = 0;
+    hi_fa.num_fs = m->hi - m->mid;
+    hi_fa.fs = malloc(lo_fa.num_fs * f_ptr);
+    memcpy(hi_fa.fs, &m->fs[m->mid + 1], lo_fa.num_fs * f_ptr);
+
+    while (true) {
+        fraction *lo_f = fa_peek(&lo_fa);
+        fraction *hi_f = fa_peek(&hi_fa);
+        if (lo_f != null && hi_f != null) {
+            if (f_lt(lo_f, hi_f)) {
+                fa_push(&fa, fa_pop(&lo_fa));
+            } else {
+                fa_push(&fa, fa_pop(&lo_fa));
+            }
+        } else if (lo_f != null) {
+            fa_push(&fa, fa_pop(&lo_fa));
+        } else if (hi_f != null) {
+            fa_push(&fa, fa_pop(&lo_fa));
+        } else {
+            break;
+        }
+    }
+
+    free(lo_fa.fs);
+    free(hi_fa.fs);
+
+    return null;
 }
 
 msg *mk_jobs(msg *m, size_t js) {
@@ -62,6 +118,7 @@ msg *mk_jobs(msg *m, size_t js) {
         ms[i].fs = m->fs;
         ms[i].lo = lo;
         ms[i].hi = hi > m->hi ? m->hi : hi;
+        ms[i].mid = (ms[i].lo + ms[i].hi) / 2;
 
         lo = hi + 1;
         hi = hi + len;
@@ -72,6 +129,12 @@ msg *mk_jobs(msg *m, size_t js) {
 
 msg *merge_jobs(msg *ms, size_t js) {
     size_t new_js = js >> 1;
+
+    if (new_js == 0) {
+        free(ms);
+        return null;
+    }
+
     msg *new_ms = malloc(new_js * sizeof(msg));
 
     size_t i;
@@ -79,116 +142,13 @@ msg *merge_jobs(msg *ms, size_t js) {
     for (i = 1; i < js; i += 2) {
         new_ms[j].fs = ms[0].fs;
         new_ms[j].lo = ms[i-1].lo;
+        new_ms[j].mid = ms[i-1].hi;
         new_ms[j].hi = ms[i].hi;
         j++;
     }
 
     free(ms);
     return new_ms;
-}
-
-void *th_sort(void *th_msg) {
-    pthread_t th_lo, th_hi;
-    msg *m = (msg *) th_msg;
-    size_t lo = m->lo;
-    size_t hi = m->hi;
-    size_t mid = (lo + hi) / 2;
-
-    if (hi - lo > 2048) {
-        msg *lo_msg = malloc(sizeof(msg));
-        lo_msg->lo = lo;
-        lo_msg->hi = mid;
-        lo_msg->fs = m->fs;
-
-        pthread_create(&th_lo, null, th_sort, lo_msg);
-
-        msg *hi_msg = malloc(sizeof(msg));
-        hi_msg->lo = mid + 1;
-        hi_msg->hi = hi;
-        hi_msg->fs = m->fs;
-
-        pthread_create(&th_hi, null, th_sort, hi_msg);
-
-        farr *lo_fa;
-        farr *hi_fa;
-        pthread_join(th_lo, (void **) &lo_fa);
-        pthread_join(th_hi, (void **) &hi_fa);
-
-        free(lo_msg);
-        free(hi_msg);
-
-        farr *fa = fa_copy(null, lo_fa->max_fs << 1);
-
-        while (true) {
-            fraction *lo_f = fa_peek(lo_fa);
-            fraction *hi_f = fa_peek(hi_fa);
-            if (lo_f != null && hi_f != null) {
-                if (f_lt(lo_f, hi_f)) {
-                    fa_push(fa, fa_pop(lo_fa));
-                } else {
-                    fa_push(fa, fa_pop(lo_fa));
-                }
-            } else if (lo_f != null) {
-                fa_push(fa, fa_pop(lo_fa));
-            } else if (hi_f != null) {
-                fa_push(fa, fa_pop(lo_fa));
-            } else {
-                break;
-            }
-        }
-
-        fa_free(lo_fa);
-        fa_free(hi_fa);
-
-        return fa;
-    } else {
-        msg *lo_msg = malloc(sizeof(msg));
-        lo_msg->lo = lo;
-        lo_msg->hi = mid;
-        lo_msg->fs = m->fs;
-
-        pthread_create(&th_lo, null, heap_sort, lo_msg);
-
-        msg *hi_msg = malloc(sizeof(msg));
-        hi_msg->lo = mid + 1;
-        hi_msg->hi = hi;
-        hi_msg->fs = m->fs;
-
-        pthread_create(&th_hi, null, heap_sort, hi_msg);
-
-        heap *lo_h;
-        heap *hi_h;
-        pthread_join(th_lo, (void **) &lo_h);
-        pthread_join(th_hi, (void **) &hi_h);
-
-        free(lo_msg);
-        free(hi_msg);
-
-        farr *fa = fa_copy(null, lo_h->max_fs << 1);
-
-        while (true) {
-            fraction *lo_f = h_peek(lo_h);
-            fraction *hi_f = h_peek(hi_h);
-            if (lo_f != null && hi_f != null) {
-                if (f_lt(lo_f, hi_f)) {
-                    fa_push(fa, h_pop(lo_h));
-                } else {
-                    fa_push(fa, h_pop(hi_h));
-                }
-            } else if (lo_f != null) {
-                fa_push(fa, h_pop(lo_h));
-            } else if (hi_f != null) {
-                fa_push(fa, h_pop(hi_h));
-            } else {
-                break;
-            }
-        }
-
-        h_free(lo_h);
-        h_free(hi_h);
-
-        return fa;
-    }
 }
 
 void *heap_sort(void *th_msg) {
@@ -222,4 +182,6 @@ void *ins_sort(void *th_msg) {
             fs[curr] = f;
         }
     }
+
+    return null;
 }
