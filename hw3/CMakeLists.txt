@@ -54,6 +54,7 @@ set(MERGE_SOURCES
     ${COMMON_SOURCES}
     heap.c
     farray.c
+    threadpool.c
     thread_sort.c
     merge_main.c
     )

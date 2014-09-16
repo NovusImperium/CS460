@@ -1,10 +1,9 @@
 #include <stdlib.h>
-#include <etip.h>
 #include "defs.h"
 #include "thread_sort.h"
 #include "heap.h"
 
-void *th_sort(void *th_msg) {
+void *th_sort_new(void *th_msg) {
     msg *m = (msg *)th_msg;
 
     if (m->hi < 1024) {
@@ -88,7 +87,7 @@ msg *merge_jobs(msg *ms, size_t js) {
     return new_ms;
 }
 
-void *th_sort_old(void *th_msg) {
+void *th_sort(void *th_msg) {
     pthread_t th_lo, th_hi;
     msg *m = (msg *) th_msg;
     size_t lo = m->lo;
@@ -110,8 +109,8 @@ void *th_sort_old(void *th_msg) {
 
         pthread_create(&th_hi, null, th_sort, hi_msg);
 
-        farr *lo_fa = malloc(sizeof(farr));
-        farr *hi_fa = malloc(sizeof(farr));
+        farr *lo_fa;
+        farr *hi_fa;
         pthread_join(th_lo, (void **) &lo_fa);
         pthread_join(th_hi, (void **) &hi_fa);
 
@@ -157,8 +156,8 @@ void *th_sort_old(void *th_msg) {
 
         pthread_create(&th_hi, null, heap_sort, hi_msg);
 
-        heap *lo_h = malloc(sizeof(heap));
-        heap *hi_h = malloc(sizeof(heap));
+        heap *lo_h;
+        heap *hi_h;
         pthread_join(th_lo, (void **) &lo_h);
         pthread_join(th_hi, (void **) &hi_h);
 
