@@ -4,60 +4,63 @@
 #include "heap.h"
 
 // initialize the heap into the given pointer
-heap *h_init() {
+heap *h_init(int (*comp)(const void *, const void *)) {
     heap *h = malloc(sizeof(heap));
 
-    h->max_fs = 100;
-    h->num_fs = 0;
-    h->fs = malloc(h->max_fs * f_ptr);
+    h->m = 100;
+    h->n = 0;
+    h->comp = comp;
+    h->q = malloc(h->m * sizeof(void*));
 
     return h;
 }
 
-heap *h_copy(heap *h, size_t s) {
+heap *h_copy(heap *h, size_t s, int (*comp)(void const *, void const *)) {
     heap *new_h = malloc(sizeof(heap));
 
-    new_h->max_fs = s;
-    new_h->fs = malloc(s * f_ptr);
+    new_h->m = s;
+    new_h->q = malloc(s * sizeof(void*));
 
     if (h == null) {
-        new_h->num_fs = 0;
+        new_h->n = 0;
+        new_h->comp = comp;
     } else {
-        new_h->num_fs = h->num_fs > s ? s : h->num_fs;
-        memcpy(new_h->fs, h->fs, new_h->num_fs * f_ptr);
+        new_h->n = h->n > s ? s : h->n;
+        new_h->comp = h->comp;
+        memcpy(new_h->q, h->q, new_h->n * sizeof(void*));
     }
 
     return new_h;
 }
 
 void h_free(heap *h) {
-    free(h->fs);
+    free(h->q);
     free(h);
 }
 
 // insert a fraction into the heap, return true if successful
-bool h_push(heap *h, fraction *f) {
-    h->num_fs++;
-    if (h->num_fs == h->max_fs) {
-        size_t new_size = h->max_fs << 4;
-        fraction **new_fs;
-        if ((new_fs = malloc(new_size * f_ptr)) == null) {
+bool h_push(heap *h, void *i) {
+    h->n++;
+    if (h->n == h->m) {
+        size_t new_size = h->m << 4;
+        void **new_fs;
+        if ((new_fs = malloc(new_size * sizeof(void*))) == null) {
             return false;
         }
-        memmove(new_fs, h->fs, h->max_fs * f_ptr);
-        free(h->fs);
-        h->fs = new_fs;
-        h->max_fs = new_size;
+        memmove(new_fs, h->q, h->m * sizeof(void*));
+        free(h->q);
+        h->q = new_fs;
+        h->m = new_size;
     }
 
-    h->fs[h->num_fs] = f;
+    h->q[h->n] = i;
 
-    size_t curr = h->num_fs;
-    size_t half = h->num_fs >> 1;
-    while (half > 0 && f_lt(h->fs[curr], h->fs[half])) {
-        fraction *tmp = h->fs[half];
-        h->fs[half] = h->fs[curr];
-        h->fs[curr] = tmp;
+    size_t curr = h->n;
+    size_t half = h->n >> 1;
+    while (half > 0 && h->comp(h->q[curr], h->q[half])) {
+        void *tmp = h->q[half];
+        h->q[half] = h->q[curr];
+        h->q[curr] = tmp;
 
         curr = half;
         half = half >> 1;
@@ -66,41 +69,41 @@ bool h_push(heap *h, fraction *f) {
     return true;
 }
 
-fraction *h_peek(heap *h) {
-    return h->num_fs == 0 ? null : h->fs[1];
+void * h_peek(heap *h) {
+    return h->n == 0 ? null : h->q[1];
 }
 
 // pop the top of the heap into the given pointer and remove it from the heap
-fraction *h_pop(heap *h) {
-    if (h->num_fs <= 1) {
-        size_t i = h->num_fs;
-        h->num_fs = 0;
-        return h->fs[i];
+void * h_pop(heap *h) {
+    if (h->n <= 1) {
+        size_t i = h->n;
+        h->n = 0;
+        return h->q[i];
     }
 
-    fraction *f = h->fs[1];
-    h->fs[1] = h->fs[h->num_fs];
-    h->fs[h->num_fs] = null;
+    void *f = h->q[1];
+    h->q[1] = h->q[h->n];
+    h->q[h->n] = null;
 
     size_t curr = 1;
     while (true) {
         size_t l = curr << 1;
         size_t r = l + 1;
-        if (r < h->num_fs && f_lt(h->fs[r], h->fs[l]) && f_lt(h->fs[r], h->fs[curr])) {
-            fraction *t = h->fs[curr];
-            h->fs[curr] = h->fs[r];
-            h->fs[r] = t;
+        if (r < h->n && h->comp(h->q[r], h->q[l]) && h->comp(h->q[r], h->q[curr])) {
+            void *t = h->q[curr];
+            h->q[curr] = h->q[r];
+            h->q[r] = t;
             curr = r;
-        } else if (l < h->num_fs && f_lt(h->fs[l], h->fs[curr])) {
-            fraction *t = h->fs[curr];
-            h->fs[curr] = h->fs[l];
-            h->fs[l] = t;
+        } else if (l < h->n && h->comp(h->q[l], h->q[curr])) {
+            void *t = h->q[curr];
+            h->q[curr] = h->q[l];
+            h->q[l] = t;
             curr = l;
         } else {
             break;
         }
     }
 
-    h->num_fs--;
+    h->n--;
     return f;
 }

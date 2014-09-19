@@ -18,8 +18,10 @@ void f_add(fraction *lhs, fraction *rhs) {
 }
 
 // compare the two fractions and return true if lhs is less-than rhs
-bool f_lt(const fraction *lhs, const fraction *rhs) {
-    return (lhs->w < rhs->w); //|| (lhs->n * rhs->d < rhs->n * lhs->d);
+bool f_lt(void const *lhs, void const *rhs) {
+    fraction *l = (fraction *)lhs;
+    fraction *r = (fraction *)rhs;
+    return (l->w < r->w); //|| (lhs->n * rhs->d < rhs->n * lhs->d);
 }
 
 // initialize and read a fraction from the input file

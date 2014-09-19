@@ -22,7 +22,7 @@ extern void f_reduce(fraction *f);
 extern void f_add(fraction *lhs, fraction *rhs);
 
 // compare the two fractions and return true if lhs is less-than rhs
-extern bool f_lt(const fraction *lhs, const fraction *rhs);
+extern bool f_lt(void const *lhs, void const *rhs);
 
 // initialize and read a fraction from the input file
 extern bool f_read(fraction *f, FILE *in);

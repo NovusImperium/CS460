@@ -11,11 +11,11 @@ typedef struct {
     size_t lo;
     size_t mid;
     size_t hi;
-    fraction **fs;
+    farr *fa;
 } msg;
 
 // sort function to handle sorting and merging subarrays, returns sorted fraction array
-extern void *th_sort(void *th_msg);
+//extern void *th_sort(void *th_msg);
 
 // merge pre-sorted subarrays
 extern void *th_merge(void *arg);
@@ -27,9 +27,9 @@ extern void *heap_merge(void *arg);
 extern void *heap_sort(void *tm_msg);
 
 // generate msg for the number of thread jobs to perform
-extern msg *mk_jobs(msg *m, size_t js);
+extern msg *mk_jobs(msg *m, int js);
 
 // merge the thread jobs so that there are half as many and no two jobs overlap
-extern msg *merge_jobs(msg *ms, size_t js);
+extern msg *merge_jobs(msg *ms, int js);
 
 #endif // THREAD_SORT

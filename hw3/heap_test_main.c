@@ -3,7 +3,7 @@
 #include "heap_test.h"
 
 int main(int argc, char **argv) {
-    heap *h = h_init();
+    heap *h = h_init(NULL);
 
     int i = 16;
     for (i; i > 0; i--) {

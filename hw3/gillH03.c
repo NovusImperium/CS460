@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv) {
     FILE *fd = fopen(argv[1], "r");
-    heap *h = h_init();
+    heap *h = h_init(NULL);
     fraction *sum = malloc(f_size);
     sum->n = 0;
     sum->d = 1;

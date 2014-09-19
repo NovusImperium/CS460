@@ -33,7 +33,8 @@ int drand(void) {
 
 int main(int argc, char **argv) {
 
-    int num = 1 << atoi(argv[1]);
+    //int num = 1 << atoi(argv[1]);
+    int num = atoi(argv[1]);
     std::ofstream out(argv[2], std::ios_base::trunc);
 
     for (int i = 0; i < num; ++i) {

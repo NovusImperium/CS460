@@ -72,7 +72,7 @@ void fa_sort(farr *fa) {
     msg *m = malloc(sizeof(msg));
     m->hi = len - 1;
     m->lo = 0;
-    m->fs = fa->fs;
+    m->fa = fa;
 
     size_t d = 0;
     while (len > 2048) {
@@ -80,13 +80,13 @@ void fa_sort(farr *fa) {
         d++;
     }
 
-    size_t jobs = (size_t)1 << d;
-    tpool *pool = tp_init(4);
+    int jobs = 1 << d;
+    threadpool *pool = tp_init(1);
     msg *ms = mk_jobs(m, jobs);
 
     size_t i;
     for (i = 0; i < jobs; i++) {
-        tp_add(pool, heap_merge, &ms[i]);
+        tp_add(pool, heap_merge, &ms[i], jobs);
     }
 
     tp_wait(pool);
@@ -96,7 +96,7 @@ void fa_sort(farr *fa) {
 
     while (jobs > 0) {
         for (i = 0; i < jobs; i++) {
-            tp_add(pool, th_merge, &ms[i]);
+            tp_add(pool, th_merge, &ms[i], jobs);
         }
 
         tp_wait(pool);
