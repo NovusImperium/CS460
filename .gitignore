@@ -12,5 +12,6 @@ output
 *.callgrind
 *.debug
 build/
+gill*/
 
 !CMakeLists.txt
