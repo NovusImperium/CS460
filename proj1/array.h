@@ -5,12 +5,7 @@
 #include "defs.h"
 #include "lexer_dfa.h"
 
-typedef struct {
-    size_t max_ts;
-    size_t num_ts;
-    size_t curr;
-    token *ts;
-} array;
+typedef struct array array;
 
 // initialize the token array with max length of s
 extern array *arr_init(size_t s);

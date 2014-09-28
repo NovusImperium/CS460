@@ -2,26 +2,22 @@
 #include <string.h>
 #include <ctype.h>
 #include "lexer_dfa.h"
+#include "array.h"
 
-array *dfa_start(char *line) {
+
+array *dfa_start(char *line, int r) {
     array *tokens = arr_init(32);
     int i;
     for (i = 0; line[i] != '\0'; i++) {
-        if (line[i] < '!') {
+        if (isspace(line[i])) {
             continue;
-        } else if (line[i] > 128) {
-            token *t = malloc(sizeof(token));
-            t->lex = invalid_lex;
-            memset(t->str, 0, 32);
-            t->c = i;
-            t->err = invalid_char;
-            arr_push(tokens, t);
         } else {
             token *t = malloc(sizeof(token));
             memset(t, 0, sizeof(token));
-            i += (dfa_trans[line[i] - '!'])(&line[i], t);
+            i += (dfa_trans[line[i]])(&line[i], t);
 
             if (t->err) {
+                t->r = r;
                 t->c = i;
             }
 
@@ -32,7 +28,7 @@ array *dfa_start(char *line) {
     return tokens;
 }
 
-int dfa_invchar(char *str, token *t) {
+int dfa_invalid(char *str, token *t) {
     t->lex = invalid_lex;
     memset(t->str, 0, 32);
     t->err = invalid_char;
@@ -73,7 +69,7 @@ int dfa_num(char *str, token *t) {
                 flt = true;
             }
         } else if (isalpha(str[i]) || str[i] == '_') {
-            t->err = invalid_char;
+            t->err = invalid_char_in_num;
             break;
         }
     }
@@ -81,10 +77,10 @@ int dfa_num(char *str, token *t) {
     size_t len = i;
     if (i > 31) {
         len = 31;
-        t->err = !t->err ? invalid_id_length : t->err;
+        t->err = !t->err ? invalid_num_length : t->err;
     }
     memcpy(t->str, str, len);
-    t->lex = flt ? num_float : num_int;
+    t->lex = flt ? literal_float : literal_int;
 
     return (int) i - 1;
 }
@@ -222,13 +218,13 @@ int dfa_carret(char *str, token *t) {
 
 int dfa_pipe(char *str, token *t) {
     if (str[1] == '=') {
-        t->lex = assn_inor;
+        t->lex = assn_or;
         return 1;
     } else if (str[1] == '|') {
         t->lex = logic_or;
         return 1;
     } else {
-        t->lex = bit_inor;
+        t->lex = bit_or;
         return 0;
     }
 }
@@ -243,17 +239,17 @@ int dfa_cparen(char *str, token *t) {
     return 0;
 }
 
-int dfa_series(char *str, token *t) {
+int dfa_comma(char *str, token *t) {
     t->lex = series_op;
     return 0;
 }
 
-int dfa_ternc(char *str, token *t) {
+int dfa_qmark(char *str, token *t) {
     t->lex = tern_cond;
     return 0;
 }
 
-int dfa_terne(char *str, token *t) {
+int dfa_colon(char *str, token *t) {
     t->lex = tern_else;
     return 0;
 }

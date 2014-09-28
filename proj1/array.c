@@ -2,6 +2,13 @@
 #include <string.h>
 #include "array.h"
 
+struct array {
+    size_t max_ts;
+    size_t num_ts;
+    size_t curr;
+    token *ts;
+};
+
 array *arr_init(size_t s) {
     array *arr = malloc(sizeof(array));
 
@@ -42,11 +49,11 @@ void arr_reset(array *arr) {
 }
 
 token *arr_peek(array *arr) {
-    return arr->curr < arr->num_ts ? arr->ts[arr->curr] : null;
+    return arr->curr < arr->num_ts ? &arr->ts[arr->curr] : null;
 }
 
 token *arr_pop(array *arr) {
-    return arr->curr < arr->num_ts ? arr->ts[arr->curr++] : null;
+    return arr->curr < arr->num_ts ? &arr->ts[arr->curr++] : null;
 }
 
 bool arr_push(array *arr, token *t) {

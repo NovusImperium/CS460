@@ -1,13 +1,19 @@
 #ifndef LEXERDFA_H
 #define LEXERDFA_H
-#include "array.h"
-#include "lexer_dfa.c"
+
+#ifndef array
+typedef struct array array;
+#endif
+
+#include "defs.h"
 
 typedef enum {
     keyword,
     ident,
-    num_int,
-    num_float,
+    literal_int,
+    literal_float,
+    literal_str,    // not yet used
+    literal_char,   // not yet used
     arith_add,
     arith_sub,
     arith_mul,
@@ -25,7 +31,7 @@ typedef enum {
     assn_rsh,
     assn_and,
     assn_xor,
-    assn_inor,
+    assn_or,
     logic_and,
     logic_not,
     logic_or,
@@ -36,7 +42,7 @@ typedef enum {
     logic_lt,
     logic_le,
     bit_and,
-    bit_inor,
+    bit_or,
     bit_xor,
     bit_lsh,
     bit_rsh,
@@ -53,7 +59,9 @@ typedef enum {
 typedef enum {
     no_err = false,
     invalid_char,
-    invalid_id_length
+    invalid_char_in_num,
+    invalid_id_length,
+    invalid_num_length
 } err_t;
 
 // struct to hold the lexical type and the string representation (if need be)
@@ -62,13 +70,14 @@ typedef struct {
     lexical_t lex;
     char str[32];
     err_t err;
+    int r;
     int c;
 } token;
 
-// entry point to the lexer dfa,
+// entry point to the lexer dfa, takes a single line of input with the line number
 // the input line must terminate in a null-char
 // returns an array of tokens that represent the valid lexemes found on the input line
-extern array *dfa_start(char *line);
+extern array *dfa_start(char *line, int n);
 
 // generate an ID or keyword token starting from the beginning of the input string
 // returns the length of the ID or keyword, up to and beyond the 31 character length limit
@@ -80,7 +89,7 @@ extern int dfa_num(char *str, token *t);
 
 // generate an invalid_char token
 // returns 0
-extern int dfa_invchar(char *str, token *t);
+extern int dfa_invalid(char *str, token *t);
 
 // generate logic_not or logic_ne token
 // returns 0 if logic_not, 1 if logic_ne
@@ -112,7 +121,7 @@ extern int dfa_add(char *str, token *t);
 
 // generate series_op token
 // returns 0
-extern int dfa_series(char *str, token *t);
+extern int dfa_comma(char *str, token *t);
 
 // generate arith_sub, arith_dec, or assn_sub token
 // returns 0 if arith_sub, 1 if arith_dec or assn_sub
@@ -124,11 +133,11 @@ extern int dfa_div(char *str, token *t);
 
 // generate tern_cond token
 // returns 0
-extern int dfa_ternc(char *str, token *t);
+extern int dfa_qmark(char *str, token *t);
 
 // generate tern_else token
 // returns 0
-extern int dfa_terne(char *str, token *t);
+extern int dfa_colon(char *str, token *t);
 
 // generate semi_colon token
 // returns 0
@@ -150,8 +159,8 @@ extern int dfa_equal(char *str, token *t);
 // returns 0 if bit_xor, 1 if assn_xor
 extern int dfa_carret(char *str, token *t);
 
-// generate bit_inor, assn_or, or logic_or token
-// returns 0 if bit_inor, 1 if assn_or or logic_or
+// generate bit_or, assn_or, or logic_or token
+// returns 0 if bit_or, 1 if assn_or or logic_or
 extern int dfa_pipe(char *str, token *t);
 
 // generate bit_ones token
@@ -162,52 +171,52 @@ extern int dfa_tilde(char *str, token *t);
 // the index of each state function corresponds to the ascii value of the character to transition from
 typedef int (*dfa_func)(char *, token *);
 
-static const dfa_func dfa_trans[128] = {
-    dfa_invchar,    // 0    Null char
-    dfa_invchar,    // 1    Start of Heading
-    dfa_invchar,    // 2    Start of Text
-    dfa_invchar,    // 3    End of Text
-    dfa_invchar,    // 4    End of Transmission
-    dfa_invchar,    // 5    Enquiry
-    dfa_invchar,    // 6    Acknowledgment
-    dfa_invchar,    // 7    Bell
-    dfa_invchar,    // 8    Back Space
-    dfa_invchar,    // 9    Horizontal Tab
-    dfa_invchar,    // 10   Line Feed
-    dfa_invchar,    // 11   Vertical Tab
-    dfa_invchar,    // 12   Form Feed
-    dfa_invchar,    // 13   Carriage Return
-    dfa_invchar,    // 14   Shift Out / X-On
-    dfa_invchar,    // 15   Shift In / X-Off
-    dfa_invchar,    // 16   Data Line Escape
-    dfa_invchar,    // 17   Device Control 1 (oft. XON)
-    dfa_invchar,    // 18   Device Control 2
-    dfa_invchar,    // 19   Device Control 3 (oft. XOFF)
-    dfa_invchar,    // 20   Device Control 4
-    dfa_invchar,    // 21   Negative Acknowledgement
-    dfa_invchar,    // 22   Synchronous Idle
-    dfa_invchar,    // 23   End of Transmit Block
-    dfa_invchar,    // 24   Cancel
-    dfa_invchar,    // 25   End of Medium
-    dfa_invchar,    // 26   Substitute
-    dfa_invchar,    // 27   Escape
-    dfa_invchar,    // 28   File Separator
-    dfa_invchar,    // 29   Group Separator
-    dfa_invchar,    // 30   Record Separator
-    dfa_invchar,    // 31   Unit Separator
-    dfa_invchar,    // 32   SPACE
+static const dfa_func dfa_trans[256] = {
+    dfa_invalid,    // 0    Null char
+    dfa_invalid,    // 1    Start of Heading
+    dfa_invalid,    // 2    Start of Text
+    dfa_invalid,    // 3    End of Text
+    dfa_invalid,    // 4    End of Transmission
+    dfa_invalid,    // 5    Enquiry
+    dfa_invalid,    // 6    Acknowledgment
+    dfa_invalid,    // 7    Bell
+    dfa_invalid,    // 8    Back Space
+    dfa_invalid,    // 9    Horizontal Tab
+    dfa_invalid,    // 10   Line Feed
+    dfa_invalid,    // 11   Vertical Tab
+    dfa_invalid,    // 12   Form Feed
+    dfa_invalid,    // 13   Carriage Return
+    dfa_invalid,    // 14   Shift Out / X-On
+    dfa_invalid,    // 15   Shift In / X-Off
+    dfa_invalid,    // 16   Data Line Escape
+    dfa_invalid,    // 17   Device Control 1 (oft. XON)
+    dfa_invalid,    // 18   Device Control 2
+    dfa_invalid,    // 19   Device Control 3 (oft. XOFF)
+    dfa_invalid,    // 20   Device Control 4
+    dfa_invalid,    // 21   Negative Acknowledgement
+    dfa_invalid,    // 22   Synchronous Idle
+    dfa_invalid,    // 23   End of Transmit Block
+    dfa_invalid,    // 24   Cancel
+    dfa_invalid,    // 25   End of Medium
+    dfa_invalid,    // 26   Substitute
+    dfa_invalid,    // 27   Escape
+    dfa_invalid,    // 28   File Separator
+    dfa_invalid,    // 29   Group Separator
+    dfa_invalid,    // 30   Record Separator
+    dfa_invalid,    // 31   Unit Separator
+    dfa_invalid,    // 32   SPACE
     dfa_not,        // 33   !
-    dfa_invchar,    // 34   "
-    dfa_invchar,    // 35   #
-    dfa_invchar,    // 36   $
+    dfa_invalid,    // 34   "
+    dfa_invalid,    // 35   #
+    dfa_invalid,    // 36   $
     dfa_mod,        // 37   %
     dfa_and,        // 38   &
-    dfa_invchar,    // 39   '
+    dfa_invalid,    // 39   '
     dfa_oparen,     // 40   (
     dfa_cparen,     // 41   )
     dfa_mul,        // 42   *
     dfa_add,        // 43   +
-    dfa_series,     // 44   ,
+    dfa_comma,      // 44   ,
     dfa_sub,        // 45   -
     dfa_num,        // 46   .
     dfa_div,        // 47   /
@@ -221,13 +230,13 @@ static const dfa_func dfa_trans[128] = {
     dfa_num,        // 55   7
     dfa_num,        // 56   8
     dfa_num,        // 57   9
-    dfa_terne,      // 58   :
+    dfa_colon,      // 58   :
     dfa_semi,       // 59   ;
     dfa_less,       // 60   <
     dfa_equal,      // 61   =
     dfa_greater,    // 62   >
-    dfa_ternc,      // 63   ?
-    dfa_invchar,    // 64   @
+    dfa_qmark,      // 63   ?
+    dfa_invalid,    // 64   @
     dfa_word,       // 65   A
     dfa_word,       // 66   B
     dfa_word,       // 67   C
@@ -254,12 +263,12 @@ static const dfa_func dfa_trans[128] = {
     dfa_word,       // 88   X
     dfa_word,       // 89   Y
     dfa_word,       // 90   Z
-    dfa_invchar,    // 91   [
-    dfa_invchar,    // 92   \ (backslash)
-    dfa_invchar,    // 93   ]
+    dfa_invalid,    // 91   [
+    dfa_invalid,    // 92   \ (backslash)
+    dfa_invalid,    // 93   ]
     dfa_carret,     // 94   ^
     dfa_word,       // 95   _
-    dfa_invchar,    // 96   `
+    dfa_invalid,    // 96   `
     dfa_word,       // 97   a
     dfa_word,       // 98   b
     dfa_word,       // 99   c
@@ -286,11 +295,139 @@ static const dfa_func dfa_trans[128] = {
     dfa_word,       // 120  x
     dfa_word,       // 121  y
     dfa_word,       // 122  z
-    dfa_invchar,    // 123  {
+    dfa_invalid,    // 123  {
     dfa_pipe,       // 124  |
-    dfa_invchar,    // 125  }
+    dfa_invalid,    // 125  }
     dfa_tilde,      // 126  ~
-    dfa_invchar,    // 127  DEL
+    dfa_invalid,    // 127  DEL
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
+    dfa_invalid,    // extended ascii character
 };
 
 #endif
