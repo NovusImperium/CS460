@@ -26,7 +26,6 @@ typedef struct {
     int pty;
     void *(*func)(void *);
     void *arg;
-    void *next;
 } tp_task;
 
 /*
