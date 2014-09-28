@@ -9,7 +9,7 @@ array *dfa_start(char *line) {
     for (i = 0; line[i] != '\0'; i++) {
         if (line[i] < '!') {
             continue;
-        } else if (line[i] > '~') {
+        } else if (line[i] > 128) {
             token *t = malloc(sizeof(token));
             t->lex = invalid_lex;
             memset(t->str, 0, 32);
@@ -158,6 +158,81 @@ int dfa_sub(char *str, token *t) {
     }
 }
 
+int dfa_div(char *str, token *t) {
+    if (str[1] == '=') {
+        t->lex = assn_div;
+        return 1;
+    } else {
+        t->lex = arith_div;
+        return 0;
+    }
+}
+
+int dfa_less(char *str, token *t) {
+    if (str[1] == '=') {
+        t->lex = logic_le;
+        return 1;
+    } else if (str[1] == '<' && str[2] == '=') {
+        t->lex = assn_lsh;
+        return 2;
+    } else if (str[1] == '<') {
+        t->lex = bit_lsh;
+        return 1;
+    } else {
+        t->lex = logic_lt;
+        return 0;
+    }
+}
+
+int dfa_greater(char *str, token *t) {
+    if (str[1] == '=') {
+        t->lex = logic_ge;
+        return 1;
+    } else if (str[1] == '>' && str[2] == '=') {
+        t->lex = assn_rsh;
+        return 2;
+    } else if (str[1] == '>') {
+        t->lex = bit_rsh;
+        return 1;
+    } else {
+        t->lex = logic_gt;
+        return 0;
+    }
+}
+
+int dfa_equal(char *str, token *t) {
+    if (str[1] == '=') {
+        t->lex = logic_eq;
+        return 1;
+    } else {
+        t->lex = assn_get;
+        return 0;
+    }
+}
+
+int dfa_carret(char *str, token *t) {
+    if (str[1] == '=') {
+        t->lex = assn_xor;
+        return 1;
+    } else {
+        t->lex = bit_xor;
+        return 0;
+    }
+}
+
+int dfa_pipe(char *str, token *t) {
+    if (str[1] == '=') {
+        t->lex = assn_inor;
+        return 1;
+    } else if (str[1] == '|') {
+        t->lex = logic_or;
+        return 1;
+    } else {
+        t->lex = bit_inor;
+        return 0;
+    }
+}
+
 int dfa_oparen(char *str, token *t) {
     t->lex = open_paren;
     return 0;
@@ -170,6 +245,26 @@ int dfa_cparen(char *str, token *t) {
 
 int dfa_series(char *str, token *t) {
     t->lex = series_op;
+    return 0;
+}
+
+int dfa_ternc(char *str, token *t) {
+    t->lex = tern_cond;
+    return 0;
+}
+
+int dfa_terne(char *str, token *t) {
+    t->lex = tern_else;
+    return 0;
+}
+
+int dfa_semi(char *str, token *t) {
+    t->lex = semi_colon;
+    return 0;
+}
+
+int dfa_tilde(char *str, token *t) {
+    t->lex = bit_ones;
     return 0;
 }
 
