@@ -34,7 +34,4 @@ extern token *arr_pop(array *arr);
 // print all the tokens in the token array
 extern void arr_print(array *arr, FILE *out);
 
-// sort the token array
-extern void arr_sort(array *arr);
-
 #endif // ARRAY

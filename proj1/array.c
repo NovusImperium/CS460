@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "array.h"
+#include "lexer_dfa.h"
 
 struct array {
     size_t max_ts;
@@ -90,4 +91,13 @@ bool arr_concat(array *dest, array *src) {
     dest->num_ts += src->num_ts;
     arr_free(src);
     return true;
+}
+
+void arr_print(array *arr, FILE *out) {
+    int i;
+    for (i = 0; i < arr->num_ts; i++) {
+        fprintf(out, lex_str[arr->ts[i].lex], arr->ts[i].str, arr->ts[i].err, arr->ts[i].r, arr->ts[i].c);
+    }
+
+    fputc('\n', out);
 }
