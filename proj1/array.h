@@ -1,37 +1,35 @@
 #ifndef ARRAY
 #define ARRAY
 
-#include <stdio.h>
 #include "defs.h"
-#include "lexer_dfa.h"
 
 typedef struct array array;
 
-// initialize the token array with max length of s
-extern array *arr_init(size_t s);
+// initialize the item array with max length of m
+extern array *arr_init(size_t m);
 
-// create and return a new copy of the token array with size 's', init new token array if 'fa' is null
-extern array *arr_copy(array *arr, size_t s);
+// create and return a new copy of the item array with size 'm', init new item array if 'arr' is null
+extern array *arr_copy(array *arr, size_t m);
 
-// free the memory used by the token array
+// free the memory used by the item array
 extern void arr_free(array *arr);
 
 // reset the state of the array to init
 extern void arr_reset(array *arr);
 
-// insert a token into the token array, return true if successful
-extern bool arr_push(array *arr, token *t);
+// insert a item into the item array, return true if successful
+extern bool arr_push(array *arr, void *a);
 
-// concatenate the src token array onto the end of the dest token array
+// concatenate the src item array onto the end of the dest item array
 extern bool arr_concat(array *dest, array *src);
 
-// peek at the head of the token array
-extern token *arr_peek(array *arr);
+// peek at the head of the item array
+extern void *arr_peek(array *arr);
 
-// pop the head of the token array
-extern token *arr_pop(array *arr);
+// pop the head of the item array
+extern void *arr_pop(array *arr);
 
-// print all the tokens in the token array
-extern void arr_print(array *arr, FILE *out);
+// apply the function to each item in the array
+extern void arr_foreach(array *arr, void (*func)(void **));
 
 #endif // ARRAY

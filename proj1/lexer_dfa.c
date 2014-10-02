@@ -25,6 +25,11 @@ array *dfa_start(char *line, int r) {
         }
     }
 
+    token *t = malloc(sizeof(token));
+    memset(t, 0, sizeof(0));
+    t->lex = eof_tok;
+    arr_push(tokens, t);
+
     return tokens;
 }
 
@@ -70,7 +75,9 @@ int dfa_num(char *str, token *t) {
             }
         } else if (isalpha(str[i]) || str[i] == '_') {
             t->err = invalid_char_in_num;
-            for (i; isalpha(str[i]) || str[i] == '_'; i++);
+            while (isalnum(str[i]) || str[i] == '_') {
+                i++;
+            }
             break;
         } else {
             break;

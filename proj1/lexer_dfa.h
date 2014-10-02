@@ -8,6 +8,7 @@ typedef struct array array;
 #include "defs.h"
 
 typedef enum {
+    eof_tok = -1,
     keyword = 0,
     ident,
     literal_int,

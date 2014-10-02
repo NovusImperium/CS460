@@ -1,103 +1,110 @@
 #include <stdlib.h>
 #include <string.h>
 #include "array.h"
-#include "lexer_dfa.h"
 
 struct array {
-    size_t max_ts;
-    size_t num_ts;
-    size_t curr;
-    token *ts;
+    size_t m;
+    size_t n;
+    void **as;
 };
 
-array *arr_init(size_t s) {
+array *arr_init(size_t m) {
     array *arr = malloc(sizeof(array));
 
-    arr->max_ts = s;
-    arr->num_ts = 0;
-    arr->curr = 0;
-    arr->ts = malloc(s * sizeof(token));
+    arr->m = m;
+    arr->n = 0;
+    arr->as = malloc(m * sizeof(void *));
 
     return arr;
 }
 
-array *arr_copy(array *arr, size_t s) {
+array *arr_copy(array *arr, size_t m) {
     array *new_arr = malloc(sizeof(array));
 
-    new_arr->ts = malloc(s * sizeof(token));
-    new_arr->max_ts = s;
+    new_arr->as = malloc(m * sizeof(void *));
+    new_arr->m = m;
 
     if (arr == null) {
-        new_arr->curr = 0;
-        new_arr->num_ts = 0;
+        new_arr->n = 0;
     } else {
-        new_arr->max_ts = arr->max_ts;
-        new_arr->num_ts = arr->num_ts;
-        memcpy(new_arr->ts, arr->ts, new_arr->num_ts * sizeof(token));
+        new_arr->m = arr->m;
+        new_arr->n = arr->n;
+        memcpy(new_arr->as, arr->as, new_arr->n * sizeof(void *));
     }
 
     return new_arr;
 }
 
 void arr_free(array *arr) {
-    free(arr->ts);
+    free(arr->as);
     free(arr);
 }
 
 void arr_reset(array *arr) {
-    memset(arr->ts, 0, arr->num_ts * sizeof(token));
-    arr->num_ts = 0;
+    memset(arr->as, 0, arr->n * sizeof(void *));
+    arr->n = 0;
 }
 
-token *arr_peek(array *arr) {
-    return arr->curr < arr->num_ts ? &arr->ts[arr->curr] : null;
+void *arr_peek(array *arr) {
+    return &arr->as[0];
 }
 
-token *arr_pop(array *arr) {
-    return arr->curr < arr->num_ts ? &arr->ts[arr->curr++] : null;
+void *arr_pop(array *arr) {
+    void *a = arr->as[0];
+    memmove(arr->as, arr->as + 1, (arr->n - 1) * sizeof(void *));
+    return a;
 }
 
-bool arr_push(array *arr, token *t) {
-    if (arr->num_ts == arr->max_ts) {
-        size_t new_size = arr->max_ts << 1;
-        token *new_ts;
-        if ((new_ts = malloc(new_size * sizeof(token))) == null) {
+bool arr_push(array *arr, void *t) {
+    if (arr->n == arr->m) {
+        size_t new_size = arr->m << 1;
+        void **new_as;
+        if ((new_as = malloc(new_size * sizeof(void *))) == null) {
             return false;
         }
-        memcpy(new_ts, arr->ts, arr->max_ts * sizeof(token));
-        free(arr->ts);
-        arr->ts = new_ts;
-        arr->max_ts = new_size;
+        memcpy(new_as, arr->as, arr->m * sizeof(void *));
+        free(arr->as);
+        arr->as = new_as;
+        arr->m = new_size;
     }
 
-    memcpy(&arr->ts[arr->num_ts++], t, sizeof(token));
+    memcpy(&arr->as[arr->n++], t, sizeof(void *));
     free(t);
     return true;
 }
 
 bool arr_concat(array *dest, array *src) {
-    if (dest->num_ts + src->num_ts >= dest->max_ts) {
-        size_t new_size = dest->max_ts + src->max_ts;
-        token *new_ts;
-        if ((new_ts = malloc(new_size * sizeof(token))) == null) {
+    if (dest->n + src->n >= dest->m) {
+        size_t new_size = dest->m + src->m;
+        void **new_as;
+        if ((new_as = malloc(new_size * sizeof(void *))) == null) {
             return false;
         }
-        memcpy(new_ts, dest->ts, dest->num_ts * sizeof(token));
-        free(dest->ts);
-        dest->ts = new_ts;
+        memcpy(new_as, dest->as, dest->n * sizeof(void *));
+        free(dest->as);
+        dest->as = new_as;
     }
 
-    memcpy(&dest->ts[dest->num_ts], src->ts, src->num_ts * sizeof(token));
-    dest->num_ts += src->num_ts;
+    memcpy(&dest->as[dest->n], src->as, src->n * sizeof(void *));
+    dest->n += src->n;
     arr_free(src);
     return true;
 }
 
+void arr_foreach(array *arr, void (*func)(void **)) {
+    int i;
+    for (i = 0; i < arr->n; i++) {
+        (func)(&arr->as[i]);
+    }
+}
+
+/*
 void arr_print(array *arr, FILE *out) {
     int i;
-    for (i = 0; i < arr->num_ts; i++) {
-        fprintf(out, lex_str[arr->ts[i].lex], arr->ts[i].str, arr->ts[i].err, arr->ts[i].r, arr->ts[i].c);
+    for (i = 0; i < arr->n; i++) {
+        fprintf(out, lex_str[arr->as[i].lex], arr->as[i].str, arr->as[i].err, arr->as[i].r, arr->as[i].c);
     }
 
     fputc('\n', out);
 }
+*/
