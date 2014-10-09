@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
+#include "defs.h"
 #include "array.h"
 
 struct array {
+    const int8_t t;
     size_t m;
     size_t n;
     void **as;
@@ -11,6 +13,7 @@ struct array {
 array *arr_init(size_t m) {
     array *arr = malloc(sizeof(array));
 
+    *((int8_t *) arr) = 2;
     arr->m = m;
     arr->n = 0;
     arr->as = malloc(m * sizeof(void *));
@@ -26,9 +29,9 @@ array *arr_copy(array *arr, size_t m) {
 
     if (arr == null) {
         new_arr->n = 0;
+        memset(new_arr->as, 0, m * sizeof(void *));
     } else {
-        new_arr->m = arr->m;
-        new_arr->n = arr->n;
+        new_arr->n = arr->n < m ? arr->n : m;
         memcpy(new_arr->as, arr->as, new_arr->n * sizeof(void *));
     }
 
@@ -91,20 +94,27 @@ bool arr_concat(array *dest, array *src) {
     return true;
 }
 
-void arr_foreach(array *arr, void (*func)(void **)) {
+void arr_foreach(array *arr, void *(*func)(void *)) {
     int i;
     for (i = 0; i < arr->n; i++) {
-        (func)(&arr->as[i]);
+        arr->as[i] = (func)(arr->as[i]);
     }
 }
 
-/*
-void arr_print(array *arr, FILE *out) {
-    int i;
-    for (i = 0; i < arr->n; i++) {
-        fprintf(out, lex_str[arr->as[i].lex], arr->as[i].str, arr->as[i].err, arr->as[i].r, arr->as[i].c);
+size_t arr_reduce(array *arr, bool (*func)(void *)) {
+    size_t i, c = 0;
+    for (i = 0; i < arr->n && (func)(arr->as[i]); i++, c++) {
     }
 
-    fputc('\n', out);
+    if (c < arr->n) {
+        for (i++; i < arr->n; i++) {
+            if ((func)(arr->as[i])) {
+                arr->as[c++] = arr->as[i];
+            }
+        }
+
+        arr->n = c;
+    }
+
+    return arr->n;
 }
-*/

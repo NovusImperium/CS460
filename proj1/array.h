@@ -30,6 +30,9 @@ extern void *arr_peek(array *arr);
 extern void *arr_pop(array *arr);
 
 // apply the function to each item in the array
-extern void arr_foreach(array *arr, void (*func)(void **));
+extern void arr_foreach(array *arr, void *(*func)(void *));
+
+// remove the items marked with false by the function, returns the new size of the array
+extern size_t arr_reduce(array *arr, bool (*func)(void *));
 
 #endif // ARRAY

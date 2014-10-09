@@ -21,15 +21,15 @@ D_LDFLAGS=-lprofiler
 
 ## define which homework number this makfile compiles
 ## will determine the name of the main file as well as the name on the tarball
-HWNUM = H03
-MAIN = lexer.c
+HWNUM = P1
+MAIN = proj1.c
 
 # sources used by both target and test exe's
 COMMON_SOURCES = 
 COMMON_HEADERS = 
 # all sources req'd for target exe
-TARGET_SOURCES = array.c lexer_dfa.c $(MAIN)
-TARGET_HEADERS = defs.h array.h lexer_dfa.h
+TARGET_SOURCES = array.c lexer_dfa.c lex.c $(MAIN)
+TARGET_HEADERS = defs.h array.h lexer_dfa.h lex.h
 # all sources req's for test exe
 INPUT_SOURCES = 
 INPUT_HEADERS = 

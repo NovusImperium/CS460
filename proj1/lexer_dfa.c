@@ -75,9 +75,7 @@ int dfa_num(char *str, token *t) {
             }
         } else if (isalpha(str[i]) || str[i] == '_') {
             t->err = invalid_char_in_num;
-            while (isalnum(str[i]) || str[i] == '_') {
-                i++;
-            }
+            for (i; isalnum(str[i]) || str[i] == '_');
             break;
         } else {
             break;
