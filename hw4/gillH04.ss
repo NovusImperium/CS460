@@ -42,7 +42,7 @@
   (lambda (l a)
     (if (and (list? l) (not (null? l)))
       (if (null? (cdr l))
-        (cons (car l) 'a)
+        (cons (car l) (list a))
         (cons (car l) (insert-last (cdr l) a)))
       '())))
 
