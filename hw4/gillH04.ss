@@ -2,13 +2,13 @@
   (lambda (l a) 
     (if (list? l)
       (cons a l)
-      ("Can only prepend to a list"))))
+      "Can only prepend an element to a list")))
 
 (define remove-first
   (lambda (l)
     (if (and (list? l) (not (null? l))) 
-      (car l)
-      ("Can only get first element from a non-empty list"))))
+      (cdr l)
+      "Can only remove an element from a non-empty list")))
 
 (define list-copy
   (lambda (l)
