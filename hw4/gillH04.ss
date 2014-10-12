@@ -40,11 +40,13 @@
 
 (define insert-last
   (lambda (l a)
-    (if (and (list? l) (not (null? l)))
+    (if (and (list? l) (not (null? a)))
       (if (null? (cdr l))
         (cons (car l) (list a))
         (cons (car l) (insert-last (cdr l) a)))
-      '())))
+      (if (list? l) 
+        l 
+        '()))))
 
 (define remove-last 
   (lambda (l)

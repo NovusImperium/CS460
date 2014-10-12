@@ -14,5 +14,6 @@ output
 build/
 gill*/
 test/
+test*
 
 !CMakeLists.txt
