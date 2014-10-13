@@ -78,6 +78,7 @@ int dfa_word(char *str, token *t) {
 int dfa_num(char *str, token *t) {
     if (str[0] == '.' && !isdigit(str[1])) {
         t->str[0] = '.';
+        t->lex = invalid_lex;
         t->err = invalid_char;
         return 0;
     }

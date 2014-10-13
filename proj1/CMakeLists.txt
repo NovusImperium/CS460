@@ -8,6 +8,6 @@ set(SOURCE_FILES
     array.c
     lexer_dfa.c
     lex.c
-    proj1.c
+    Project1.c
     )
 add_executable(lexer.bin ${SOURCE_FILES})
