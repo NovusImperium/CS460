@@ -5,29 +5,43 @@
 #include "array.h"
 
 
-array *dfa_start(char *line, int r) {
-    array *tokens = arr_init(32);
-    int i;
-    for (i = 0; line[i] != '\0'; i++) {
-        if (isspace(line[i])) {
+array *dfa_start(char *file) {
+    array *tokens;
+    optional opt = arr_init(32);
+    if (!opt.e) {
+        return null;
+    } else {
+        tokens = opt.val;
+    }
+    int i, c = 0, line = 1;
+    for (i = 0; file[i] != '\0'; i++, c++) {
+        if (file[i] == '\n') {
+            line++;
+            c = 0;
+            continue;
+        } else if (isspace(file[i])) {
             continue;
         } else {
             token *t = malloc(sizeof(token));
             memset(t, 0, sizeof(token));
-            i += (dfa_trans[line[i]])(&line[i], t);
+            int len = (dfa_trans[file[i]])(&file[i], t);
 
-            if (t->err) {
-                t->r = r;
-                t->c = i;
-            }
+            t->r = line;
+            t->c = c;
 
+            c += len;
+            i += len;
             arr_push(tokens, t);
         }
     }
 
     token *t = malloc(sizeof(token));
-    memset(t, 0, sizeof(0));
+    memset(t, 0, sizeof(token));
     t->lex = eof_tok;
+    t->err = no_err;
+    t->c = c;
+    t->r = line;
+
     arr_push(tokens, t);
 
     return tokens;
@@ -35,7 +49,7 @@ array *dfa_start(char *line, int r) {
 
 int dfa_invalid(char *str, token *t) {
     t->lex = invalid_lex;
-    memset(t->str, 0, 32);
+    t->str[0] = str[0];
     t->err = invalid_char;
 
     return 0;
@@ -62,6 +76,11 @@ int dfa_word(char *str, token *t) {
 }
 
 int dfa_num(char *str, token *t) {
+    if (str[0] == '.' && !isdigit(str[1])) {
+        t->str[0] = '.';
+        t->err = invalid_char;
+        return 0;
+    }
     size_t i;
     bool flt = false;
     for (i = 0; str[i] != '\0'; i++) {
@@ -73,11 +92,7 @@ int dfa_num(char *str, token *t) {
             } else {
                 flt = true;
             }
-        } else if (isalpha(str[i]) || str[i] == '_') {
-            t->err = invalid_char_in_num;
-            for (i; isalnum(str[i]) || str[i] == '_');
-            break;
-        } else {
+        }  else {
             break;
         }
     }
@@ -94,8 +109,10 @@ int dfa_num(char *str, token *t) {
 }
 
 int dfa_not(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = logic_ne;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = logic_not;
@@ -103,9 +120,11 @@ int dfa_not(char *str, token *t) {
     }
 }
 
-int dfa_mod(char *str, token *t) { 
+int dfa_mod(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_mod;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = arith_mod;
@@ -113,12 +132,15 @@ int dfa_mod(char *str, token *t) {
     }
 }
 
-int dfa_and(char *str, token *t) { 
+int dfa_and(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_and;
+        t->str[1] = str[1];
         return 1;
     } else if (str[1] == '&') {
         t->lex = logic_and;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = bit_and;
@@ -127,8 +149,10 @@ int dfa_and(char *str, token *t) {
 }
 
 int dfa_mul(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_mul;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = arith_mul;
@@ -137,11 +161,14 @@ int dfa_mul(char *str, token *t) {
 }
 
 int dfa_add(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_add;
+        t->str[1] = str[1];
         return 1;
     } else if (str[1] == '+') {
         t->lex = arith_inc;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = arith_add;
@@ -150,11 +177,14 @@ int dfa_add(char *str, token *t) {
 }
 
 int dfa_sub(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_sub;
+        t->str[1] = str[1];
         return 1;
     } else if (str[1] == '-') {
         t->lex = arith_dec;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = arith_sub;
@@ -163,8 +193,10 @@ int dfa_sub(char *str, token *t) {
 }
 
 int dfa_div(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_div;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = arith_div;
@@ -173,13 +205,19 @@ int dfa_div(char *str, token *t) {
 }
 
 int dfa_less(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = logic_le;
+        t->str[1] = str[1];
         return 1;
     } else if (str[1] == '<' && str[2] == '=') {
+        t->str[1] = str[1];
+        t->str[2] = str[2];
         t->lex = assn_lsh;
         return 2;
     } else if (str[1] == '<') {
+        t->str[1] = str[1];
+        t->str[2] = str[2];
         t->lex = bit_lsh;
         return 1;
     } else {
@@ -189,14 +227,20 @@ int dfa_less(char *str, token *t) {
 }
 
 int dfa_greater(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = logic_ge;
+        t->str[1] = str[1];
         return 1;
     } else if (str[1] == '>' && str[2] == '=') {
         t->lex = assn_rsh;
+        t->str[1] = str[1];
+        t->str[2] = str[2];
         return 2;
     } else if (str[1] == '>') {
         t->lex = bit_rsh;
+        t->str[1] = str[1];
+        t->str[2] = str[2];
         return 1;
     } else {
         t->lex = logic_gt;
@@ -205,8 +249,10 @@ int dfa_greater(char *str, token *t) {
 }
 
 int dfa_equal(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = logic_eq;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = assn_get;
@@ -215,8 +261,10 @@ int dfa_equal(char *str, token *t) {
 }
 
 int dfa_carret(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_xor;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = bit_xor;
@@ -225,11 +273,14 @@ int dfa_carret(char *str, token *t) {
 }
 
 int dfa_pipe(char *str, token *t) {
+    t->str[0] = str[0];
     if (str[1] == '=') {
         t->lex = assn_or;
+        t->str[1] = str[1];
         return 1;
     } else if (str[1] == '|') {
         t->lex = logic_or;
+        t->str[1] = str[1];
         return 1;
     } else {
         t->lex = bit_or;
@@ -238,36 +289,43 @@ int dfa_pipe(char *str, token *t) {
 }
 
 int dfa_oparen(char *str, token *t) {
+    t->str[0] = str[0];
     t->lex = open_paren;
     return 0;
 }
 
 int dfa_cparen(char *str, token *t) {
+    t->str[0] = str[0];
     t->lex = close_paren;
     return 0;
 }
 
 int dfa_comma(char *str, token *t) {
+    t->str[0] = str[0];
     t->lex = series_op;
     return 0;
 }
 
 int dfa_qmark(char *str, token *t) {
+    t->str[0] = str[0];
     t->lex = tern_cond;
     return 0;
 }
 
 int dfa_colon(char *str, token *t) {
+    t->str[0] = str[0];
     t->lex = tern_else;
     return 0;
 }
 
 int dfa_semi(char *str, token *t) {
+    t->str[0] = str[0];
     t->lex = semi_colon;
     return 0;
 }
 
 int dfa_tilde(char *str, token *t) {
+    t->str[0] = str[0];
     t->lex = bit_ones;
     return 0;
 }

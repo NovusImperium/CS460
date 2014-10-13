@@ -3,9 +3,10 @@ project(proj1)
 
 set(SOURCE_FILES
     defs.h
+    optional.h
+    container_types.h
     array.c
     lexer_dfa.c
-    lexer.c
     lex.c
     proj1.c
     )

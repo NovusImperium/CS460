@@ -8,7 +8,6 @@ typedef struct array array;
 #include "defs.h"
 
 typedef enum {
-    eof_tok = -1,
     keyword = 0,
     ident,
     literal_int,
@@ -54,65 +53,75 @@ typedef enum {
     tern_cond,
     tern_else,
     series_op,
-    invalid_lex
+    invalid_lex,
+    eof_tok,
 } lexical_t;
 
 static const char *lex_str[] = {
-        "{KEYWORD:%s, err:%d %d:%d} ",
-        "{IDENT:%s, err:%d %d:%d} ",
-        "{LITERAL_INT:%s, err:%d %d:%d} ",
-        "{LITERAL_FLOAT:%s, err:%d %d:%d} ",
-        "{LITERAL_STR:%s, err:%d %d:%d} ",
-        "{LITERAL_CHAR:%s, err:%d %d:%d} ",
-        "{ARITH_ADD:%s, err:%d %d:%d} ",
-        "{ARITH_SUB:%s, err:%d %d:%d} ",
-        "{ARITH_MUL:%s, err:%d %d:%d} ",
-        "{ARITH_DIV:%s, err:%d %d:%d} ",
-        "{ARITH_MOD:%s, err:%d %d:%d} ",
-        "{ARITH_INC:%s, err:%d %d:%d} ",
-        "{ARITH_DEC:%s, err:%d %d:%d} ",
-        "{ASSN_GET:%s, err:%d %d:%d} ",
-        "{ASSN_ADD:%s, err:%d %d:%d} ",
-        "{ASSN_SUB:%s, err:%d %d:%d} ",
-        "{ASSN_MUL:%s, err:%d %d:%d} ",
-        "{ASSN_DIV:%s, err:%d %d:%d} ",
-        "{ASSN_MOD:%s, err:%d %d:%d} ",
-        "{ASSN_LSH:%s, err:%d %d:%d} ",
-        "{ASSN_RSH:%s, err:%d %d:%d} ",
-        "{ASSN_AND:%s, err:%d %d:%d} ",
-        "{ASSN_XOR:%s, err:%d %d:%d} ",
-        "{ASSN_OR:%s, err:%d %d:%d} ",
-        "{LOGIC_AND:%s, err:%d %d:%d} ",
-        "{LOGIC_NOT:%s, err:%d %d:%d} ",
-        "{LOGIC_OR:%s, err:%d %d:%d} ",
-        "{LOGIC_NE:%s, err:%d %d:%d} ",
-        "{LOGIC_EQ:%s, err:%d %d:%d} ",
-        "{LOGIC_GT:%s, err:%d %d:%d} ",
-        "{LOGIC_GE:%s, err:%d %d:%d} ",
-        "{LOGIC_LT:%s, err:%d %d:%d} ",
-        "{LOGIC_LE:%s, err:%d %d:%d} ",
-        "{BIT_AND:%s, err:%d %d:%d} ",
-        "{BIT_OR:%s, err:%d %d:%d} ",
-        "{BIT_XOR:%s, err:%d %d:%d} ",
-        "{BIT_LSH:%s, err:%d %d:%d} ",
-        "{BIT_RSH:%s, err:%d %d:%d} ",
-        "{BIT_ONES:%s, err:%d %d:%d} ",
-        "{OPEN_PAREN:%s, err:%d %d:%d} ",
-        "{CLOSE_PAREN:%s, err:%d %d:%d} ",
-        "{SEMI_COLON:%s, err:%d %d:%d} ",
-        "{TERN_COND:%s, err:%d %d:%d} ",
-        "{TERN_ELSE:%s, err:%d %d:%d} ",
-        "{SERIES_OP:%s, err:%d %d:%d} ",
-        "{INVALID_LE:%s, err:%d %d:%d} ",
+        "{KEYWORD:%s, err:%s %d:%d} ",
+        "{IDENT:%s, err:%s %d:%d} ",
+        "{LIT_INT:%s, err:%s %d:%d} ",
+        "{LIT_FLOAT:%s, err:%s %d:%d} ",
+        "{LIT_STR:%s, err:%s %d:%d} ",
+        "{LIT_CHAR:%s, err:%s %d:%d} ",
+        "{ARITH_ADD:%s, err:%s %d:%d} ",
+        "{ARITH_SUB:%s, err:%s %d:%d} ",
+        "{ARITH_MUL:%s, err:%s %d:%d} ",
+        "{ARITH_DIV:%s, err:%s %d:%d} ",
+        "{ARITH_MOD:%s, err:%s %d:%d} ",
+        "{ARITH_INC:%s, err:%s %d:%d} ",
+        "{ARITH_DEC:%s, err:%s %d:%d} ",
+        "{ASSN_GET:%s, err:%s %d:%d} ",
+        "{ASSN_ADD:%s, err:%s %d:%d} ",
+        "{ASSN_SUB:%s, err:%s %d:%d} ",
+        "{ASSN_MUL:%s, err:%s %d:%d} ",
+        "{ASSN_DIV:%s, err:%s %d:%d} ",
+        "{ASSN_MOD:%s, err:%s %d:%d} ",
+        "{ASSN_LSH:%s, err:%s %d:%d} ",
+        "{ASSN_RSH:%s, err:%s %d:%d} ",
+        "{ASSN_AND:%s, err:%s %d:%d} ",
+        "{ASSN_XOR:%s, err:%s %d:%d} ",
+        "{ASSN_OR:%s, err:%s %d:%d} ",
+        "{LOGIC_AND:%s, err:%s %d:%d} ",
+        "{LOGIC_NOT:%s, err:%s %d:%d} ",
+        "{LOGIC_OR:%s, err:%s %d:%d} ",
+        "{LOGIC_NE:%s, err:%s %d:%d} ",
+        "{LOGIC_EQ:%s, err:%s %d:%d} ",
+        "{LOGIC_GT:%s, err:%s %d:%d} ",
+        "{LOGIC_GE:%s, err:%s %d:%d} ",
+        "{LOGIC_LT:%s, err:%s %d:%d} ",
+        "{LOGIC_LE:%s, err:%s %d:%d} ",
+        "{BIT_AND:%s, err:%s %d:%d} ",
+        "{BIT_OR:%s, err:%s %d:%d} ",
+        "{BIT_XOR:%s, err:%s %d:%d} ",
+        "{BIT_LSH:%s, err:%s %d:%d} ",
+        "{BIT_RSH:%s, err:%s %d:%d} ",
+        "{BIT_ONES:%s, err:%s %d:%d} ",
+        "{OPEN_PAREN:%s, err:%s %d:%d} ",
+        "{CLOSE_PAREN:%s, err:%s %d:%d} ",
+        "{SEMI_COLON:%s, err:%s %d:%d} ",
+        "{TERN_COND:%s, err:%s %d:%d} ",
+        "{TERN_ELSE:%s, err:%s %d:%d} ",
+        "{SERIES_OP:%s, err:%s %d:%d} ",
+        "{INVALID_LEX:%s, err:%s %d:%d} ",
+        "{EOF_TOK:%s, err:%s %d:%d}",
 };
 
 typedef enum {
     no_err = 0,
-    invalid_char = -1,
-    invalid_char_in_num = -2,
-    invalid_id_length = -3,
-    invalid_num_length = -4,
+    invalid_char,
+    invalid_char_in_num,
+    invalid_id_length,
+    invalid_num_length,
 } err_t;
+
+static const char* err_str[] = {
+    "no_err",
+    "invalid_char",
+    "invalid_char_in_num",
+    "invalid_id_length",
+    "invalid_num_length",
+};
 
 // struct to hold the lexical type and the string representation (if need be)
 // if a lexical error is present, also holds the error type and the column location in the line
@@ -127,7 +136,7 @@ typedef struct {
 // entry point to the lexer dfa, takes a single line of input with the line number
 // the input line must terminate in a null-char
 // returns an array of tokens that represent the valid lexemes found on the input line
-extern array *dfa_start(char *line, int n);
+extern array *dfa_start(char *file);
 
 // generate an ID or keyword token starting from the beginning of the input string
 // returns the length of the ID or keyword, up to and beyond the 31 character length limit
