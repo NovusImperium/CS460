@@ -41,8 +41,8 @@
 (define insert-last
   (lambda (l a)
     (if (and (list? l) (not (null? a)))
-      (if (null? (cdr l))
-        (cons (car l) (list a))
+      (if (null? l)
+        (list a)
         (cons (car l) (insert-last (cdr l) a)))
       (if (list? l) 
         l 
@@ -53,7 +53,7 @@
     (if (and (list? l) (not (null? l)))
       (if (null? (cdr l))
         '()
-        (cons (cdr l) (remove-last (cdr l))))
+        (cons (car l) (remove-last (cdr l))))
       '())))
 
 (define list-reverse

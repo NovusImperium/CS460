@@ -13,6 +13,7 @@ array *dfa_start(char *file) {
     } else {
         tokens = opt.val;
     }
+
     int i, c = 0, line = 1;
     for (i = 0; file[i] != '\0'; i++, c++) {
         if (file[i] == '\n') {
@@ -56,14 +57,14 @@ int dfa_invalid(char *str, token *t) {
 }
 
 int dfa_word(char *str, token *t) {
-    size_t i;
+    unsigned i;
     for (i = 0; str[i] != '\0'; i++) {
         if (!isalnum(str[i]) && str[i] != '_') {
             break;
         }
     }
 
-    size_t len = i;
+    unsigned len = i;
     if (i > 31) {
         len = 31;
         t->err = invalid_id_length;
@@ -82,7 +83,8 @@ int dfa_num(char *str, token *t) {
         t->err = invalid_char;
         return 0;
     }
-    size_t i;
+
+    unsigned i;
     bool flt = false;
     for (i = 0; str[i] != '\0'; i++) {
         if (isdigit(str[i])) {
@@ -93,12 +95,12 @@ int dfa_num(char *str, token *t) {
             } else {
                 flt = true;
             }
-        }  else {
+        } else {
             break;
         }
     }
 
-    size_t len = i;
+    unsigned len = i;
     if (i > 31) {
         len = 31;
         t->err = !t->err ? invalid_num_length : t->err;

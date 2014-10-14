@@ -7,13 +7,11 @@
 struct array {
     unsigned m;
     unsigned n;
-    token **as;
+    void **as;
 };
 
 optional arr_init(unsigned m) {
     optional opt;
-    opt.e = true;
-
     array *arr;
     if ((arr = malloc(sizeof(array))) == null) {
         opt.e = false;
@@ -21,15 +19,17 @@ optional arr_init(unsigned m) {
         return opt;
     }
 
-    if ((arr->as = malloc(m * sizeof(token *))) == null) {
+    if ((arr->as = malloc(m * sizeof(void *))) == null) {
         free(arr);
-        opt.e = malloc_fail;
+        opt.e = false;
+        opt.err = malloc_fail;
         return opt;
     }
 
     arr->m = m;
     arr->n = 0;
 
+    opt.e = true;
     opt.val = arr;
     return opt;
 }
@@ -44,7 +44,8 @@ optional arr_copy(array *arr, unsigned m) {
         return opt;
     }
 
-    if ((new_arr->as = malloc(m * sizeof(token *))) == null) {
+    if ((new_arr->as = malloc(m * sizeof(void *))) == null) {
+        free(new_arr);
         opt.e = false;
         opt.err = malloc_fail;
         return opt;
@@ -54,10 +55,10 @@ optional arr_copy(array *arr, unsigned m) {
 
     if (arr == null) {
         new_arr->n = 0;
-        memset(new_arr->as, 0, m * sizeof(token *));
+        memset(new_arr->as, 0, m * sizeof(void *));
     } else {
         new_arr->n = arr->n < m ? arr->n : m;
-        memcpy(new_arr->as, arr->as, new_arr->n * sizeof(token *));
+        memcpy(new_arr->as, arr->as, new_arr->n * sizeof(void *));
     }
 
     opt.e = true;
@@ -88,12 +89,12 @@ optional arr_pop(array *arr) {
     if (arr->n > 1) {
         opt.e = true;
         opt.val = arr->as[0];
-        memmove(arr->as, &arr->as[1], (arr->n - 1) * sizeof(token *));
+        memmove(arr->as, &arr->as[1], (arr->n - 1) * sizeof(void *));
         arr->n--;
     } else if (arr->n == 1) {
         opt.e = true;
         opt.val = arr->as[0];
-        memset(arr->as, 0, sizeof(token*));
+        memset(arr->as, 0, sizeof(void *));
         arr->n--;
     } else {
         opt.e = false;
@@ -103,14 +104,14 @@ optional arr_pop(array *arr) {
     return opt;
 }
 
-bool arr_push(array *arr, token * a) {
+bool arr_push(array *arr, void *a) {
     if (arr->n == arr->m) {
         unsigned new_size = arr->m * 2;
-        token * *new_as;
-        if ((new_as = malloc(new_size * sizeof(token *))) == null) {
+        void **new_as;
+        if ((new_as = malloc(new_size * sizeof(void *))) == null) {
             return false;
         }
-        memcpy(new_as, arr->as, arr->m * sizeof(token *));
+        memcpy(new_as, arr->as, arr->m * sizeof(void *));
         free(arr->as);
         arr->as = new_as;
         arr->m = new_size;
@@ -124,21 +125,21 @@ bool arr_push(array *arr, token * a) {
 bool arr_concat(array *dest, array *src) {
     if (dest->n + src->n >= dest->m) {
         unsigned new_size = dest->m + src->m;
-        token * *new_as;
-        if ((new_as = malloc(new_size * sizeof(token *))) == null) {
+        void **new_as;
+        if ((new_as = malloc(new_size * sizeof(void *))) == null) {
             return false;
         }
-        memcpy(new_as, dest->as, dest->n * sizeof(token *));
+        memcpy(new_as, dest->as, dest->n * sizeof(void *));
         free(dest->as);
         dest->as = new_as;
     }
 
-    memcpy(&dest->as[dest->n], src->as, src->n * sizeof(token *));
+    memcpy(&dest->as[dest->n], src->as, src->n * sizeof(void *));
     dest->n += src->n;
     return true;
 }
 
-int arr_foreach(array *arr, token * (*func)(token *)) {
+int arr_foreach(array *arr, void *(*func)(void *)) {
     int i;
     for (i = 0; i < arr->n; i++) {
         arr->as[i] = (func)(arr->as[i]);
@@ -147,7 +148,7 @@ int arr_foreach(array *arr, token * (*func)(token *)) {
     return 0;
 }
 
-int arr_reduce(array *arr, optional (*func)(token *)) {
+int arr_reduce(array *arr, optional (*func)(void *)) {
     int i, c = 0;
     for (i = 0; i < arr->n; i++) {
         optional opt = func(arr->as[i]);
@@ -158,7 +159,7 @@ int arr_reduce(array *arr, optional (*func)(token *)) {
 
     if (c < arr->n) {
         arr->n = (unsigned) c;
-        memset(&arr->as[arr->n], 0, (arr->m - arr->n) * sizeof(token *));
+        memset(&arr->as[arr->n], 0, (arr->m - arr->n) * sizeof(void *));
     }
 
     return c;
@@ -180,6 +181,6 @@ optional arr_get(array *arr, unsigned i) {
     return opt;
 }
 
-bool arr_insert(array *arr, token *a, unsigned i) {
+bool arr_insert(array *arr, void *a, unsigned i) {
     return false;
 }

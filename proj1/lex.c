@@ -4,7 +4,7 @@
 #include "lex.h"
 #include "array.h"
 
-char * token_names[] = {
+const static char *token_names[] = {
         "KEYWORD",
         "IDENT",
         "LIT_INT",
@@ -84,10 +84,10 @@ lexical_t get_token() {
     optional opt = arr_get(tokens.ts, tokens.curr);
     if (opt.e) {
         tokens.curr++;
-        tokens.t = **((token**)opt.val);
+        tokens.t = **((token **) opt.val);
         if (tokens.t.err != no_err) {
             token *t = malloc(sizeof(token));
-            memcpy(t, *((token**)opt.val), sizeof(token));
+            memcpy(t, *((token **) opt.val), sizeof(token));
             arr_push(errors.errs, t);
         }
         return tokens.t.lex;
@@ -109,7 +109,7 @@ void end_lex() {
     char *fmt = "%s:%s, err:%s at %d:%d\n";
     optional opt = arr_pop(errors.errs);
     for (opt; opt.e; opt = arr_pop(errors.errs)) {
-        token t = *((token*)opt.val);
+        token t = *((token *) opt.val);
         char *str = malloc(64);
         sprintf(str, fmt, token_names[t.lex], t.str, err_str[t.err], t.r, t.c);
         error_message(str);

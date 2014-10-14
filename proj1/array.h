@@ -23,10 +23,10 @@ extern unsigned arr_size(array *arr);
 extern optional arr_get(array *arr, unsigned i);
 
 // insert the element at the index 'i'
-extern bool arr_insert(array *arr, token *t, unsigned i);
+extern bool arr_insert(array *arr, void *t, unsigned i);
 
 // insert a item into the item array, return true if successful
-extern bool arr_push(array *arr, token *t);
+extern bool arr_push(array *arr, void *t);
 
 // concatenate the src item array onto the end of the dest item array
 extern bool arr_concat(array *dest, array *src);
@@ -38,9 +38,9 @@ extern optional arr_peek(array *arr);
 extern optional arr_pop(array *arr);
 
 // apply the function to each item in the array
-extern int arr_foreach(array *arr, token * (*func)(token *));
+extern int arr_foreach(array *arr, void *(*func)(void *));
 
 // remove the items marked with false by the function, returns the new size of the array
-extern int arr_reduce(array *arr, optional (*func)(token *));
+extern int arr_reduce(array *arr, optional (*func)(void *));
 
 #endif // ARRAY
