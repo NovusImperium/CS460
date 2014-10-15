@@ -6,15 +6,35 @@
 
 ##############################################################################!#
 
+;; Top-level function definition to call quick sort
+;; input:   a list
+;; output:  a sorted list of the numbers in the input list
+(define (quicksort as)
+  (define (sort as)
+    (if (and (not (null? as) (not (null? (cdr as)))))
+      (let ((s (split as)))
+          (append (sort (car s)) (sort (cdr s))))
+      as))
+  (sort (filter number? as)))
+
+(define (split as)
+  (if (or (null? as) (null? (cdr as))) 
+      as
+      (let ((avg (quotient (+ (car as) (car (reverse as))) 2)))
+        (cons 
+          (filter (lambda (a) (< a avg)) as) 
+          (filter (lambda (a) (>= a avg)) as)))))
+
+
 ;; Top-level function definition to call merge sort
 ;; input:   a list
 ;; output:  a sorted list of the numbers in the input list
 (define (mergesort as)
-  (define (sort as) ; sorts the list by spliting it in two and sorting the sublists
+  (define (sort as) ; splits the list in two and calls sort with the sublists
     (define (split as) ; splits the list into two parts
       (if (and (list? as) (not (null? as)))
-        (let ((half (/ (length as) 2)))
-         (cons (take as half) (drop as half)))))
+        (let ((half (quotient (length as) 2)))
+              (cons (take as half) (drop as half)))))
     (if (and (list? as) (not (null? as)))
       (if (null? (cdr as))
           as
@@ -31,11 +51,13 @@
           (else '())))
   (sort (filter number? as)))
 
+;; takes up to the first i elements of the list
 (define (take as i)
   (if (and (< 0 i) (not (null? as)))
     (cons (car as) (take (cdr as) (- i 1)))
     '()))
 
+;; drops up to the first i elements from the list
 (define (drop as i)
   (if (not (null? as))
     (if (< 0 i)
