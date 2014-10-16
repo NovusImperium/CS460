@@ -1,3 +1,11 @@
+#!##############################################################################
+
+              CS460  - Programming Languages
+              Author - Amandeep Gill
+              HW 4   - List handling functions
+
+##############################################################################!#
+
 (define insert-first
   (lambda (l a) 
     (if (list? l)

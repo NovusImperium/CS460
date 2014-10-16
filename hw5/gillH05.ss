@@ -15,16 +15,16 @@
       (let ((s (split as)))
           (append (sort (car s)) (sort (cdr s))))
       as))
-  (sort (filter number? as)))
+  (sort (filter (lambda (a) (number? a)) as)))
 
 (define (split as)
-  (if (or (null? as) (null? (cdr as))) 
-      as
-      (let ((avg (quotient (+ (car as) (car (reverse as))) 2)))
-        (cons 
-          (filter (lambda (a) (< a avg)) as) 
-          (filter (lambda (a) (>= a avg)) as)))))
-
+  (cond ((null? as) as)
+        ((null?  (cdr as)) as)
+        (else 
+          (let ((avg (quotient (+ (car as) (car (reverse as))) 2)))
+            (cons 
+              (filter (lambda (a) (< a avg)) as) 
+              (filter (lambda (a) (>= a avg)) as))))))
 
 ;; Top-level function definition to call merge sort
 ;; input:   a list

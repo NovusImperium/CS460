@@ -68,6 +68,7 @@ void init_lex(char *filename) {
     char *file = null;
     size_t s = 0;
     getdelim(&file, &s, EOF, in);
+    fclose(in);
 
     tokens.ts = dfa_start(file);
     tokens.curr = 0;

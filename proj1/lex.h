@@ -1,6 +1,6 @@
 #include "lexer_dfa.h"
 
-extern const static char *token_names[];
+extern const char *token_names[];
 
 void init_lex(char *filename);
 
