@@ -28,8 +28,8 @@ MAIN = Project1.c
 COMMON_SOURCES = 
 COMMON_HEADERS = 
 # all sources req'd for target exe
-TARGET_SOURCES = array.c lexer_dfa.c lex.c $(MAIN)
-TARGET_HEADERS = optional.h defs.h array.h lexer_dfa.h lex.h
+TARGET_SOURCES = array.c lexer_dfa.c lex.c SetLimits.c $(MAIN)
+TARGET_HEADERS = container_types.h optional.h defs.h array.h lexer_dfa.h lex.h SetLimits.h
 # all sources req's for test exe
 INPUT_SOURCES = 
 INPUT_HEADERS = 
@@ -68,9 +68,9 @@ PROF_TXT = profile.txt
 TURNIN_FILES = Makefile $(COMMON_SOURCES) $(COMMON_HEADERS) $(TARGET_SOURCES) $(TARGET_HEADERS)
 
 # the name of the file to turn in (taken from the main file)
-FILE = $(MAIN:.c=/)
+FILE = gill$(HWNUM)
 # the name of the tarball to turn in (file_name + .tgz)
-TARBALL = $(MAIN:.c=.tgz)
+TARBALL = $(FILE).tgz
 # the directory to turn the file into
 DROPBOX = ~tiawatts/cs460drop/
 

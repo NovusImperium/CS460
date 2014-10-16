@@ -15,5 +15,6 @@ build/
 gill*/
 test/
 test*
+turnin/
 
 !CMakeLists.txt

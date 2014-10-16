@@ -28,8 +28,8 @@ MAIN = gill$(HWNUM).c
 COMMON_SOURCES = 
 COMMON_HEADERS = 
 # all sources req'd for target exe
-TARGET_SOURCES = gcd.c heap.c fraction.c $(MAIN)
-TARGET_HEADERS = defs.h heap.h gcd.h fraction.h
+TARGET_SOURCES = gcd.c heap.c fraction.c SetLimits.c $(MAIN)
+TARGET_HEADERS = defs.h heap.h gcd.h fraction.h SetLimits.h
 # all sources req's for test exe
 INPUT_SOURCES = mkinput.cpp 
 INPUT_HEADERS = 
@@ -77,6 +77,9 @@ DROPBOX = ~tiawatts/cs460drop/
 ## the name of the files used to contain the input to the exe and the output of the exe
 INPUT = input
 OUTPUT = output
+
+## the number of inputs to generate from the random fraction generator
+NUMFS = 1000000
 
 .PHONY: all target tests run tarball turnin
 
@@ -128,7 +131,7 @@ profile: debug
 
 ## recipe to compile test exe and generate input
 input: tests
-	./$(INPUT_EXECUTABLE) 100000 $(INPUT)
+	./$(INPUT_EXECUTABLE) $(NUMFS) $(INPUT)
 
 ## recipe to generate tarball with required directory name and source files
 tarball:
