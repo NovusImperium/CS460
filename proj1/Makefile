@@ -28,8 +28,8 @@ MAIN = Project1.c
 COMMON_SOURCES = 
 COMMON_HEADERS = 
 # all sources req'd for target exe
-TARGET_SOURCES = array.c lexer_dfa.c lex.c $(MAIN)
-TARGET_HEADERS = optional.h defs.h array.h lexer_dfa.h lex.h
+TARGET_SOURCES = dfa.c lex.c SetLimits.c $(MAIN)
+TARGET_HEADERS = dfa.h lex.h SetLimits.h
 # all sources req's for test exe
 INPUT_SOURCES = 
 INPUT_HEADERS = 

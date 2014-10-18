@@ -11,7 +11,7 @@
 ;; output:  a sorted list of the numbers in the input list
 (define (quicksort as)
   (define (sort as)
-    (if (and (not (null? as) (not (null? (cdr as)))))
+    (if (and (not (null? as)) (not (null? (cdr as))))
       (let ((s (split as)))
           (append (sort (car s)) (sort (cdr s))))
       as))
@@ -19,9 +19,13 @@
 
 (define (split as)
   (cond ((null? as) as)
-        ((null?  (cdr as)) as)
+        ((null? (cdr as)) as)
         (else 
-          (let ((avg (quotient (+ (car as) (car (reverse as))) 2)))
+          (let ((avg (quotient 
+                       (+ (car as) 
+                          (car (reverse as)) 
+                          (car (drop as (quotient (length as) 2))))
+                       2)))
             (cons 
               (filter (lambda (a) (< a avg)) as) 
               (filter (lambda (a) (>= a avg)) as))))))

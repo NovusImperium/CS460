@@ -13,6 +13,7 @@ output
 *.debug
 build/
 gill*/
+pickup/
 test/
 test*
 
