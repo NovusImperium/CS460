@@ -11,24 +11,12 @@
 ;; output:  a sorted list of the numbers in the input list
 (define (quicksort as)
   (define (sort as)
-    (if (and (not (null? as)) (not (null? (cdr as))))
-      (let ((s (split as)))
-          (append (sort (car s)) (sort (cdr s))))
-      as))
+    (if (null? as)
+        '()
+        (append (sort (filter (lambda (a) (>= (car as) a)) (cdr as)))
+                (list (car as))
+                (sort (filter (lambda (a) (< (car as) a)) (cdr as))))))
   (sort (filter (lambda (a) (number? a)) as)))
-
-(define (split as)
-  (cond ((null? as) as)
-        ((null? (cdr as)) as)
-        (else 
-          (let ((avg (quotient 
-                       (+ (car as) 
-                          (car (reverse as)) 
-                          (car (drop as (quotient (length as) 2))))
-                       2)))
-            (cons 
-              (filter (lambda (a) (< a avg)) as) 
-              (filter (lambda (a) (>= a avg)) as))))))
 
 ;; Top-level function definition to call merge sort
 ;; input:   a list

@@ -45,10 +45,10 @@ void init_lex(char *filename) {
 
     if (file[i] == '\n') {
         file[i] = '\0';
-        printf("%3d: %s\n", line, file);
+        printf("%4d: %s\n", line, file);
         file[i] = '\n';
     } else {
-        printf("%3d: %s\n", line, file);
+        printf("%4d: %s\n", line, file);
     }
 }
 
@@ -64,10 +64,10 @@ char read_char() {
 
         if (file[i] == '\n') {
             file[i] = '\0';
-            printf("%3d: %s\n", line, &file[curr]);
+            printf("%4d: %s\n", line, &file[curr]);
             file[i] = '\n';
         } else {
-            printf("%3d: %s\n", line, &file[curr]);
+            printf("%4d: %s\n", line, &file[curr]);
         }
     }
 
