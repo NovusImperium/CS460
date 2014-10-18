@@ -101,6 +101,12 @@ token_type get_token() {
         snprintf(err, 64, "Error at %d,%d: invalid character: %s", line, lpos, lexeme);
         error_message(err);
         errs++;
+    } else if (t == IDENT) {
+        if (strcmp("int", lexeme) == 0) {
+            t = INTTYPE;
+        } else if (strcmp("double", lexeme) == 0) {
+            t = DBLTYPE;
+        }
     }
 
     curr += len;
