@@ -75,7 +75,7 @@ char read_char() {
     return file[curr++];
 }
 
-token_type get_token() {
+token_t get_token() {
     memset(lexeme, 0, 32);
     char c;
     for (c = read_char(); isspace(c); c = read_char());
@@ -84,7 +84,7 @@ token_type get_token() {
         return EOFT;
     }
 
-    token_type t;
+    token_t t;
     int len = dfa_start(&file[curr - 1], &t);
 
     int l = 0;

@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
     SetLimits();
-    token_type t;
+    token_t t;
 
     if (argc < 2) {
         printf("format: proj1 <filename>\n");

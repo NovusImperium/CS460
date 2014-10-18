@@ -261,16 +261,16 @@ static const dfa_func dfa_trans[256] = {
         dfa_invalid,    // extended ascii character
 };
 
-inline int dfa_start(char *str, token_type *t) {
+inline int dfa_start(char *str, token_t *t) {
     return dfa_trans[str[0]](str, t);
 }
 
-inline int dfa_invalid(char *str, token_type *t) {
+inline int dfa_invalid(char *str, token_t *t) {
     *t = ERROR;
     return 0;
 }
 
-inline int dfa_word(char *str, token_type *t) {
+inline int dfa_word(char *str, token_t *t) {
     int i;
     for (i = 0; str[i] != '\0'; i++) {
         if (!isalnum(str[i]) && str[i] != '_') {
@@ -282,7 +282,7 @@ inline int dfa_word(char *str, token_type *t) {
     return i - 1;
 }
 
-inline int dfa_num(char *str, token_type *t) {
+inline int dfa_num(char *str, token_t *t) {
     if (str[0] == '.' && !isdigit(str[1])) {
         *t = ERROR;
         return 0;
@@ -308,7 +308,7 @@ inline int dfa_num(char *str, token_type *t) {
     return i - 1;
 }
 
-inline int dfa_not(char *str, token_type *t) {
+inline int dfa_not(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = NOTEQ;
         return 1;
@@ -318,7 +318,7 @@ inline int dfa_not(char *str, token_type *t) {
     }
 }
 
-inline int dfa_mod(char *str, token_type *t) {
+inline int dfa_mod(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = MODEQ;
         return 1;
@@ -328,7 +328,7 @@ inline int dfa_mod(char *str, token_type *t) {
     }
 }
 
-inline int dfa_and(char *str, token_type *t) {
+inline int dfa_and(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = ANDEQ;
         return 1;
@@ -341,7 +341,7 @@ inline int dfa_and(char *str, token_type *t) {
     }
 }
 
-inline int dfa_mul(char *str, token_type *t) {
+inline int dfa_mul(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = MULTEQ;
         return 1;
@@ -357,7 +357,7 @@ inline int dfa_mul(char *str, token_type *t) {
     }
 }
 
-inline int dfa_add(char *str, token_type *t) {
+inline int dfa_add(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = PLUSEQ;
         return 1;
@@ -370,7 +370,7 @@ inline int dfa_add(char *str, token_type *t) {
     }
 }
 
-inline int dfa_sub(char *str, token_type *t) {
+inline int dfa_sub(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = MINUSEQ;
         return 1;
@@ -383,7 +383,7 @@ inline int dfa_sub(char *str, token_type *t) {
     }
 }
 
-inline int dfa_div(char *str, token_type *t) {
+inline int dfa_div(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = DIVEQ;
         return 1;
@@ -393,7 +393,7 @@ inline int dfa_div(char *str, token_type *t) {
     }
 }
 
-inline int dfa_less(char *str, token_type *t) {
+inline int dfa_less(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = LTE;
         return 1;
@@ -409,7 +409,7 @@ inline int dfa_less(char *str, token_type *t) {
     }
 }
 
-inline int dfa_greater(char *str, token_type *t) {
+inline int dfa_greater(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = GTE;
         return 1;
@@ -425,7 +425,7 @@ inline int dfa_greater(char *str, token_type *t) {
     }
 }
 
-inline int dfa_equal(char *str, token_type *t) {
+inline int dfa_equal(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = EQUALTO;
         return 1;
@@ -435,7 +435,7 @@ inline int dfa_equal(char *str, token_type *t) {
     }
 }
 
-inline int dfa_carret(char *str, token_type *t) {
+inline int dfa_carret(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = XOREQ;
         return 1;
@@ -445,7 +445,7 @@ inline int dfa_carret(char *str, token_type *t) {
     }
 }
 
-inline int dfa_pipe(char *str, token_type *t) {
+inline int dfa_pipe(char *str, token_t *t) {
     if (str[1] == '=') {
         *t = OREQ;
         return 1;
@@ -458,37 +458,37 @@ inline int dfa_pipe(char *str, token_type *t) {
     }
 }
 
-inline int dfa_oparen(char *str, token_type *t) {
+inline int dfa_oparen(char *str, token_t *t) {
     *t = LPAREN;
     return 0;
 }
 
-inline int dfa_cparen(char *str, token_type *t) {
+inline int dfa_cparen(char *str, token_t *t) {
     *t = RPAREN;
     return 0;
 }
 
-inline int dfa_comma(char *str, token_type *t) {
+inline int dfa_comma(char *str, token_t *t) {
     *t = COMMA;
     return 0;
 }
 
-inline int dfa_qmark(char *str, token_type *t) {
+inline int dfa_qmark(char *str, token_t *t) {
     *t = QUEST;
     return 0;
 }
 
-inline int dfa_colon(char *str, token_type *t) {
+inline int dfa_colon(char *str, token_t *t) {
     *t = COLON;
     return 0;
 }
 
-inline int dfa_semi(char *str, token_type *t) {
+inline int dfa_semi(char *str, token_t *t) {
     *t = SEMI;
     return 0;
 }
 
-inline int dfa_tilde(char *str, token_type *t) {
+inline int dfa_tilde(char *str, token_t *t) {
     *t = TILDE;
     return 0;
 }
