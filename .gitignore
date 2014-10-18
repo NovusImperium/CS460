@@ -16,5 +16,6 @@ gill*/
 pickup/
 test/
 test*
+turnin/
 
 !CMakeLists.txt

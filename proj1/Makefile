@@ -68,9 +68,9 @@ PROF_TXT = profile.txt
 TURNIN_FILES = Makefile $(COMMON_SOURCES) $(COMMON_HEADERS) $(TARGET_SOURCES) $(TARGET_HEADERS)
 
 # the name of the file to turn in (taken from the main file)
-FILE = $(MAIN:.c=/)
+FILE = gill$(HWNUM)
 # the name of the tarball to turn in (file_name + .tgz)
-TARBALL = $(MAIN:.c=.tgz)
+TARBALL = $(FILE).tgz
 # the directory to turn the file into
 DROPBOX = ~tiawatts/cs460drop/
 
