@@ -16,7 +16,9 @@
         (append (sort (filter (lambda (a) (>= (car as) a)) (cdr as)))
           (list (car as))
           (sort (filter (lambda (a) (< (car as) a)) (cdr as))))))
-  (sort (filter (lambda (a) (number? a)) as)))
+  (if (list? as)
+    (sort (filter (lambda (a) (number? a)) as))
+    as))
 
 ;; Top-level function definition to call merge sort
 ;; input:   a list
@@ -32,7 +34,9 @@
         as
         (let ((half (quotient (length as) 2)))
           (merge (sort (take as half)) (sort (drop as half)))))))
-  (sort (filter number? as)))
+  (if (list? as)
+    (sort (filter number? as))
+    as))
 
 ;; takes up to the first n elements of the list
 ;; input:   a list
