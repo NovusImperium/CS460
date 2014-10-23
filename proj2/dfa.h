@@ -96,6 +96,30 @@ inline int dfa_pipe(char *str, token_t *t);
 // returns 0
 inline int dfa_tilde(char *str, token_t *t);
 
+// generate string literal token
+// returns the length of the string literal - 1
+inline int dfa_string(char *str, token_t *t);
+
+// generate char literal token
+// returns the length of the char literal - 1
+inline int dfa_char(char *str, token_t *t);
+
+// generate right-bracket token
+// returns 0
+inline int dfa_rbrack(char *str, token_t *t);
+
+// generate left-bracket token
+// returns 0
+inline int dfa_lbrack(char *str, token_t *t);
+
+// generate right-brace token
+// returns 0
+inline int dfa_rbrace(char *str, token_t *t);
+
+// generate left-brace token
+// returns 0
+inline int dfa_lbrace(char *str, token_t *t);
+
 // store an array of dfa state functions to call from the starting state
 // the index of each state function corresponds to the ascii value of the character to transition from
 typedef int (*dfa_func)(char *, token_t *);

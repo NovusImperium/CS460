@@ -8,6 +8,38 @@ struct array {
     void **as;
 };
 
+// resize the array to the given value, can be larger or smaller than the current size
+// if the new size is smaller, the items at index size or higher are lost
+// does nothing if the new size is not different from the old size
+static bool resize(array *arr, unsigned s) {
+    if (s < arr->n) {
+        void **as;
+        if ((as = malloc(s * sizeof(void *))) == null) {
+            return false;
+        }
+
+        memcpy(as, arr->as, s * sizeof(void *));
+        free(arr->as);
+        arr->as = as;
+        arr->m = s;
+        arr->n = arr->n < s ? arr->n : s;
+
+        return true;
+    } else if (s > arr->n) {
+        void **as;
+        if ((as = realloc(arr->as, s * sizeof(void *))) != null) {
+            arr->as = as;
+            arr->m = s;
+
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 optional arr_init(unsigned m) {
     optional opt;
     array *arr;
@@ -89,6 +121,10 @@ optional arr_pop(array *arr) {
         opt.e = true;
         opt.val = arr->as[arr->n];
         arr->as[arr->n] = null;
+
+        if (arr->n < (arr->m / 4)) {
+            resize(arr, arr->m / 2);
+        }
     } else {
         opt.e = false;
         opt.err = out_of_bounds;
@@ -98,16 +134,8 @@ optional arr_pop(array *arr) {
 }
 
 bool arr_push(array *arr, void *a) {
-    if (arr->n == arr->m) {
-        unsigned new_size = arr->m * 2;
-        void **new_as;
-        if ((new_as = malloc(new_size * sizeof(void *))) == null) {
-            return false;
-        }
-        memcpy(new_as, arr->as, arr->m * sizeof(void *));
-        free(arr->as);
-        arr->as = new_as;
-        arr->m = new_size;
+    if (arr->n == arr->m && !resize(arr, arr->m * 2)) {
+        return false;
     }
 
     arr->as[arr->n++] = a;
@@ -132,13 +160,11 @@ bool arr_concat(array *dest, array *src) {
     return true;
 }
 
-int arr_foreach(array *arr, void *(*func)(void *)) {
+void arr_foreach(array *arr, void *(*func)(void *)) {
     int i;
     for (i = 0; i < arr->n; i++) {
         arr->as[i] = (func)(arr->as[i]);
     }
-
-    return 0;
 }
 
 int arr_reduce(array *arr, optional (*func)(void *)) {
