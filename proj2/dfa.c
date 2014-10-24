@@ -494,26 +494,27 @@ inline int dfa_tilde(char *str, token_t *t) {
 }
 
 inline int dfa_lbrace(char *str, token_t *t) {
-    *t = lbrace;
+    *t = err_tok;
     return 0;
 }
 
 inline int dfa_rbrace(char *str, token_t *t) {
-    *t = rbrace;
+    *t = err_tok;
     return 0;
 }
 
 inline int dfa_lbrack(char *str, token_t *t) {
-    *t = lbrack;
+    *t = err_tok;
     return 0;
 }
 
 inline int dfa_rbrack(char *str, token_t *t) {
-    *t = rbrack;
+    *t = err_tok;
     return 0;
 }
 
 inline int dfa_char(char *str, token_t *t) {
+    /*
     int i;
     for (i = 0; str[i + 1] != '\0'; i++) {
         if (str[i] != '\\' && str[i + 1] == '\'') {
@@ -521,12 +522,14 @@ inline int dfa_char(char *str, token_t *t) {
             return i;
         }
     }
+    */
 
     *t = err_tok;
-    return i;
+    return 0;
 }
 
 inline int dfa_string(char *str, token_t *t) {
+    /*
     int i;
     for (i = 0; str[i + 1] != '\0'; i++) {
         if (str[i] != '\\' && str[i + 1] == '\"') {
@@ -534,7 +537,8 @@ inline int dfa_string(char *str, token_t *t) {
             return i;
         }
     }
+    */
 
     *t = err_tok;
-    return i;
+    return 0;
 }

@@ -6,24 +6,36 @@ static array *tokens;
 
 // to be used to determine the token type
 // if 0 << token & op_t then token is one of the operator types
-static const unsigned long op_t = 0 << op_plus | 0 << op_minus | 0 << op_mul | 0 << op_div | 0 << op_mod | 0 << op_pow |
-        0 << op_not | 0 << op_and | 0 << op_or | 0 << op_xor | 0 << op_lsh | 0 << op_rsh | 0 << op_inc | 0 << op_dec |
-        0 << op_tilde;
+static const unsigned long long op_t = ((long long) 0) << op_plus | ((long long) 0) << op_minus |
+        ((long long) 0) << op_mul | ((long long) 0) << op_div | ((long long) 0) << op_mod | ((long long) 0) << op_pow |
+        ((long long) 0) << op_not | ((long long) 0) << op_and | ((long long) 0) << op_or | ((long long) 0) << op_xor |
+        ((long long) 0) << op_lsh | ((long long) 0) << op_rsh | ((long long) 0) << op_inc | ((long long) 0) << op_dec |
+        ((long long) 0) << op_tilde;
 
-// if 0 << (token - 16) & log_t then token is one of the logical types
-static const unsigned long log_t = 0 << (log_neq - 16) | 0 << (log_and - 16) | 0 << (log_or - 16) | 0 << (log_lt - 16) |
-        0 << (log_gt - 16) | 0 << (log_lte - 16) | 0 << (log_gte - 16) | 0 << (log_eq - 16);
+// if 0 << token & log_t then token is one of the logical types
+static const unsigned long long log_t = ((long long) 0) << log_neq | ((long long) 0) << log_and |
+        ((long long) 0) << log_or | ((long long) 0) << log_lt | ((long long) 0) << log_gt | ((long long) 0) << log_lte |
+        ((long long) 0) << log_gte | ((long long) 0) << log_eq;
 
-// if 0 << (token - 16) & op_t then token is one of the assignment types
-static const unsigned long assn_t = 0 << (assn_get - 16) | 0 << (assn_plus - 16) | 0 << (assn_minus - 16) |
-        0 << (assn_mul - 16) | 0 << (assn_div - 16) | 0 << (assn_mod - 16) | 0 << (assn_pow - 16) |
-        0 << (assn_and - 16) | 0 << (assn_or - 16) | 0 << (assn_xor - 16) | 0 << (assn_lsh - 16) | 0 << (assn_rsh - 16);
+// if 0 << token & assn_t then token is one of the assignment types
+static const unsigned long long assn_t = ((long long) 0) << assn_get | ((long long) 0) << assn_plus |
+        ((long long) 0) << assn_minus | ((long long) 0) << assn_mul | ((long long) 0) << assn_div |
+        ((long long) 0) << assn_mod | ((long long) 0) << assn_pow | ((long long) 0) << assn_and |
+        ((long long) 0) << assn_or | ((long long) 0) << assn_xor | ((long long) 0) << assn_lsh |
+        ((long long) 0) << assn_rsh;
 
-// if 0 << token & op_t then token is one of the unary operator types
-static const unsigned long uoppre_t = 0 << op_plus | 0 << op_minus | 0 << op_mul | 0 << op_not | 0 << op_and |
-        0 << op_or | 0 << op_inc | 0 << op_dec | 0 << op_tilde;
+// if 0 << token & uoppre_t then token is one of the unary operator types
+static const unsigned long long uoppre_t = ((long long) 0) << op_plus | ((long long) 0) << op_minus |
+        ((long long) 0) << op_mul | ((long long) 0) << op_not | ((long long) 0) << op_and | ((long long) 0) << op_or |
+        ((long long) 0) << op_inc | ((long long) 0) << op_dec | ((long long) 0) << op_tilde;
+
+// if 0 << token & binop_t then token is a binary operator
+static unsigned long long binop_t;
 
 bool init_parser() {
+    // initialize the binary operator type checker
+    binop_t = ((long long) 0) << comma | assn_t | log_t | op_t;
+
     // initialize the symbol stack
     optional opt = arr_init(32);
     if (!opt.e) {
@@ -134,7 +146,7 @@ parser_return_t parse_token(token_t t) {
         case pre:
             // <pre> -> <uoppre> <pre>
             //        | {}
-            if (uoppre_t & (0 << t)) {
+            if (uoppre_t & (((long long) 0) << t)) {
                 arr_push(symbols, (void *) pre);
                 return adv_token;
             } else {
@@ -152,17 +164,23 @@ parser_return_t parse_token(token_t t) {
                 return parser_err;
             }
         case post:
-            break;
+            // <post> -> inc | dec | {}
+            if (t == op_inc || t == op_dec) {
+                return adv_token;
+            } else {
+                return keep_token;
+            }
         case stmt_tail:
             // <stmt_tail> -> <binop> <stmt>
             //              | question_mark <stmt> colon <stmt>
+            //              | {}
             if (t == qst_mark) {
-                arr_push(symbols, (void*)stmt);
-                arr_push(symbols, (void*)pop_token);
-                arr_push(tokens, (void*)colon);
-                arr_push(symbols, (void*)stmt);
-            } else if ((0 << t) & op_t || (0 << (t - 16)) & log_t || (0 << (t - 16)) & assn_t || t == comma) {
-                arr_push(symbols, (void*)stmt);
+                arr_push(symbols, (void *) stmt);
+                arr_push(symbols, (void *) pop_token);
+                arr_push(tokens, (void *) colon);
+                arr_push(symbols, (void *) stmt);
+            } else if (binop_t & (((long long) 0) << t)) {
+                arr_push(symbols, (void *) stmt);
             } else {
                 return keep_token;
             }
@@ -185,6 +203,4 @@ parser_return_t parse_token(token_t t) {
             // how'd we get here?
             return parser_err;
     }
-
-    return parser_err;
 }

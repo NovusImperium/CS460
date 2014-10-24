@@ -7,7 +7,7 @@ typedef enum {
     // user-defined
     id,
     // literal tokens
-    num_lit, str_lit, char_lit,
+    num_lit,
     // operator tokens
     op_plus, op_minus, op_mul, op_div, op_mod, op_pow, op_not, op_and, op_or, op_xor, op_lsh, op_rsh, op_inc, op_dec,
     op_tilde,
@@ -17,11 +17,9 @@ typedef enum {
     // logical tokens
     log_neq, log_and, log_or, log_lt, log_gt, log_lte, log_gte, log_eq,
     // separator tokens
-    rparen, lparen, semi, qst_mark, colon, comma, lbrack, rbrack, lbrace, rbrace,
+    rparen, lparen, semi, qst_mark, colon, comma,
     // reserved keyword tokens
-    rsv_type_int, rsv_type_double, rsv_type_unsigned, rsv_type_char, rsv_if, rsv_elif, rsv_else, rsv_for, rsv_in,
-    rsv_while, rsv_loop, rsv_break, rsv_void, rsv_string, rsv_struct, rsv_enum, rsv_switch, rsv_case, rsv_default,
-    rsv_let, rsv_mut, rsv_fn
+    rsv_type_int, rsv_type_double
 } token_t;
 
 extern char *token_names[];
