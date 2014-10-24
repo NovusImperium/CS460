@@ -17,10 +17,11 @@ typedef enum {
     // logical tokens
     log_neq, log_and, log_or, log_lt, log_gt, log_lte, log_gte, log_eq,
     // separator tokens
-    rparen, lparen, semi, tern_cond, tern_sepr, comma, lbrack, rbrack, lbrace, rbrace,
+    rparen, lparen, semi, qst_mark, colon, comma, lbrack, rbrack, lbrace, rbrace,
     // reserved keyword tokens
-    rsv_int, rsv_double, rsv_unsigned, rsv_char, rsv_if, rsv_elif, rsv_else, rsv_for, rsv_in, rsv_while, rsv_loop,
-    rsv_break, rsv_void, rsv_string, rsv_struct, rsv_enum, rsv_switch, rsv_case, rsv_default, rsv_let, rsv_mut
+    rsv_type_int, rsv_type_double, rsv_type_unsigned, rsv_type_char, rsv_if, rsv_elif, rsv_else, rsv_for, rsv_in,
+    rsv_while, rsv_loop, rsv_break, rsv_void, rsv_string, rsv_struct, rsv_enum, rsv_switch, rsv_case, rsv_default,
+    rsv_let, rsv_mut, rsv_fn
 } token_t;
 
 extern char *token_names[];

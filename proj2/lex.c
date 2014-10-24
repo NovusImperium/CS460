@@ -24,21 +24,21 @@ char *token_names[] = {
     "rparen", "lparen", "semi", "tern_cond", "tern_sepr", "comma", "lbrack", "rbrack", "lbrace", "rbrace", "rsv_int",
     "rsv_double", "rsv_unsigned", "srv_char", "rsv_if", "rsv_elif", "rsv_else", "rsv_for", "rsv_in", "rsv_while",
     "rsv_loop", "rsv_break", "rsv_void", "rsv_string", "rsv_struct", "rsv_enum", "rsv_switch", "rsv_case",
-    "rsv_default", "rsv_let", "rsv_mut"
+    "rsv_default", "rsv_let", "rsv_mut", "rsv_fn"
 };
 
 static char *keywords[] = {
     "int", "double", "unsigned", "char", "if", "elif", "else", "for", "in", "while", "loop", "break", "void", "string",
-    "struct", "enum", "switch", "case", "default", "let", "mut"
+    "struct", "enum", "switch", "case", "default", "let", "mut", "fn"
 };
-static const unsigned num_kw = 19;
+static const unsigned num_kw = 21;
 
 // returns the keyword that matches the string given or 'id' if no keywords match
 token_t match_keyword(char *str) {
     unsigned i;
     for (i = 0; i < num_kw; i++) {
         if (strcmp(str, keywords[i]) == 0) {
-            return rsv_int + i;
+            return rsv_type_int + i;
         }
     }
 

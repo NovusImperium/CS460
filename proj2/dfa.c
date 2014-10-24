@@ -474,12 +474,12 @@ inline int dfa_comma(char *str, token_t *t) {
 }
 
 inline int dfa_qmark(char *str, token_t *t) {
-    *t = tern_cond;
+    *t = qst_mark;
     return 0;
 }
 
 inline int dfa_colon(char *str, token_t *t) {
-    *t = tern_sepr;
+    *t = colon;
     return 0;
 }
 

@@ -1,7 +1,7 @@
-#include "lex.h"
-
 #ifndef DFA_H
 #define DFA_H
+
+#include "lex.h"
 
 // entry point to the lexer dfa, takes a single line of input with the line number
 // the input line must terminate in a null-char
