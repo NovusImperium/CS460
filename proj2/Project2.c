@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "SetLimits.h"
 #include "lex.h"
+#include "parser.h"
 
 int main(int argc, char *argv[]) {
     SetLimits();
@@ -13,8 +14,28 @@ int main(int argc, char *argv[]) {
     }
 
     init_lex(argv[1]);
-    while ((t = get_token()) != eof_tok)
-        printf("\t%-12s%s\n", token_names[t], get_lexeme());
+    init_parser();
+
+    t = get_token();
+    printf("\t%-12s%s\n", token_names[t], get_lexeme());
+    while (true) {
+        switch (parse_token(t)) {
+            case parser_err:
+                fputs("Error reading token\n", stderr);
+                goto shutdown;
+            case adv_token:
+                t = get_token();
+                printf("\t%-12s%s\n", token_names[t], get_lexeme());
+                break;
+            case keep_token:
+                break;
+            case end_token:
+                goto shutdown;
+        }
+    }
+
+    shutdown:
     end_lex();
+    shutdown_parser();
     return 0;
 }

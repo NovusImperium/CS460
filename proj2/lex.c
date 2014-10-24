@@ -17,21 +17,17 @@ static unsigned curr;
 static unsigned errs;
 
 char *token_names[] = {
-    "err_tok", "eof_tok", "id", "num_lit", "str_lit", "char_lit", "op_plus", "op_minus", "op_mul", "op_div", "op_mod",
-    "op_pow", "op_not", "op_and", "op_or", "op_xor", "op_lsh", "op_rsh", "op_inc", "op_dec", "op_tilde", "assn_get",
-    "assn_plus", "assn_minus", "assn_mul", "assn_div", "assn_mod", "assn_pow", "assn_and", "assn_or", "assn_xor",
-    "assn_lsh", "assn_rsh", "log_neq", "log_and", "log_or", "log_lt", "log_gt", "log_lte", "log_gte", "log_eq",
-    "rparen", "lparen", "semi", "tern_cond", "tern_sepr", "comma", "lbrack", "rbrack", "lbrace", "rbrace", "rsv_int",
-    "rsv_double", "rsv_unsigned", "srv_char", "rsv_if", "rsv_elif", "rsv_else", "rsv_for", "rsv_in", "rsv_while",
-    "rsv_loop", "rsv_break", "rsv_void", "rsv_string", "rsv_struct", "rsv_enum", "rsv_switch", "rsv_case",
-    "rsv_default", "rsv_let", "rsv_mut", "rsv_fn"
+        "err_tok", "eof_tok", "id", "num_lit", "op_plus", "op_minus", "op_mul", "op_div", "op_mod", "op_pow", "op_not",
+        "op_and", "op_or", "op_xor", "op_lsh", "op_rsh", "op_inc", "op_dec", "op_tilde", "assn_get", "assn_plus",
+        "assn_minus", "assn_mul", "assn_div", "assn_mod", "assn_pow", "assn_and", "assn_or", "assn_xor", "assn_lsh",
+        "assn_rsh", "log_neq", "log_and", "log_or", "log_lt", "log_gt", "log_lte", "log_gte", "log_eq", "rparen", "lparen",
+        "semi", "qst_mark", "colon", "comma", "type_int", "type_double"
 };
 
 static char *keywords[] = {
-    "int", "double", "unsigned", "char", "if", "elif", "else", "for", "in", "while", "loop", "break", "void", "string",
-    "struct", "enum", "switch", "case", "default", "let", "mut", "fn"
+        "int", "double"
 };
-static const unsigned num_kw = 21;
+static const unsigned num_kw = 2;
 
 // returns the keyword that matches the string given or 'id' if no keywords match
 token_t match_keyword(char *str) {
@@ -81,7 +77,7 @@ void init_lex(char *file_name) {
 
     FILE *in = fopen(file_name, "r");
     if (in == null || getdelim(&file, &len, EOF, in) < 0) {
-        printf("Error reading file: %s\n", file_name);
+        fprintf(stderr, "Error reading file: %s\n", file_name);
         exit(1);
     }
 
@@ -108,7 +104,7 @@ token_t get_token() {
     }
 
     token_t t;
-    unsigned len = (unsigned)dfa_start(&file[curr - 1], &t);
+    unsigned len = (unsigned) dfa_start(&file[curr - 1], &t);
 
     memset(lexeme, 0, 32);
     unsigned l = 0;
@@ -123,7 +119,7 @@ token_t get_token() {
 
     if (t == err_tok) {
         char err[64];
-        snprintf(err, 64, "Error at %d,%d: invalid character: %s", line, lpos, lexeme);
+        snprintf(err, 64, "Error at %d,%d: invalid character: %s\n", line, lpos, lexeme);
         error_message(err);
         errs++;
     } else if (t == id) {
@@ -140,9 +136,9 @@ char *get_lexeme() {
 }
 
 void error_message(char *msg) {
-    puts(msg);
+    fputs(msg, stderr);
 }
 
 void end_lex() {
-    printf("found %d errors in %s\n", errs, filename);
+    fprintf(stderr, "found %d errors in %s\n", errs, filename);
 }

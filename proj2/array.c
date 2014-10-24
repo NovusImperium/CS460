@@ -105,7 +105,7 @@ optional arr_peek(array *arr) {
     optional opt;
     if (arr->n > 0) {
         opt.e = true;
-        opt.val = arr->as[arr->n-1];
+        opt.val = arr->as[arr->n - 1];
     } else {
         opt.e = false;
         opt.err = out_of_bounds;
