@@ -13,6 +13,8 @@ typedef enum {
     parser_err = -1, adv_token = 0, keep_token, end_token
 } parser_return_t;
 
+extern char *symbol_names[];
+
 // initialize the parser state, currently does not need initialization variables
 inline bool init_parser();
 

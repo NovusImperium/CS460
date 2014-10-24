@@ -17,7 +17,6 @@ int main(int argc, char *argv[]) {
     init_parser();
 
     t = get_token();
-    printf("\t%-12s%s\n", token_names[t], get_lexeme());
     while (true) {
         switch (parse_token(t)) {
             case parser_err:
@@ -25,7 +24,6 @@ int main(int argc, char *argv[]) {
                 goto shutdown;
             case adv_token:
                 t = get_token();
-                printf("\t%-12s%s\n", token_names[t], get_lexeme());
                 break;
             case keep_token:
                 break;
