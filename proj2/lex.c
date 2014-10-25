@@ -140,5 +140,5 @@ void error_message(char *msg) {
 }
 
 void end_lex() {
-    fprintf(stderr, "found %d errors in %s\n", errs, filename);
+    printf("found %d errors in %s\n", errs, filename);
 }

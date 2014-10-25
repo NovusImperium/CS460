@@ -16,12 +16,15 @@ typedef enum {
 extern char *symbol_names[];
 
 // initialize the parser state, currently does not need initialization variables
-inline bool init_parser();
+extern inline bool init_parser();
 
 // parse a single token, returns true if the token does not force an error
-inline parser_return_t parse_token(token_t t);
+extern inline parser_return_t parse_token(token_t t);
 
 // shutdown the parser
-inline void shutdown_parser();
+extern inline void shutdown_parser();
+
+// dump the parser productions rules
+extern inline void dump_parser();
 
 #endif  // PARSER_H

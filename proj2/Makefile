@@ -22,7 +22,7 @@ D_LDFLAGS=-lprofiler
 ## define which homework number this makfile compiles
 ## will determine the name of the main file as well as the name on the tarball
 HWNUM = P1
-MAIN = Project1.c
+MAIN = Project2.c
 
 # sources used by both target and test exe's
 COMMON_SOURCES = 

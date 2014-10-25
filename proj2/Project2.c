@@ -6,7 +6,6 @@
 
 int main(int argc, char *argv[]) {
     SetLimits();
-    token_t t;
 
     if (argc < 2) {
         printf("format: proj2 <filename>\n");
@@ -16,11 +15,12 @@ int main(int argc, char *argv[]) {
     init_lex(argv[1]);
     init_parser();
 
-    t = get_token();
+    token_t t = get_token();
     while (true) {
         switch (parse_token(t)) {
             case parser_err:
-                fputs("Error reading token\n", stderr);
+                dump_parser();
+                printf("\nError reading token {%s : ' %s '}\n", token_names[t], get_lexeme());
                 goto shutdown;
             case adv_token:
                 t = get_token();
@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
             case keep_token:
                 break;
             case end_token:
+                dump_parser();
                 goto shutdown;
         }
     }
