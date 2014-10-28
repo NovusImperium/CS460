@@ -1,10 +1,10 @@
-#!##############################################################################
-
-              CS460  - Programming Languages
-              Author - Amandeep Gill
-              HW 5   - Quicksort and Mergesort
-
-##############################################################################!#
+;##############################################################################;
+;                                                                              ;
+;              CS460  - Programming Languages                                  ;
+;              Author - Amandeep Gill                                          ;
+;              HW 5   - Quicksort and Mergesort                                ;
+;                                                                              ;
+;##############################################################################;
 
 ;; Top-level function definition to call quick sort
 ;; input:   a list
