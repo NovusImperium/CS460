@@ -2,7 +2,7 @@
 ;                                                                              ;
 ;              CS460  - Programming Languages                                  ;
 ;              Author - Amandeep Gill                                          ;
-;              HW 5   - Quicksort and Mergesort                                ;
+;              HW 5   - Recursive list reverse, Quicksort, and Mergesort       ;
 ;                                                                              ;
 ;##############################################################################;
 
