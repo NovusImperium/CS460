@@ -5,8 +5,8 @@
 #include "lex.h"
 
 typedef enum {
-    program = 0, more_stmts, stmt, decl, ntype, decl_tail, term, pre, uoppre, var, post, stmt_tail, binop, pop_token,
-    eof_sym
+    program = 0, more_stmts, stmt, decl, ntype, decl_tail, term, pre, uoppre, var, post, stmt_tail, binop, 
+    pop_token, eof_sym
 } symbol_t;
 
 typedef enum {

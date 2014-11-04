@@ -54,3 +54,12 @@
     as 
     (drop (cdr as) (- n 1))))
 
+;; reverses the given list recursively
+;; input:   a list of lists
+;; output:  a list of lists where sublists have been reversed as well
+(define (all-reverse as)
+  (map (lambda (a)
+         (if (list? a)
+           (all-reverse a)
+           a))
+       (reverse as)))

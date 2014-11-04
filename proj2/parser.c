@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include "parser.h"
 #include "array.h"
 
@@ -13,37 +14,35 @@ char *symbol_names[] = {
 
 // to be used to determine the token type
 // if 1 << token & op_t then token is one of the operator types
-static const unsigned long long op_t = ((long long) 1) << op_plus | ((long long) 1) << op_minus |
-        ((long long) 1) << op_mul | ((long long) 1) << op_div | ((long long) 1) << op_mod | ((long long) 1) << op_pow |
-        ((long long) 1) << op_not | ((long long) 1) << op_and | ((long long) 1) << op_or | ((long long) 1) << op_xor |
-        ((long long) 1) << op_lsh | ((long long) 1) << op_rsh | ((long long) 1) << op_inc | ((long long) 1) << op_dec |
-        ((long long) 1) << op_tilde;
+static const uint64_t op_t = ((uint64_t) 1) << op_plus | ((uint64_t) 1) << op_minus |
+        ((uint64_t) 1) << op_mul | ((uint64_t) 1) << op_div | ((uint64_t) 1) << op_mod | ((uint64_t) 1) << op_pow |
+        ((uint64_t) 1) << op_not | ((uint64_t) 1) << op_and | ((uint64_t) 1) << op_or | ((uint64_t) 1) << op_xor |
+        ((uint64_t) 1) << op_lsh | ((uint64_t) 1) << op_rsh | ((uint64_t) 1) << op_inc | ((uint64_t) 1) << op_dec |
+        ((uint64_t) 1) << op_tilde;
 
 // if 1 << token & log_t then token is one of the logical types
-static const unsigned long long log_t = ((unsigned long long) 1) << log_neq | ((unsigned long long) 1) << log_and |
-        ((unsigned long long) 1) << log_or | ((unsigned long long) 1) << log_lt | ((unsigned long long) 1) << log_gt |
-        ((unsigned long long) 1) << log_lte | ((unsigned long long) 1) << log_gte | ((unsigned long long) 1) << log_eq;
+static const uint64_t log_t = ((uint64_t) 1) << log_neq | ((uint64_t) 1) << log_and |
+        ((uint64_t) 1) << log_or | ((uint64_t) 1) << log_lt | ((uint64_t) 1) << log_gt |
+        ((uint64_t) 1) << log_lte | ((uint64_t) 1) << log_gte | ((uint64_t) 1) << log_eq;
 
 // if 1 << token & assn_t then token is one of the assignment types
-static const unsigned long long assn_t = ((unsigned long long) 1) << assn_get | ((unsigned long long) 1) << assn_plus |
-        ((unsigned long long) 1) << assn_minus | ((unsigned long long) 1) << assn_mul |
-        ((unsigned long long) 1) << assn_div | ((unsigned long long) 1) << assn_mod |
-        ((unsigned long long) 1) << assn_pow | ((unsigned long long) 1) << assn_and |
-        ((unsigned long long) 1) << assn_or | ((unsigned long long) 1) << assn_xor |
-        ((unsigned long long) 1) << assn_lsh | ((unsigned long long) 1) << assn_rsh;
+static const uint64_t assn_t = ((uint64_t) 1) << assn_get | ((uint64_t) 1) << assn_plus |
+        ((uint64_t) 1) << assn_minus | ((uint64_t) 1) << assn_mul | ((uint64_t) 1) << assn_div | ((uint64_t) 1) << assn_mod |
+        ((uint64_t) 1) << assn_pow | ((uint64_t) 1) << assn_and | ((uint64_t) 1) << assn_or | ((uint64_t) 1) << assn_xor |
+        ((uint64_t) 1) << assn_lsh | ((uint64_t) 1) << assn_rsh;
 
 // if 1 << token & uoppre_t then token is one of the unary operator types
-static const unsigned long long uoppre_t = ((unsigned long long) 1) << op_plus | ((unsigned long long) 1) << op_minus |
-        ((unsigned long long) 1) << op_mul | ((unsigned long long) 1) << op_not | ((unsigned long long) 1) << op_and |
-        ((unsigned long long) 1) << op_or | ((unsigned long long) 1) << op_inc | ((unsigned long long) 1) << op_dec |
-        ((unsigned long long) 1) << op_tilde;
+static const uint64_t uoppre_t = ((uint64_t) 1) << op_plus | ((uint64_t) 1) << op_minus |
+        ((uint64_t) 1) << op_mul | ((uint64_t) 1) << op_not | ((uint64_t) 1) << op_and |
+        ((uint64_t) 1) << op_or | ((uint64_t) 1) << op_inc | ((uint64_t) 1) << op_dec |
+        ((uint64_t) 1) << op_tilde;
 
 // if 1 << token & binop_t then token is a binary operator
-static unsigned long long binop_t;
+static uint64_t binop_t;
 
 bool init_parser() {
     // initialize the binary operator type checker
-    binop_t = ((unsigned long long) 1) << comma | assn_t | log_t | op_t;
+    binop_t = ((uint64_t) 1) << comma | assn_t | log_t | op_t;
 
     // initialize the symbol stack
     optional opt = arr_init(32);
@@ -71,8 +70,6 @@ bool init_parser() {
     return true;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "CannotResolve"
 parser_return_t parse_token(token_t t) {
     // push the current token stack onto the productions tracker
     char *t_str = null;
@@ -221,7 +218,7 @@ parser_return_t parse_token(token_t t) {
         case pre: {
             // <pre> -> <uoppre> <pre>
             //        | {}
-            if (uoppre_t & (((unsigned long long) 1) << t)) {
+            if (uoppre_t & (((uint64_t) 1) << t)) {
                 asprintf(&prod, "\n<pre> -> %s <pre>\n", token_names[t]);
                 arr_push(productions, prod);
                 arr_push(symbols, (void *) pre);
@@ -270,7 +267,7 @@ parser_return_t parse_token(token_t t) {
                 arr_push(symbols, (void *) pop_token);
                 arr_push(tokens, (void *) colon);
                 arr_push(symbols, (void *) stmt);
-            } else if (binop_t & (((unsigned long long) 1) << t)) {
+            } else if (binop_t & (((uint64_t) 1) << t)) {
                 asprintf(&prod, "\n<stmt_tail> -> %s <stmt>\n", token_names[t]);
                 arr_push(productions, prod);
                 arr_push(symbols, (void *) stmt);
@@ -315,7 +312,6 @@ parser_return_t parse_token(token_t t) {
         }
     }
 }
-#pragma clang diagnostic pop
 
 void shutdown_parser() {
     arr_free(symbols);
