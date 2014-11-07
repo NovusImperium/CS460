@@ -14,8 +14,8 @@
     (if (null? as)
         '()
         (append (sort (filter (lambda (a) (>= (car as) a)) (cdr as)))
-          (list (car as))
-          (sort (filter (lambda (a) (< (car as) a)) (cdr as))))))
+                (list (car as))
+                (sort (filter (lambda (a) (< (car as) a)) (cdr as))))))
   (if (list? as)
     (sort (filter (lambda (a) (number? a)) as))
     as))
@@ -58,8 +58,6 @@
 ;; input:   a list of lists
 ;; output:  a list of lists where sublists have been reversed as well
 (define (all-reverse as)
-  (map (lambda (a)
-         (if (list? a)
-           (all-reverse a)
-           a))
+  (map (lambda (a) 
+         (if (list? a) (all-reverse a) a))
        (reverse as)))
