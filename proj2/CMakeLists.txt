@@ -11,3 +11,8 @@ set(SOURCE_FILES
     Project2.c
     )
 add_executable(proj2 ${SOURCE_FILES})
+
+set(GENERATOR_FILES
+    parser_gen.c
+    )
+add_executable(mkparser EXCLUDE_FROM_ALL ${GENERATOR_FILES})

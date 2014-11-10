@@ -7,6 +7,8 @@ static array *symbols;
 static array *tokens;
 static array *productions;
 
+static token_t ct;
+
 char *symbol_names[] = {
         "program", "more_stmts", "stmt", "decl", "ntype", "decl_tail", "term", "pre", "uoppre", "var", "post",
         "stmt_tail", "binop", "pop_token", "eof_sym"
@@ -40,7 +42,59 @@ static const uint64_t uoppre_t = ((uint64_t) 1) << op_plus | ((uint64_t) 1) << o
 // if 1 << token & binop_t then token is a binary operator
 static uint64_t binop_t;
 
-bool init_parser() {
+// <program> -> <stmt> semi <more_stmts> <eof_sym>
+//            | <decl> semi <more_stmts> <eof_sym>
+// int program();
+
+// <more_stmts> -> <stmt> semi <more_stmts>
+//               | <decl> semi <more_stmts>
+//               | {}
+//int more_stmts();
+
+// <stmt> -> <term> <more_stmts>
+//int stmt();
+
+// <decl> -> <ntype> <var> <decl_tail>
+//int decl();
+
+// <ntype> -> int | double
+//int ntype();
+
+// <decl_tail> -> assign <stmt> <decl_tail>
+//              | comma <var> <decl_tail>
+//              | {}
+//int decl_tail();
+
+// <term> -> <pre> <var> <post>
+//         | lparen <stmt> rparen
+//int term();
+
+// <pre> -> <uoppre> <pre>
+//        | {}
+//int pre();
+
+// <uoppre> -> plus | minus | mult | not | and | tilde | inc | dec
+// note: rule has been incorporated into <pre>
+//int uoppre();
+
+// <var> -> id | num
+//int var();
+
+// <post> -> inc | dec | {}
+//int post();
+
+// <stmt_tail> -> <binop> <stmt>
+//              | question_mark <stmt> colon <stmt>
+//              | {}
+//int stmt_tail();
+
+// <binop> -> plus | minus | mult | div | mod | and | or | xor | assign | lt | gt | lte | gte | shiftl
+//          | shiftr | plus_eq | minus_eq | mul_eq | pow_eq | div_eq | mod_eq | neq | eq | log_and | log_or
+//          | and_eq | or_eq | xor_eq | shiftl_eq | shiftr_eq | comma | pow
+// note: rule has been incorporated into <stmt_tail>
+//int binop();
+
+inline bool init_parser() {
     // initialize the binary operator type checker
     binop_t = ((uint64_t) 1) << comma | assn_t | log_t | op_t;
 
@@ -70,7 +124,7 @@ bool init_parser() {
     return true;
 }
 
-parser_return_t parse_token(token_t t) {
+inline parser_return_t parse_token(token_t t) {
     // push the current token stack onto the productions tracker
     char *t_str = null;
     asprintf(&t_str, "\ncurrent token: %s(%s)\ntokens: ", token_names[t], get_lexeme());
@@ -313,12 +367,12 @@ parser_return_t parse_token(token_t t) {
     }
 }
 
-void shutdown_parser() {
+inline void shutdown_parser() {
     arr_free(symbols);
     arr_free(tokens);
 }
 
-void dump_parser() {
+inline void dump_parser() {
     void *print_str(void *s) {
         printf("%s", (char *)s);
         return s;
