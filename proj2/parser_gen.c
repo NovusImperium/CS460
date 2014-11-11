@@ -4,7 +4,7 @@
 
 static FILE *rules;
 static char *fstring;
-static int fstr_len = 0;
+static size_t fstr_len = 0;
 static FILE *parser;
 
 static array *terminals;
@@ -20,6 +20,9 @@ typedef struct {
 } prod_rules;
 static array *productions;
 
+// reads in the terminal and nonterminals symbols
+inline void read_syms();
+
 inline bool generate(char *in, char *out) {
     if ((rules = fopen(in, "r")) == 0 || getdelim(&fstring, &fstr_len, EOF, rules) <= 0) {
         fprintf(stderr, "Error reading input file: %s", in);
@@ -30,4 +33,6 @@ inline bool generate(char *in, char *out) {
         fprintf(stderr, "Could not open output file for writing: %s", out);
         return false;
     }
+
+    return true;
 }

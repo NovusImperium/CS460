@@ -13,6 +13,10 @@ set(SOURCE_FILES
 add_executable(proj2 ${SOURCE_FILES})
 
 set(GENERATOR_FILES
+    defs.h
     parser_gen.c
+    set.c
+    array.c
+    generator.c
     )
 add_executable(mkparser EXCLUDE_FROM_ALL ${GENERATOR_FILES})

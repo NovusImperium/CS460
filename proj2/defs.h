@@ -24,8 +24,6 @@ typedef struct {
 typedef enum {
     no_cerr = 0,
     malloc_fail = -10,
-    init_lock_fail,
-    get_lock_fail,
     container_empty,
     out_of_bounds,
     invalid_container_type,
