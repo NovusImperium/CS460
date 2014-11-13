@@ -94,3 +94,12 @@ void set_foreach(set *s, void (*func)(unsigned)) {
         }
     }
 }
+
+bool set_element(set *s, unsigned t) {
+    unsigned i = t / 64;
+    if (i < s->sets) {
+        return (s->bitsets[i] & (1 << (t & mask))) != 0;
+    }
+
+    return false;
+}

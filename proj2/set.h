@@ -23,6 +23,9 @@ extern unsigned set_size(set *s);
 // insert the element into the set
 extern int set_insert(set *s, unsigned t);
 
+// returns true if the argument is an element of the set
+extern bool set_element(set *s, unsigned t);
+
 // apply the function to each item in the set
 extern void set_foreach(set *s, void (*func)(unsigned));
 

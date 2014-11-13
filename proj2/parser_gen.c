@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 #include "parser_gen.h"
 #include "array.h"
 #include "set.h"
@@ -48,6 +49,12 @@ inline bool generate(char *in, char *out) {
 }
 
 inline bool read_syms() {
+    while (f_curr < fstr_len) {
+        while (isspace(fstring[f_curr])) {
+            f_curr++;
+        }
+        
+    }
 
     return false;
 }
