@@ -20,6 +20,10 @@ extern unsigned arr_size(array *arr);
 // get the element at the index 'i'
 extern optional arr_get(array *arr, unsigned i);
 
+// set the element at the index 'i'
+// returns false if the index does not already contain an element
+extern bool arr_set(array *arr, void *a, unsigned i);
+
 // insert the element at the index 'i'
 extern bool arr_insert(array *arr, void *t, unsigned i);
 

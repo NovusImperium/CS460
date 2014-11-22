@@ -1,6 +1,6 @@
+#include "array.h"
 #include <stdlib.h>
 #include <string.h>
-#include "array.h"
 
 struct array {
     unsigned m;
@@ -97,8 +97,12 @@ optional arr_copy(array *arr, unsigned m) {
 }
 
 void arr_free(array *arr) {
-    free(arr->as);
-    free(arr);
+    if (arr != null) {
+        if (arr->as != null) {
+            free(arr->as);
+        }
+        free(arr);
+    }
 }
 
 optional arr_peek(array *arr) {
@@ -198,6 +202,13 @@ optional arr_get(array *arr, unsigned i) {
         opt.err = out_of_bounds;
     }
     return opt;
+}
+
+bool arr_set(array *arr, void *a, unsigned i) {
+    if (i < arr->n) {
+        arr->as[i] = a;
+    }
+    return false;
 }
 
 bool arr_insert(array *arr, void *a, unsigned i) {
