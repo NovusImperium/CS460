@@ -1,37 +1,150 @@
-P2.out : Project2.o dfa.o syn.o SetLimits.o
-	gcc -o P2.out Project2.o dfa.o syn.o SetLimits.o -g
+##
+# Author: Amandeep Gill
+##
 
-Project2.o : Project2.c dfa.h syn.h
-	gcc -c Project2.c -g
+# define syscalls for file manipulation
+# using cp/tar/mv: [syscall] [target] [sources...]
+RM=rm -rf
+MKDIR=mkdir -p
+TAR=tar czf
+CP=cp -t
+MV=mv -t
 
-syn.o : syn.c syn.h
-	gcc -c syn.c -g
+## define the c/c++ compilers and compilation flags
+CC=gcc
+CFLAGS=-c -MMD
+CXX=g++
+CXXFLAGS=-c -std=c++11 -MMD
+LDFLAGS=
+DFLAGS=-g
+D_LDFLAGS=-lprofiler
 
-dfa.o : dfa.c dfa.h
-	gcc -c dfa.c -g
+## define which homework number this makfile compiles
+## will determine the name of the main file as well as the name on the tarball
+HWNUM = P3
+MAIN = Project3.c
 
-SetLimits.o : SetLimits.c SetLimits.h
-	gcc -c SetLimits.c -g
+# sources used by both target and test exe's
+COMMON_SOURCES = 
+COMMON_HEADERS = 
+# all sources req'd for target exe
+TARGET_SOURCES = syn.c hashmap.c sym.c array.c dfa.c lex.c SetLimits.c $(MAIN)
+TARGET_HEADERS = syn.h hashmap.h sym.h array.h defs.h dfa.h lex.h SetLimits.h
+# all sources req's for test exe
+INPUT_SOURCES = 
+INPUT_HEADERS = 
 
-clean :
-	rm -f *.o *.out *.*~ *~ *.lst *.dbg
+## build object files for all the source files
+COMMON_OBJECTS = $(COMMON_SOURCES:.c=.o)
+TARGET_OBJECTS = $(TARGET_SOURCES:.c=.o)
+INPUT_OBJECTS = $(INPUT_SOURCES:.cpp=.o) 
 
-veryclean :
-	rm -f *.in
+## the following will keep a file for each source object that tracks the object's dependencies
+## if any of the dependencies are modified it will trigger a recompiliation of the object
+COMMON_DEPS = $(COMMON_OBJECTS:.o=.d)			
+TARGET_DEPS = $(TARGET_OBJECTS:.o=.d)
+INPUT_DEPS = $(INPUT_OBJECTS:.o=.d)
 
-run :
-	./P02.out
+## build object files for the debug executable
+DEBUG_OBJECTS = $(COMMON_SOURCES:.c=.o) $(TARGET_SOURCES:.c=.o)
+## maintain dependency files for debug objects
+DEBUG_DEPS = $(DEBUG_OBJECTS:.o=.d)
+## profiler output file
+DEBUG_PROF = $(HWNUM).prof
+## callgrind output file
+DEBUG_CALLGRIND = $(HWNUM).callgrind
 
-submit: Project2.c dfa.c dfa.h syn.c syn.h Makefile SetLimits.c SetLimits.h
-	rm -rf olsonP2
-	mkdir olsonP2
-	cp Project2.c olsonP2
-	cp dfa.c olsonP2
-	cp dfa.h olsonP2
-	cp syn.c olsonP2
-	cp syn.h olsonP2
-	cp Makefile olsonP2
-	cp SetLimits.c olsonP2
-	cp SetLimits.h olsonP2
-	tar cfvz olsonP2.tgz olsonP2
-	cp olsonP2.tgz ~tiawatts/cs460drop
+## define the exe that will be run when turned in
+EXECUTABLE = $(HWNUM).out 
+## this exe will only be run locally
+INPUT_EXECUTABLE = $(INPUT_SOURCES:.cpp=.bin)
+## define the output for the profiled-debug version of the exe
+DEBUG_EXE = $(HWNUM).debug
+## text file to hold the profiler output
+PROF_TXT = profile.txt
+
+## define the sources and name of the tarball to turn in
+# all files that are to be included in the tarball
+TURNIN_FILES = Makefile $(COMMON_SOURCES) $(COMMON_HEADERS) $(TARGET_SOURCES) $(TARGET_HEADERS)
+
+# the name of the file to turn in (taken from the main file)
+FILE = gill$(HWNUM)
+# the name of the tarball to turn in (file_name + .tgz)
+TARBALL = $(FILE).tgz
+# the directory to turn the file into
+DROPBOX = ~tiawatts/cs460drop/
+
+## the name of the files used to contain the input to the exe and the output of the exe
+INPUT = input
+OUTPUT = output
+
+.PHONY: all target tests run tarball turnin
+
+## recipe to call when no recipe is specified
+all: target 
+
+## recipe for building the target exe
+target: $(COMMON_SOURCES) $(TARGET_SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): $(COMMON_OBJECTS) $(TARGET_OBJECTS)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+## recipe for building the test executable
+tests: $(COMMON_SOURCES) $(INPUT_SOURCES) $(INPUT_EXECUTABLE)
+
+$(INPUT_EXECUTABLE): $(INPUT_OBJECTS)
+	$(CXX) $(LDFLAGS) $^ -o $@
+
+## redefine the compiler and linker flags for the debug exe
+$(DEBUG_EXE): CFLAGS += $(DFLAGS)
+$(DEBUG_EXE): LDFLAGS += $(D_LDFLAGS)
+## recipe for building all exe's with debug flag and profiler
+debug: $(DEBUG_EXE)
+
+$(DEBUG_EXE): $(COMMON_OBJECTS) $(TARGET_OBJECTS)
+	$(CC) $(D_LDFLAGS) $^ -o $@
+
+## tell make to include dependency files
+-include $(COMMON_DEPS) $(TARGET_DEPS) $(INPUT_DEPS)
+
+## define how to get object files from source files
+## the -MF $(patsubst ...) option tells the compiler to look for updated dependencies in the associated
+##		.d dependencies file
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -MF $(patsubst %.o,%.d,$@) $< -o $@
+
+.c.o:
+	$(CC) $(CFLAGS) -MF $(patsubst %.o,%.d,$@) $< -o $@
+
+## recipe to compile 'all' and run target exe with input
+run: all
+	./$(EXECUTABLE) $(INPUT) > $(OUTPUT)
+
+profile: debug
+	env CPUPROFILE=./$(DEBUG_PROF) ./$(DEBUG_EXE) < $(INPUT) > $(OUTPUT)
+	pprof --text ./$(DEBUG_EXE) $(DEBUG_PROF) > $(PROF_TXT)
+#pprof --callgrind ./$(DEBUG_EXE) $(DEBUG_PROF) > $(DEBUG_CALLGRIND)
+#kcachegrind $(DEBUG_CALLGRIND)
+
+## recipe to compile test exe and generate input
+input: tests
+	./$(INPUT_EXECUTABLE) 100000 $(INPUT)
+
+## recipe to generate tarball with required directory name and source files
+tarball:
+	$(MKDIR) $(FILE)
+	$(CP) $(FILE) $(TURNIN_FILES)
+	$(TAR) $(TARBALL) $(FILE)
+	$(RM) $(FILE)
+
+## recipe to turn in the assignment by moving the tarball into the dropbox folder
+turnin: tarball 
+	$(MV) $(DROPBOX) $(TARBALL)
+
+## remove all files generated by this makefile
+clean: debugclean
+	$(RM) $(INPUT) $(OUTPUT) $(TARBALL)
+
+debugclean:
+	$(RM) $(COMMON_OBJECTS) $(COMMON_DEPS) $(TARGET_DEPS) $(TARGET_OBJECTS) $(INPUT_DEPS) $(INPUT_OBJECTS) \
+	$(EXECUTABLE) $(INPUT_EXECUTABLE) $(DEBUG_EXE) $(DEBUG_EXE) $(DEBUG_OBJECTS) $(DEBUG_PROF) $(PROF_TXT)
