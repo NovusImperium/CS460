@@ -6,9 +6,10 @@ set(SOURCE_FILES
     dfa.c
     syn.c
     sym.c
+    lex.c
     array.c
     hashmap.c
     SetLimits.c
-    Project2.c
+    Project3.c
     )
 add_executable(proj2 ${SOURCE_FILES})
