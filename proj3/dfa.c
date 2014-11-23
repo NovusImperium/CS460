@@ -1,337 +1,495 @@
+#include <ctype.h>
+#include <stdbool.h>
 #include "dfa.h"
-#include <string.h>
 
-Filein filein;
-extern FILE * lst; //This pointer refers to a FILE pointer declared in syn.c
+static const dfa_func dfa_trans[256] = {
+        dfa_invalid,    // 0    Null char
+        dfa_invalid,    // 1    Start of Heading
+        dfa_invalid,    // 2    Start of Text
+        dfa_invalid,    // 3    End of Text
+        dfa_invalid,    // 4    End of Transmission
+        dfa_invalid,    // 5    Enquiry
+        dfa_invalid,    // 6    Acknowledgment
+        dfa_invalid,    // 7    Bell
+        dfa_invalid,    // 8    Back Space
+        dfa_invalid,    // 9    Horizontal Tab
+        dfa_invalid,    // 10   Line Feed
+        dfa_invalid,    // 11   Vertical Tab
+        dfa_invalid,    // 12   Form Feed
+        dfa_invalid,    // 13   Carriage Return
+        dfa_invalid,    // 14   Shift Out / X-On
+        dfa_invalid,    // 15   Shift In / X-Off
+        dfa_invalid,    // 16   Data Line Escape
+        dfa_invalid,    // 17   Device Control 1 (oft. XON)
+        dfa_invalid,    // 18   Device Control 2
+        dfa_invalid,    // 19   Device Control 3 (oft. XOFF)
+        dfa_invalid,    // 20   Device Control 4
+        dfa_invalid,    // 21   Negative Acknowledgement
+        dfa_invalid,    // 22   Synchronous Idle
+        dfa_invalid,    // 23   End of Transmit Block
+        dfa_invalid,    // 24   Cancel
+        dfa_invalid,    // 25   End of Medium
+        dfa_invalid,    // 26   Substitute
+        dfa_invalid,    // 27   Escape
+        dfa_invalid,    // 28   File Separator
+        dfa_invalid,    // 29   Group Separator
+        dfa_invalid,    // 30   Record Separator
+        dfa_invalid,    // 31   Unit Separator
+        dfa_invalid,    // 32   SPACE
+        dfa_not,        // 33   !
+        dfa_invalid,    // 34   "
+        dfa_invalid,    // 35   #
+        dfa_invalid,    // 36   $
+        dfa_mod,        // 37   %
+        dfa_and,        // 38   &
+        dfa_invalid,    // 39   '
+        dfa_oparen,     // 40   (
+        dfa_cparen,     // 41   )
+        dfa_mul,        // 42   *
+        dfa_add,        // 43   +
+        dfa_comma,      // 44   ,
+        dfa_sub,        // 45   -
+        dfa_num,        // 46   .
+        dfa_div,        // 47   /
+        dfa_num,        // 48   0
+        dfa_num,        // 49   1
+        dfa_num,        // 50   2
+        dfa_num,        // 51   3
+        dfa_num,        // 52   4
+        dfa_num,        // 53   5
+        dfa_num,        // 54   6
+        dfa_num,        // 55   7
+        dfa_num,        // 56   8
+        dfa_num,        // 57   9
+        dfa_colon,      // 58   :
+        dfa_semi,       // 59   ;
+        dfa_less,       // 60   <
+        dfa_equal,      // 61   =
+        dfa_greater,    // 62   >
+        dfa_qmark,      // 63   ?
+        dfa_invalid,    // 64   @
+        dfa_word,       // 65   A
+        dfa_word,       // 66   B
+        dfa_word,       // 67   C
+        dfa_word,       // 68   D
+        dfa_word,       // 69   E
+        dfa_word,       // 70   F
+        dfa_word,       // 71   G
+        dfa_word,       // 72   H
+        dfa_word,       // 73   I
+        dfa_word,       // 74   J
+        dfa_word,       // 75   K
+        dfa_word,       // 76   L
+        dfa_word,       // 77   M
+        dfa_word,       // 78   N
+        dfa_word,       // 79   O
+        dfa_word,       // 80   P
+        dfa_word,       // 81   Q
+        dfa_word,       // 82   R
+        dfa_word,       // 83   S
+        dfa_word,       // 84   T
+        dfa_word,       // 85   U
+        dfa_word,       // 86   V
+        dfa_word,       // 87   W
+        dfa_word,       // 88   X
+        dfa_word,       // 89   Y
+        dfa_word,       // 90   Z
+        dfa_invalid,    // 91   [
+        dfa_invalid,    // 92   \ (backslash)
+        dfa_invalid,    // 93   ]
+        dfa_carret,     // 94   ^
+        dfa_word,       // 95   _
+        dfa_invalid,    // 96   `
+        dfa_word,       // 97   a
+        dfa_word,       // 98   b
+        dfa_word,       // 99   c
+        dfa_word,       // 100  d
+        dfa_word,       // 101  e
+        dfa_word,       // 102  f
+        dfa_word,       // 103  g
+        dfa_word,       // 104  h
+        dfa_word,       // 105  i
+        dfa_word,       // 106  j
+        dfa_word,       // 107  k
+        dfa_word,       // 108  l
+        dfa_word,       // 109  m
+        dfa_word,       // 110  n
+        dfa_word,       // 111  o
+        dfa_word,       // 112  p
+        dfa_word,       // 113  q
+        dfa_word,       // 114  r
+        dfa_word,       // 115  s
+        dfa_word,       // 116  t
+        dfa_word,       // 117  u
+        dfa_word,       // 118  v
+        dfa_word,       // 119  w
+        dfa_word,       // 120  x
+        dfa_word,       // 121  y
+        dfa_word,       // 122  z
+        dfa_invalid,    // 123  {
+        dfa_pipe,       // 124  |
+        dfa_invalid,    // 125  }
+        dfa_tilde,      // 126  ~
+        dfa_invalid,    // 127  DEL
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+        dfa_invalid,    // extended ascii character
+};
 
-
-char * token_names [] = {"ERROR", "IDENT", "NUMLIT", "PLUS", 
-			 "MINUS", "MULT", "DIV", "MOD", "EXP", "NOT", "AND", "OR", 
-			 "XOR", "ASSIGN", "LT", "GT", "SHIFTL", "SHIFTR", "PLUSPLUS", 
-			 "PLUSEQ", "MINUSMINUS", "MINUSEQ", "MULTEQ", "DIVEQ", "MODEQ", 
-			 "EXPEQ", "NOTEQ", "LOGAND", "ANDEQ", "LOGOR", "OREQ", "XOREQ", 
-			 "EQUALTO", "SHIFTLEQ", "LTE", "SHIFTREQ", "GTE", "TILDE", "RPAREN",
-			 "LPAREN", "SEMI", "ERROR", "NUMLIT", "INTTYPE", "DBLTYPE", "EOFT"};
-
-valid_t reduce_char(char c);
-
-int get_special_type(char * id)
-{
-  char * i = "int";
-  char * d = "double";
-  if(strcmp(id, i) == 0)
-    return 43;
-  else if(strcmp(id, d) == 0)
-    return 44;
-  return -2;
+inline int dfa_start(char *str, token_t *t) {
+    return dfa_trans[str[0]](str, t);
 }
 
-char* concat(char *str, char c)
-{
-  size_t len = strlen(str);
-  char *updatedstr = malloc( len + 2 );
-  strcpy(updatedstr, str);
-  updatedstr[len] = c;
-  updatedstr[len+1] = '\0';
-  return updatedstr;
+inline int dfa_invalid(char *str, token_t *t) {
+    *t = ERROR;
+    return 0;
 }
 
-size_t stringLen(const char *str)
-{
-  const char *s;
-  for(s = str; *s; ++s);
-  return(s - str);
-}
-
-char * get_lexeme()
-{ 
-  return filein.lex;
-}
-
-void reportID_error()
-{
-  filein.errorcount++;
-  fprintf(lst, "Lexical error found on line %d: Invalid Identifier found: %s\n", filein.linecount, filein.lex);
-}
-
-void report_error()
-{
-  filein.errorcount++;
-  fprintf(lst, "Lexical error at %d,%d: Invalid character found: %c\n", filein.linecount, filein.position, *filein.lex);
-}
-
-token get_next_state(token current, valid_t c)
-{
-//alp 0, dig 1, pls 2, mns 3, mul 4, mod 5, div 6, eql 7, lt 8, gt 9, bang 10, amp 11, pipe 12, carr 13, tilde 14, dot 15, lpar 16, rpar 17, semi 18, inv 19
-  int state_table[43][22] = {{1, 2, 3, 4, 5, 7, 6, 13, 14, 15, 9, 10, 11, 12, 37, 42, 39, 38, 40, 41, 41, 0},            //START 0
-			     {1, 1, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},    //IDENT 1
-			     {41, 2, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 42, 41, 41, 41, 41, 41, 41},    //NUMLIT 2
-			     {41, 41, 18, 41, 41, 41, 41, 19, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //PLUS   3
-			     {41, 41, 41, 20, 41, 41, 41, 21, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //MINUS  4
-			     {41, 41, 41, 41, 8, 41, 41, 22, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //MULT 5
-			     {41, 41, 41, 41, 41, 41, 41, 23, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //DIV 6
-			     {41, 41, 41, 41, 41, 41, 41, 24, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //MOD 7
-			     {41, 41, 41, 41, 41, 41, 41, 25, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},   //EXP 8
-			     {41, 41, 41, 41, 41, 41, 41, 26, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //NOT 9
- 			     {41, 41, 41, 41, 41, 41, 41, 28, 41, 41, 41, 27, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //AND 10
-			     {41, 41, 41, 41, 41, 41, 41, 30, 41, 41, 41, 41, 29, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //OR 11
-			     {41, 41, 41, 41, 41, 41, 41, 31, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //XOR 12 
-			     {41, 41, 41, 41, 41, 41, 41, 32, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //ASSIGN 13
-			     {41, 41, 41, 41, 41, 41, 41, 34, 16, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //LT 14
-			     {41, 41, 41, 41, 41, 41, 41, 36, 41, 17, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //GT 15
-			     {41, 41, 41, 41, 41, 41, 41, 33, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //SHIFTL 16
-			     {41, 41, 41, 41, 41, 41, 41, 35, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //SHIFTR 17
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //PLUSPLUS 18
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //PLUSEQ 19
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //MINUSMINUS 20
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //MINUSEQ 21
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //MULTEQ 22
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //DIVEQ 23
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //MODEQ 24
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //EXPEQ 25
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //NOTEQ 26
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //LOGAND 27
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //ANDEQ 28
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //LOGOR 29
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //OREQ 30
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //XOREQ 31
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //EQUALTO 32
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //SHIFTLEQ 33
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //LTE 34
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //SHIFTREQ 35
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //GTE 36
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //TILDE 37
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //RPAREN 38
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //LPAREN 39
-			     {41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41},  //SEMI 40
-			     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},  //ERROR 41
-			     {41, 42, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41}}; //NUMNUT 42
-  
-  
-  token ret = (state_table[current][c]);
-  //  printf("the return value = %d\n", ret);
-  return ret;
-
-}
-void init (char * filename)
-{
-  filein.input = fopen(filename, "r");
-  filein.position = 0;
-  filein.linecount = 1;
-  filein.errorcount = 0;
-  filein.lex = malloc(sizeof(char *));
-  filein.read = getline(&filein.line, &filein.len, filein.input);
-  fprintf(lst, "%d. %s",filein.linecount, filein.line);
-}
-
-char read_character()
-{
-  char c = filein.line[filein.position];
-  if(c == '\n'){
-    filein.read = getline(&filein.line, &filein.len, filein.input);
-    filein.position = 0;
-    filein.linecount ++;
-    if(filein.read > 0){
-      c = filein.line[filein.position];
-      fprintf(lst, "%d. %s",filein.linecount, filein.line);
+inline int dfa_word(char *str, token_t *t) {
+    int i;
+    for (i = 0; str[i] != '\0'; i++) {
+        if (!isalnum(str[i]) && str[i] != '_') {
+            break;
+        }
     }
-    else{
-      return 0;
-    }
-  }
-  filein.position++;
-  filein.nc = reduce_char(filein.line[filein.position]);
-  return c;
+
+    *t = IDENT;
+    return i - 1;
 }
 
-token get_token(){
-  filein.lex = "";
-  token cs = ERROR;
-  token ns = ERROR;
-  token ks = ERROR;
-  valid_t cc;
-  char c = read_character();
-    
-  while(ns != 41){
-    if(c == '\0'){
-      return EOFT;
+inline int dfa_num(char *str, token_t *t) {
+    if (str[0] == '.' && !isdigit(str[1])) {
+        *t = ERROR;
+        return 0;
     }
-    cc = (reduce_char(c));
-    ns = (get_next_state(cs, cc));
-    ks = (get_next_state(ns, filein.nc));
-    if(cc != ws){
-      filein.lex = concat(filein.lex, c);
-      if(cc == invalid){
-	report_error();
-	return 0;
-      }
-      if(ks == 41){
-	if(cc == dot && strlen(filein.lex) < 2){
-	  report_error();
-	  return 0;
-	}
-	else if(cs == IDENT && strlen(filein.lex) > 32){
-	  reportID_error();
-	  return 0;
-	}
-	else if(cs == IDENT && get_special_type(filein.lex) >= 43){
-	  return get_special_type(filein.lex);
-	}
-	else if(cs == IDENT && strlen(filein.lex) < 2 && cc != ws)
-	  return cs;
-	else
-	  return ns;
-      }
-      else{
-	if(ns != ERROR)
-	  cs = ns;
-      }
+
+    int i;
+    bool flt = false;
+    for (i = 0; str[i] != '\0'; i++) {
+        if (isdigit(str[i])) {
+            continue;
+        } else if (str[i] == '.') {
+            if (flt) {
+                break;
+            } else {
+                flt = true;
+            }
+        } else {
+            break;
+        }
     }
-    c = read_character();
-  }
-  
+
+    *t = NUMLIT;
+    return i - 1;
 }
 
-valid_t reduce_char(char c)
-{
-  if(c > 126 || c < 0)
-    return invalid;
-  
-  static valid_t lookup[256] = {
-    eof,          //0
-    invalid,      //1
-    invalid,      //2
-    invalid,      //3
-    invalid,      //4
-    invalid,      //5
-    invalid,      //6
-    invalid,      //7
-    invalid,      //8
-    ws,           //9
-    ws,           //10
-    ws,           //11
-    ws,           //12
-    ws,           //13
-    invalid,      //14
-    invalid,      //15
-    invalid,      //16
-    invalid,      //17
-    invalid,      //18
-    invalid,      //19
-    invalid,      //20
-    invalid,      //21
-    invalid,      //22
-    invalid,      //23
-    invalid,      //24
-    invalid,      //25
-    invalid,      //26
-    invalid,      //27
-    invalid,      //28
-    invalid,      //29
-    invalid,      //30
-    invalid,      //31
-    ws,           //32
-    bang,         //33
-    invalid,      //34
-    invalid,      //35
-    invalid,      //36
-    mod,          //37
-    amp,          //38
-    invalid,      //39
-    rpar,         //40
-    lpar,         //41
-    mult,         //42
-    pls,          //43
-    invalid,      //44
-    mns,          //45
-    dot,          //46
-    divide,       //47
-    digit,        //48
-    digit,        //49
-    digit,        //50
-    digit,        //51
-    digit,        //52
-    digit,        //53
-    digit,        //54
-    digit,        //55
-    digit,        //56
-    digit,        //57
-    invalid,      //58
-    semi,         //59
-    lt,           //60
-    eql,          //61
-    gt,           //62
-    invalid,      //63
-    invalid,      //64
-    alpha,        //65
-    alpha,        //66
-    alpha,        //67
-    alpha,        //68
-    alpha,        //69
-    alpha,        //70
-    alpha,        //71
-    alpha,        //72
-    alpha,        //73
-    alpha,        //74
-    alpha,        //75
-    alpha,        //76
-    alpha,        //77
-    alpha,        //78
-    alpha,        //79
-    alpha,        //80
-    alpha,        //81
-    alpha,        //82
-    alpha,        //83
-    alpha,        //84
-    alpha,        //85
-    alpha,        //86
-    alpha,        //87
-    alpha,        //88
-    alpha,        //89
-    alpha,        //90
-    invalid,      //91
-    invalid,      //92
-    invalid,      //93
-    carrot,       //94
-    alpha,        //95
-    invalid,      //96
-    alpha,        //97
-    alpha,        //98
-    alpha,        //99
-    alpha,        //100
-    alpha,        //101
-    alpha,        //102
-    alpha,        //103
-    alpha,        //104
-    alpha,        //105
-    alpha,        //106
-    alpha,        //107
-    alpha,        //108
-    alpha,        //109
-    alpha,        //110
-    alpha,        //111
-    alpha,        //112
-    alpha,        //113
-    alpha,        //114
-    alpha,        //115
-    alpha,        //116
-    alpha,        //117
-    alpha,        //118
-    alpha,        //119
-    alpha,        //120
-    alpha,        //121
-    alpha,        //122
-    invalid,      //123
-    pipe,         //124
-    invalid,      //125
-    tilde,        //126
-  };
-  return lookup[c];
+inline int dfa_not(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = NOTEQ;
+        return 1;
+    } else {
+        *t = NOT;
+        return 0;
+    }
 }
 
-void end_lex(){
-  fprintf(lst, "\n%d lexical errors found in input file\n", filein.errorcount);
-  fclose(filein.input);
-  return;
+inline int dfa_mod(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = MODEQ;
+        return 1;
+    } else {
+        *t = MOD;
+        return 0;
+    }
+}
+
+inline int dfa_and(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = ANDEQ;
+        return 1;
+    } else if (str[1] == '&') {
+        *t = LOGAND;
+        return 1;
+    } else {
+        *t = AND;
+        return 0;
+    }
+}
+
+inline int dfa_mul(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = MULTEQ;
+        return 1;
+    } else if (str[1] == '*' && str[2] == '=') {
+        *t = EXPEQ;
+        return 2;
+    } else if (str[1] == '*') {
+        *t = EXP;
+        return 1;
+    } else {
+        *t = MULT;
+        return 0;
+    }
+}
+
+inline int dfa_add(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = PLUSEQ;
+        return 1;
+    } else if (str[1] == '+') {
+        *t = PLUSPLUS;
+        return 1;
+    } else {
+        *t = PLUS;
+        return 0;
+    }
+}
+
+inline int dfa_sub(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = MINUSEQ;
+        return 1;
+    } else if (str[1] == '-') {
+        *t = MINUSMINUS;
+        return 1;
+    } else {
+        *t = MINUS;
+        return 0;
+    }
+}
+
+inline int dfa_div(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = DIVEQ;
+        return 1;
+    } else {
+        *t = DIV;
+        return 0;
+    }
+}
+
+inline int dfa_less(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = LTE;
+        return 1;
+    } else if (str[1] == '<' && str[2] == '=') {
+        *t = SHIFTLEQ;
+        return 2;
+    } else if (str[1] == '<') {
+        *t = SHIFTL;
+        return 1;
+    } else {
+        *t = LT;
+        return 0;
+    }
+}
+
+inline int dfa_greater(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = GTE;
+        return 1;
+    } else if (str[1] == '>' && str[2] == '=') {
+        *t = SHIFTREQ;
+        return 2;
+    } else if (str[1] == '>') {
+        *t = SHIFTR;
+        return 1;
+    } else {
+        *t = GT;
+        return 0;
+    }
+}
+
+inline int dfa_equal(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = EQUALTO;
+        return 1;
+    } else {
+        *t = ASSIGN;
+        return 0;
+    }
+}
+
+inline int dfa_carret(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = XOREQ;
+        return 1;
+    } else {
+        *t = XOR;
+        return 0;
+    }
+}
+
+inline int dfa_pipe(char *str, token_t *t) {
+    if (str[1] == '=') {
+        *t = OREQ;
+        return 1;
+    } else if (str[1] == '|') {
+        *t = OR;
+        return 1;
+    } else {
+        *t = LOGOR;
+        return 0;
+    }
+}
+
+inline int dfa_oparen(char *str, token_t *t) {
+    *t = LPAREN;
+    return 0;
+}
+
+inline int dfa_cparen(char *str, token_t *t) {
+    *t = RPAREN;
+    return 0;
+}
+
+inline int dfa_comma(char *str, token_t *t) {
+    *t = COMMA;
+    return 0;
+}
+
+inline int dfa_qmark(char *str, token_t *t) {
+    *t = QUEST;
+    return 0;
+}
+
+inline int dfa_colon(char *str, token_t *t) {
+    *t = COLON;
+    return 0;
+}
+
+inline int dfa_semi(char *str, token_t *t) {
+    *t = SEMI;
+    return 0;
+}
+
+inline int dfa_tilde(char *str, token_t *t) {
+    *t = TILDE;
+    return 0;
 }
 

@@ -1,17 +1,19 @@
 #include "syn.h"
-#include "SetLimits.h"
 #include <stdio.h>
 #include <string.h>
 
+
+
 char *currentlex;
-token tok;
+token_t tok;
 int errors = 0;
 FILE * db; //db is the debug file
 FILE * lst; //lst is the list of errors
+FILE * sym; //symbols from symbol table
 char * errmsg;
 
 
-extern Filein filein;
+//extern Filein filein;
 
 void start (char * filename){
 
@@ -23,10 +25,12 @@ void start (char * filename){
   char temp[256];
   char file[256];
   char file2[256];
+  char file3[256];
 
   strcpy(temp, filename);
   strncpy(file, filename, posi);
   strcpy(file2, file);
+  strcpy(file3, file);
 
 
   long i;
@@ -39,11 +43,13 @@ void start (char * filename){
 
     char *debugfile = strcat(file, ".dbg");
     char *listfile = strcat(file2, ".lst");
+    char *symbolfile = strcat(file3, ".sym");
 
     db = fopen(debugfile, "w");
     lst = fopen(listfile, "w");
+    sym = fopen(symbolfile, "w");
 
-    init(filename);
+    init_lex(filename);
     tok = get_token();
     currentlex = get_lexeme();
     while(tok == ERROR){
@@ -70,10 +76,10 @@ void stop (void){
 void error(char * msg)
 {
   errors ++;
-  fprintf(lst, "Syntax Error in line %d position %d: Unexpected character or string found: %s\n", filein.linecount, filein.position, msg);
+  fprintf(lst, "Syntax Error in line %d position %d: Unexpected character or string found: %s\n", get_linenum(), get_position(), msg);
 }
 
-int accept(token t)
+int accept(token_t t)
 {
   if (tok == t){
     tok = get_token();
@@ -126,6 +132,7 @@ void decl(void){
   //Check for IDENT following ntype
   if(tok == IDENT){
     fprintf(db, "In decl returning IDENT tok = %s lexeme = %s\n", token_names[tok], currentlex);
+    //ADD THE VARIABLE TO THE SYMBOL TABLE HERE....
     accept(tok);
   }
   else{
@@ -133,6 +140,29 @@ void decl(void){
   }
   fprintf(db, "In decl entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
   decl_tail();
+
+  fprintf(db, "In decl entering more_decls tok = %s lexeme = %s\n", token_names[tok], currentlex);
+  more_decls();
+
+}
+
+void more_decls(void){
+  if(tok != COMMA){
+    return;
+  }
+  else if(tok == COMMA){
+    accept(tok);
+    if(tok == IDENT){
+      accept(tok);
+      fprintf(db, "In more_decls entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
+      decl_tail();
+    }
+    else{
+      error(currentlex);
+    }
+  }
+  fprintf(db, "In more_decls entering more_decls tok = %s lexeme = %s\n", token_names[tok], currentlex);
+  more_decls();
 }
 
 void ntype(void){
@@ -210,7 +240,7 @@ void term(void){
 void pre(void){
   //Check for terminal Symbols in pre
   if(tok == MINUSMINUS ||  tok == MINUS || tok == NOT || tok == PLUS || tok == PLUSPLUS ||
-     tok == TILDA){
+     tok == TILDE){
     fprintf(db, "In pre entering pre tok = %s lexeme = %s\n", token_names[tok], currentlex);
     accept(tok);
     pre();
@@ -231,11 +261,23 @@ void stmt_tail(void){
     fprintf(db, "In stmt_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
     stmt();
   }
+  else if(tok == QUEST){
+    fprintf(db, "In stme_tail entering stme tok == %s lexeme = %s\n", token_names[tok], currentlex);
+    accept(tok);
+    stmt();
+    if(tok == COLON){
+      fprintf(db, "In stmt_tail entering stmt tok == %s lexeme = %s\n,", token_names[tok], currentlex);
+      accept(tok);
+      stmt();
+    }
+  }
 }
 
 void var(void){
   //Check for terminal symbols for var
-  if(tok == IDENT || tok == NUMLIT || tok == NUMNUT){
+  if(tok == IDENT || tok == NUMLIT){
+    //TEST TO SEE IF THE SYMBOL IS IN THE SYMBOL TABLE.  IF NOT ADD IT IN....
+    //IF TOKEN IS NUMNUT IT IS A NUMLIT WITH A DECIMAL POINT IN IT
     fprintf(db, "In var accepting token tok = %s lex = %s\n", token_names[tok], currentlex);
     accept(tok);
   }
