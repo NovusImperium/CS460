@@ -1,8 +1,10 @@
 #include "sym.h"
 #include "hashmap.h"
+#include "set.h"
 
 #include <string.h>
 #include <malloc.h>
+#include <gmp.h>
 
 struct sym {
     char *id;
@@ -13,11 +15,18 @@ struct sym {
     };
 };
 
+static set *s;
+static FILE* out;
+
 // hash function for char*
 static unsigned hash(void *);
 
 // equality comparison function for char*
 static bool cmp(void *, void *);
+
+static void *sort(void *a);
+
+static void *print(void *a);
 
 inline optional init_sym() {
     return hashmap_init(1024, hash, cmp);
@@ -40,7 +49,8 @@ inline bool insert_sym(table *t, char *id, optional val) {
 
 inline optional get_value(sym *s) {
     optional opt;
-    opt.val = (opt.e = s->flag) ? &s->ival : &s->dval;
+    opt.e = s->flag;
+    opt.val = (void *) &s->ival;
     return opt;
 }
 
@@ -48,8 +58,18 @@ inline char *get_id(sym *s) {
     return s->id;
 }
 
-inline void write_syms(table *t, FILE *out) {
-
+inline void write_syms(table *t, FILE *o) {
+    int cmp(void *a, void *b) {
+        return strcmp((char *)a, (char *)b);
+    }
+    optional opt = set_init(cmp);
+    if (opt.e) {
+        out = o;
+        s = opt.val;
+        hashmap_foreach(t, sort);
+        set_foreach(s, print);
+        set_free(s);
+    }
 }
 
 static unsigned hash(void *a) {
@@ -61,9 +81,32 @@ static unsigned hash(void *a) {
         h = ((h << 5) + h) ^ c;
     }
 
-    return h;
+    return h & 0x3ff;
 }
 
 static bool cmp(void *a, void *b) {
     return strcmp((char *) a, (char *) b) == 0;
 }
+
+static void *sort(void *a) {
+    set_push(s, a);
+    return a;
+}
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "CannotResolve"
+static void *print(void *a) {
+    sym *sm = (sym*)a;
+    char *val;
+    if (sm->flag) {
+        asprintf(&val, "%d", sm->ival);
+    } else {
+        asprintf(&val, "%f", sm->dval);
+    }
+    fprintf(out, "%s = %s", sm->id, val);
+
+    free(val);
+    free(a);
+    return null;
+}
+#pragma clang diagnostic pop

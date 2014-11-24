@@ -28,8 +28,8 @@ MAIN = Project3.c
 COMMON_SOURCES = 
 COMMON_HEADERS = 
 # all sources req'd for target exe
-TARGET_SOURCES = syn.c hashmap.c sym.c array.c dfa.c lex.c SetLimits.c $(MAIN)
-TARGET_HEADERS = syn.h hashmap.h sym.h array.h defs.h dfa.h lex.h SetLimits.h
+TARGET_SOURCES = syn.c hashmap.c sym.c set.c array.c dfa.c lex.c SetLimits.c $(MAIN)
+TARGET_HEADERS = syn.h hashmap.h sym.h set.h array.h defs.h dfa.h lex.h SetLimits.h
 # all sources req's for test exe
 INPUT_SOURCES = 
 INPUT_HEADERS = 

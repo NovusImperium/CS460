@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.4)
-project(proj2)
+project(proj3)
 
 set(SOURCE_FILES
     defs.h
@@ -9,7 +9,8 @@ set(SOURCE_FILES
     lex.c
     array.c
     hashmap.c
+    set.c
     SetLimits.c
     Project3.c
     )
-add_executable(proj2 ${SOURCE_FILES})
+add_executable(proj3 ${SOURCE_FILES})

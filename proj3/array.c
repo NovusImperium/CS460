@@ -3,7 +3,7 @@
 #include <string.h>
 
 struct array {
-    unsigned m;
+    unsigned s;
     unsigned n;
     void **as;
 };
@@ -21,7 +21,7 @@ static bool resize(array *arr, unsigned s) {
         memcpy(as, arr->as, s * sizeof(void *));
         free(arr->as);
         arr->as = as;
-        arr->m = s;
+        arr->s = s;
         arr->n = arr->n < s ? arr->n : s;
 
         return true;
@@ -29,7 +29,7 @@ static bool resize(array *arr, unsigned s) {
         void **as;
         if ((as = realloc(arr->as, s * sizeof(void *))) != null) {
             arr->as = as;
-            arr->m = s;
+            arr->s = s;
 
             return true;
         } else {
@@ -40,7 +40,7 @@ static bool resize(array *arr, unsigned s) {
     }
 }
 
-optional arr_init(unsigned m) {
+inline optional arr_init(unsigned s) {
     optional opt;
     array *arr;
     if ((arr = malloc(sizeof(array))) == null) {
@@ -49,14 +49,14 @@ optional arr_init(unsigned m) {
         return opt;
     }
 
-    if ((arr->as = malloc(m * sizeof(void *))) == null) {
+    if ((arr->as = malloc(s * sizeof(void *))) == null) {
         free(arr);
         opt.e = false;
         opt.err = malloc_fail;
         return opt;
     }
 
-    arr->m = m;
+    arr->s = s;
     arr->n = 0;
 
     opt.e = true;
@@ -64,7 +64,7 @@ optional arr_init(unsigned m) {
     return opt;
 }
 
-optional arr_copy(array *arr, unsigned m) {
+inline optional arr_copy(array *arr, unsigned s) {
     optional opt;
 
     array *new_arr;
@@ -74,20 +74,20 @@ optional arr_copy(array *arr, unsigned m) {
         return opt;
     }
 
-    if ((new_arr->as = malloc(m * sizeof(void *))) == null) {
+    if ((new_arr->as = malloc(s * sizeof(void *))) == null) {
         free(new_arr);
         opt.e = false;
         opt.err = malloc_fail;
         return opt;
     }
 
-    new_arr->m = m;
+    new_arr->s = s;
 
     if (arr == null) {
         new_arr->n = 0;
-        memset(new_arr->as, 0, m * sizeof(void *));
+        memset(new_arr->as, 0, s * sizeof(void *));
     } else {
-        new_arr->n = arr->n < m ? arr->n : m;
+        new_arr->n = arr->n < s ? arr->n : s;
         memcpy(new_arr->as, arr->as, new_arr->n * sizeof(void *));
     }
 
@@ -96,7 +96,7 @@ optional arr_copy(array *arr, unsigned m) {
     return opt;
 }
 
-void arr_free(array *arr) {
+inline void arr_free(array *arr) {
     if (arr != null) {
         if (arr->as != null) {
             free(arr->as);
@@ -105,7 +105,7 @@ void arr_free(array *arr) {
     }
 }
 
-optional arr_peek(array *arr) {
+inline optional arr_peek(array *arr) {
     optional opt;
     if (arr->n > 0) {
         opt.e = true;
@@ -118,7 +118,7 @@ optional arr_peek(array *arr) {
     return opt;
 }
 
-optional arr_pop(array *arr) {
+inline optional arr_pop(array *arr) {
     optional opt;
     if (arr->n > 0) {
         arr->n--;
@@ -126,8 +126,8 @@ optional arr_pop(array *arr) {
         opt.val = arr->as[arr->n];
         arr->as[arr->n] = null;
 
-        if (arr->n < (arr->m / 4)) {
-            resize(arr, arr->m / 2);
+        if (arr->n < (arr->s / 4)) {
+            resize(arr, arr->s / 2);
         }
     } else {
         opt.e = false;
@@ -137,8 +137,8 @@ optional arr_pop(array *arr) {
     return opt;
 }
 
-bool arr_push(array *arr, void *a) {
-    if (arr->n == arr->m && !resize(arr, arr->m * 2)) {
+inline bool arr_push(array *arr, void *a) {
+    if (arr->n == arr->s && !resize(arr, arr->s * 2)) {
         return false;
     }
 
@@ -147,9 +147,9 @@ bool arr_push(array *arr, void *a) {
     return true;
 }
 
-bool arr_concat(array *dest, array *src) {
-    if (dest->n + src->n >= dest->m) {
-        unsigned new_size = dest->m + src->m;
+inline bool arr_concat(array *dest, array *src) {
+    if (dest->n + src->n >= dest->s) {
+        unsigned new_size = dest->s + src->s;
         void **new_as;
         if ((new_as = malloc(new_size * sizeof(void *))) == null) {
             return false;
@@ -164,14 +164,14 @@ bool arr_concat(array *dest, array *src) {
     return true;
 }
 
-void arr_foreach(array *arr, void *(*func)(void *)) {
+inline void arr_foreach(array *arr, void *(*func)(void *)) {
     int i;
     for (i = 0; i < arr->n; i++) {
         arr->as[i] = (func)(arr->as[i]);
     }
 }
 
-int arr_reduce(array *arr, optional (*func)(void *)) {
+inline int arr_reduce(array *arr, optional (*func)(void *)) {
     int i, c = 0;
     for (i = 0; i < arr->n; i++) {
         optional opt = func(arr->as[i]);
@@ -182,17 +182,17 @@ int arr_reduce(array *arr, optional (*func)(void *)) {
 
     if (c < arr->n) {
         arr->n = (unsigned) c;
-        memset(&arr->as[arr->n], 0, (arr->m - arr->n) * sizeof(void *));
+        memset(&arr->as[arr->n], 0, (arr->s - arr->n) * sizeof(void *));
     }
 
     return c;
 }
 
-unsigned arr_size(array *arr) {
+inline unsigned arr_size(array *arr) {
     return arr->n;
 }
 
-optional arr_get(array *arr, unsigned i) {
+inline optional arr_get(array *arr, unsigned i) {
     optional opt;
     if (i < arr->n) {
         opt.e = true;
@@ -204,13 +204,22 @@ optional arr_get(array *arr, unsigned i) {
     return opt;
 }
 
-bool arr_set(array *arr, void *a, unsigned i) {
+inline bool arr_set(array *arr, void *a, unsigned i) {
     if (i < arr->n) {
         arr->as[i] = a;
+        return true;
     }
     return false;
 }
 
-bool arr_insert(array *arr, void *a, unsigned i) {
+inline bool arr_insert(array *arr, void *a, unsigned i) {
+    if (i <= arr->n) {
+        if (arr->n++ == arr->s && !resize(arr, arr->s * 2)) {
+            return false;
+        }
+        memmove(&arr->as[i + 1], &arr->as[i], (arr->n - i) * sizeof(void *));
+        arr->as[i] = a;
+        return true;
+    }
     return false;
 }
