@@ -13,13 +13,13 @@ extern inline optional init_sym();
 // get a symbol entry from the symbol table
 // returns an optional such that:
 //  opt.e == true iff the symbol has a valid entry in the table
-extern inline optional get_sym(table *t, char* id);
+extern inline optional get_sym(table *t, char *id);
 
 // insert a symbol into the symbol table
 // val.e == true => *val.val == integer
 // val.e == false => *val.val == double
 // returns true iff the symbol already exists
-extern inline bool insert_sym(table *t, char* id, optional val);
+extern inline bool insert_sym(table *t, char *id, optional val);
 
 // get the value of the symbol entry
 // returns an optional such that:

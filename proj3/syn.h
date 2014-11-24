@@ -6,13 +6,13 @@
 //#include "sym.h"
 #include "lex.h"
 
-void error(char * msg);
+void error(char *msg);
 
-void start(char * filename);
+void start(char *filename);
 
 int accept(token_t t);
 
-int expect (token_t t);
+int expect(token_t t);
 
 void program(void);
 

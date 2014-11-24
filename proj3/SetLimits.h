@@ -1,1 +1,1 @@
-extern void SetLimits ();
+extern void SetLimits();

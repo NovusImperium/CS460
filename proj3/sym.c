@@ -4,7 +4,6 @@
 
 #include <string.h>
 #include <malloc.h>
-#include <gmp.h>
 
 struct sym {
     char *id;
@@ -16,7 +15,7 @@ struct sym {
 };
 
 static set *s;
-static FILE* out;
+static FILE *out;
 
 // hash function for char*
 static unsigned hash(void *);
@@ -60,7 +59,7 @@ inline char *get_id(sym *s) {
 
 inline void write_syms(table *t, FILE *o) {
     int cmp(void *a, void *b) {
-        return strcmp((char *)a, (char *)b);
+        return strcmp((char *) a, (char *) b);
     }
     optional opt = set_init(cmp);
     if (opt.e) {
@@ -95,8 +94,9 @@ static void *sort(void *a) {
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "CannotResolve"
+
 static void *print(void *a) {
-    sym *sm = (sym*)a;
+    sym *sm = (sym *) a;
     char *val;
     if (sm->flag) {
         asprintf(&val, "%d", sm->ival);
@@ -109,4 +109,5 @@ static void *print(void *a) {
     free(a);
     return null;
 }
+
 #pragma clang diagnostic pop

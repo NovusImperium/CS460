@@ -6,7 +6,7 @@
 typedef struct hashmap hashmap;
 
 // inits the hashmap with a max hash size of s, with the hash and equality comparison functions given
-extern inline optional hashmap_init(unsigned s, unsigned (*hash)(void*), bool (*cmp)(void*,void*));
+extern inline optional hashmap_init(unsigned s, unsigned (*hash)(void *), bool (*cmp)(void *, void *));
 
 extern inline void hashmap_free(hashmap *h);
 

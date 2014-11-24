@@ -12,7 +12,9 @@ struct node {
 
 struct set {
     unsigned n;
+
     int (*cmp)(void *, void *);
+
     node *root;
 };
 
@@ -20,14 +22,14 @@ static bool node_insert(node *n, void *t, int (*cmp)(void *, void *));
 
 static void node_free(node *n);
 
-static void node_foreach(node *n, void *(*func)(void*));
+static void node_foreach(node *n, void *(*func)(void *));
 
 optional set_init(int (*cmp)(void *, void *)) {
     optional opt;
-    if ((opt.e = (opt.val = malloc(sizeof(set*))) != null)) {
-        (*(set*)opt.val).n = 0;
-        (*(set*)opt.val).cmp = cmp;
-        (*(set*)opt.val).root = null;
+    if ((opt.e = (opt.val = malloc(sizeof(set *))) != null)) {
+        (*(set *) opt.val).n = 0;
+        (*(set *) opt.val).cmp = cmp;
+        (*(set *) opt.val).root = null;
     } else {
         opt.err = malloc_fail;
     }
@@ -48,7 +50,7 @@ unsigned set_size(set *s) {
 bool set_push(set *s, void *t) {
     if (s->n > 0) {
         return node_insert(s->root, t, s->cmp) ? s->n++ : false;
-    } else  if ((s->root = malloc(sizeof(node*))) == null) {
+    } else if ((s->root = malloc(sizeof(node *))) == null) {
         return false;
     } else {
         s->root->t = t;
@@ -131,7 +133,7 @@ static void node_free(node *n) {
     }
 }
 
-static void node_foreach(node *n, void *(*func)(void*)) {
+static void node_foreach(node *n, void *(*func)(void *)) {
     if (n != null) {
         node_foreach(n->l, func);
         n->t = func(n->t);
