@@ -2,7 +2,7 @@
 #include <sys/resource.h>
 #include "SetLimits.h"
 
-void SetLimits() {
+inline void SetLimits() {
     // Beginning of resource limit code
     int getrlimit(int resource, struct rlimit *rlim);
     int getrusage(int who, struct rusage *usage);

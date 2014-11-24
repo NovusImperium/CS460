@@ -15,8 +15,6 @@ char *errmsg;
 //extern Filein filein;
 
 void start(char *filename) {
-
-    SetLimits();
     char *filex = ".";
     char extension[256];
     long posi = strcspn(filename, filex);

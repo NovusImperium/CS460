@@ -11,7 +11,7 @@ struct array {
 // resize the array to the given value, can be larger or smaller than the current size
 // if the new size is smaller, the items at index size or higher are lost
 // does nothing if the new size is not different from the old size
-static bool resize(array *arr, unsigned s) {
+static inline bool resize(array *arr, unsigned s) {
     if (s < arr->n) {
         void **as;
         if ((as = malloc(s * sizeof(void *))) == null) {

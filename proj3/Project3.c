@@ -3,10 +3,10 @@
  *Development time 48 hours
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "syn.h"
 #include "SetLimits.h"
+
+#include <stdio.h>
 
 int main(int argc, char *argv[]) {
     SetLimits();

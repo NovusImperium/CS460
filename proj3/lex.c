@@ -25,7 +25,7 @@ char *token_names[] = {
         "LPAREN", "SEMI", "QUEST", "COLON", "COMMA", "EOFT"
 };
 
-void init_lex(char *filename) {
+inline void init_lex(char *filename) {
     fn = filename;
     file = NULL;
     len = 0;
@@ -54,15 +54,15 @@ void init_lex(char *filename) {
     }
 }
 
-int get_linenum() {
+inline int get_linenum() {
     return line;
 }
 
-int get_position() {
+inline int get_position() {
     return lpos;
 }
 
-char read_char() {
+inline char read_char() {
     int i;
     for (i = 0; file[curr + i] == '\n'; i++);
     curr += i;
@@ -85,7 +85,7 @@ char read_char() {
     return file[curr++];
 }
 
-token_t get_token() {
+inline token_t get_token() {
     memset(lexeme, 0, 32);
     char c;
     for (c = read_char(); isspace(c); c = read_char());
@@ -124,15 +124,15 @@ token_t get_token() {
     return t;
 }
 
-char *get_lexeme() {
+inline char *get_lexeme() {
     return lexeme;
 }
 
-void error_message(char *msg) {
+inline void error_message(char *msg) {
     strcat(msg, "\n");
     fputs(msg, lst);
 }
 
-void end_lex() {
+inline void end_lex() {
     fprintf(lst, "found %d Lexical errors in %s\n", errs, fn);
 }

@@ -18,14 +18,14 @@ static set *s;
 static FILE *out;
 
 // hash function for char*
-static unsigned hash(void *);
+static inline unsigned hash(void *);
 
 // equality comparison function for char*
-static bool cmp(void *, void *);
+static inline bool cmp(void *, void *);
 
-static void *sort(void *a);
+static inline void *sort(void *a);
 
-static void *print(void *a);
+static inline void *print(void *a);
 
 inline optional init_sym() {
     return hashmap_init(1024, hash, cmp);
@@ -71,7 +71,7 @@ inline void write_syms(table *t, FILE *o) {
     }
 }
 
-static unsigned hash(void *a) {
+static inline unsigned hash(void *a) {
     char *str = (char *) a;
     unsigned h = 0;
 
@@ -83,11 +83,11 @@ static unsigned hash(void *a) {
     return h & 0x3ff;
 }
 
-static bool cmp(void *a, void *b) {
+static inline bool cmp(void *a, void *b) {
     return strcmp((char *) a, (char *) b) == 0;
 }
 
-static void *sort(void *a) {
+static inline void *sort(void *a) {
     set_push(s, a);
     return a;
 }
@@ -95,7 +95,7 @@ static void *sort(void *a) {
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "CannotResolve"
 
-static void *print(void *a) {
+static inline void *print(void *a) {
     sym *sm = (sym *) a;
     char *val;
     if (sm->flag) {

@@ -11,18 +11,18 @@ typedef enum {
 
 extern char *token_names[];
 
-void init_lex(char *filename);
+extern inline void init_lex(char *filename);
 
-token_t get_token();
+extern inline token_t get_token();
 
-char *get_lexeme();
+extern inline char *get_lexeme();
 
-void error_message(char *msg);
+extern inline void error_message(char *msg);
 
-void end_lex();
+extern inline void end_lex();
 
-int get_linenum();
+extern inline int get_linenum();
 
-int get_position();
+extern inline int get_position();
 
 #endif  // LEX_H

@@ -1,43 +1,43 @@
+#include "dfa.h"
+#include "lex.h"
+
+#include <stdlib.h>
+
 #ifndef SYN_H
 #define SYN_H
 
-#include <stdlib.h>
-#include "dfa.h"
-//#include "sym.h"
-#include "lex.h"
+extern void error(char *msg);
 
-void error(char *msg);
+extern void start(char *filename);
 
-void start(char *filename);
+extern int accept(token_t t);
 
-int accept(token_t t);
+extern int expect(token_t t);
 
-int expect(token_t t);
+extern void program(void);
 
-void program(void);
+extern void stmt(void);
 
-void stmt(void);
+extern void more_stmts(void);
 
-void more_stmts(void);
+extern void more_decls(void);
 
-void more_decls(void);
+extern void decl(void);
 
-void decl(void);
+extern void decl_tail(void);
 
-void decl_tail(void);
+extern void ntype(void);
 
-void ntype(void);
+extern void term(void);
 
-void term(void);
+extern void pre(void);
 
-void pre(void);
+extern void post(void);
 
-void post(void);
+extern void var(void);
 
-void var(void);
+extern void binop(void);
 
-void binop(void);
-
-void stmt_tail(void);
+extern void stmt_tail(void);
 
 #endif
