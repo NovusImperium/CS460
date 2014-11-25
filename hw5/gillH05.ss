@@ -28,7 +28,7 @@
     (letrec ((merge (lambda (ls rs)
                        (cond ((null? ls) rs)
                              ((null? rs) ls)
-                             ((< (car ls) (car rs)) (cons (car ls) (merge (cdr ls) rs)))
+                             ((> (car ls) (car rs)) (cons (car ls) (merge (cdr ls) rs)))
                              (else (cons (car rs) (merge ls (cdr rs))))))))
       (if (or (null? as) (< (length as) 2))
         as
