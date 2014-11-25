@@ -73,6 +73,8 @@ void stop(void) {
 void error(char *msg) {
     errors++;
     fprintf(lst, "Syntax Error in line %d position %d: Unexpected character or string found: %s\n", get_linenum(), get_position(), msg);
+    while(tok != SEMI)
+      tok = get_token();
 }
 
 int accept(token_t t) {
