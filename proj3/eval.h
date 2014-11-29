@@ -3,7 +3,6 @@
 
 #include "stdio.h"
 #include "sym.h"
-#include "syn.h"
 
 typedef enum{
   SYMBOL, OPERAND, VARIABLE, NUMBER, TEMPORARY, OPERATOR
@@ -34,3 +33,5 @@ void NewDeclaration(char *L);
 void NumLitFound(char *N);
 
 void VariableFound(char *N);
+
+void InitSymantic(void);

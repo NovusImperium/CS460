@@ -1,5 +1,6 @@
 #include "dfa.h"
 #include "lex.h"
+#include "eval.h"
 
 #include <stdlib.h>
 

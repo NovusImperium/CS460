@@ -4,15 +4,15 @@
 
 
 char *currentlex;
+token_t currentType;
 token_t tok;
 int errors = 0;
 FILE *db; //db is the debug file
 FILE *lst; //lst is the list of errors
 FILE *sym; //symbols from symbol table
 char *errmsg;
+static table *t;
 
-
-//extern Filein filein;
 
 void start(char *filename) {
     char *filex = ".";
@@ -61,12 +61,12 @@ void start(char *filename) {
     }
 }
 
-void stop(void) {
+void stop(table *t, FILE *o) {
     end_lex();
+    write_syms(t, o);
     fprintf(lst, "%d Syntactic errors found.\n", errors);
     fclose(db);
     fclose(lst);
-
     exit(1);
 }
 
@@ -93,8 +93,9 @@ int accept(token_t t) {
 void program(void) {
     //Check for firsts of decl
     if (tok == INTTYPE || tok == DBLTYPE) {
-        fprintf(db, "In program entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        decl();
+      currentType = tok;
+      fprintf(db, "In program entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
+      decl();
     }
     else {
         fprintf(db, "In program entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
@@ -109,7 +110,7 @@ void program(void) {
     fprintf(db, "In program entering more_stmts tok = %s lexeme = %s\n", token_names[tok], currentlex);
     more_stmts();
     if (tok == EOFT)
-        stop();
+      stop(t, sym);
     else {
         error(currentlex);
     }
