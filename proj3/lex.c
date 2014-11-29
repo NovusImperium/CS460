@@ -5,7 +5,7 @@
 #include "lex.h"
 #include "dfa.h"
 
-extern FILE *lst;
+extern FILE *lst_file;
 
 static char *fn;
 static char *file;
@@ -36,7 +36,7 @@ inline void init_lex(char *filename) {
 
     FILE *in = fopen(filename, "r");
     if (in == NULL || getdelim(&file, &len, EOF, in) < 0) {
-        fprintf(lst, "Error reading file: %s\n", filename);
+        fprintf(lst_file, "Error reading file: %s\n", filename);
         exit(1);
     }
 
@@ -47,10 +47,10 @@ inline void init_lex(char *filename) {
 
     if (file[i] == '\n') {
         file[i] = '\0';
-        fprintf(lst, "%4d: %s\n", line, file);
+        fprintf(lst_file, "%4d: %s\n", line, file);
         file[i] = '\n';
     } else {
-        fprintf(lst, "%4d: %s\n", line, file);
+        fprintf(lst_file, "%4d: %s\n", line, file);
     }
 }
 
@@ -74,10 +74,10 @@ inline char read_char() {
 
         if (file[i] == '\n') {
             file[i] = '\0';
-            fprintf(lst, "%4d: %s\n", line, &file[curr]);
+            fprintf(lst_file, "%4d: %s\n", line, &file[curr]);
             file[i] = '\n';
         } else {
-            fprintf(lst, "%4d: %s\n", line, &file[curr]);
+            fprintf(lst_file, "%4d: %s\n", line, &file[curr]);
         }
     }
 
@@ -130,9 +130,9 @@ inline char *get_lexeme() {
 
 inline void error_message(char *msg) {
     strcat(msg, "\n");
-    fputs(msg, lst);
+    fputs(msg, lst_file);
 }
 
 inline void end_lex() {
-    fprintf(lst, "found %d Lexical errors in %s\n", errs, fn);
+    fprintf(lst_file, "found %d Lexical errors in %s\n", errs, fn);
 }

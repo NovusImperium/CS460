@@ -1,96 +1,95 @@
-#include "eval.h"
 #include <stdlib.h>
 
-using namespace std;
+#include "eval.h"
+#include "syn.h"
 
-
-extern FILE * sym;
+extern FILE *sym_file;
+extern FILE *dbg_file;
+extern table *tab;
 extern token_t currentType;
-static array * operators;
-static array * operands;
+static array *operators;
+static array *operands;
 
-bool NewDeclaration(table *t, char *L){
-  
-  optional opt = get_sym(t, L);
-  if(opt.e){
-    printf("Error at line %d position %d Redeclaration of %s\n", L, get_linenum(), get_position());
-    fprintf(dbg, "Error at line %d position %d Redeclaration of %s\n", L, get_linenum(), get_position());
-    stop(t, sym);
-    return false;
-  }
-  else{
-    value val;
-    if(val.flag = currentType == INTTYPE){
-      val.ival = 0;
-      insert_sym(t, L, val);
+bool NewDeclaration(table *t, char *L) {
+
+    optional opt = get_sym(t, L);
+    if (opt.e) {
+        printf("Error at line %d position %d Redeclaration of %s\n", get_linenum(), get_position(), L);
+        fprintf(dbg_file, "Error at line %d position %d Redeclaration of %s\n", get_linenum(), get_position(), L);
+        stop(t, sym_file);
+        return false;
+    } else {
+        value val;
+        if ((val.flag = currentType == INTTYPE)) {
+            val.ival = 0;
+        } else {
+            val.dval = 0.0;
+        }
+        return insert_sym(t, L, val);
     }
-    else{
-      val.dval = 0.0;
-      insert_sym(t, L, val);
-    }
-  }
-}  
-void NumLitFound(char *N){
-  optional opt = get_sym(t, N);
-  if(opt.e){
-    arr_push(operands, N);
-  }
-  else{
-    value val;
-    val.flag = true;
-    char *str = N;
-    char c;
-    while ((c = *str++)) {
-      if (c == '.') {
-	val.flag = false;
-	val.dval = aotf(N);
-      }
-    }
-    if (val.flag) {
-      val.ival = atoi(N);
-    }
-  }
 
 }
 
-void VariableFound(char*N){
-  optional opt = get_sym(t, N);
-  if(opt.e){
-    arr_push(operands, N);
-  }
-  else{
-    printf("Error at line %d position %d Use of undeclared variable %s\n", L, get_linenum(), get_position());
-    fprintf(dbg, "Error at line %d position %d Use of undeclared variable %s\n", L, get_linenum(), get_position());
-  }
+void NumLitFound(char *N) {
+    optional opt = get_sym(tab, N);
+    if (opt.e) {
+        arr_push(operands, N);
+    }
+    else {
+        value val;
+        val.flag = true;
+        char *str = N;
+        char c;
+        while ((c = *str++)) {
+            if (c == '.') {
+                val.flag = false;
+                val.dval = atof(N);
+            }
+        }
+        if (val.flag) {
+            val.ival = atoi(N);
+        }
+    }
+
 }
 
-void InitSymantic(void){
-  
-  optional opt = init_sym();
-  if(!opt.e){
-    fprintf(dbg, "Initialization of symbol table failed.\n");
-    exit(1);
-  }
-  else{
-    t = opt.val;
-  }
-  opt = arr_init(32);
-  if(!opt.e){
-    fprintf(dbg, "Initializiation of operator array failed.\n");
-    exit(1);
-  }
-  else{
-    operators = opt.val;
-  }
-  opt = arr_init(32);
-  if(!opt.e){
-    fprintf(dbg, "Initilization of operand array failed.\n");
-    exit(1);
-  }
-  else{
-    operands = opt.val;
-  }
+void VariableFound(char *N) {
+    optional opt = get_sym(tab, N);
+    if (opt.e) {
+        arr_push(operands, N);
+    }
+    else {
+        printf("Error at line %d position %d Use of undeclared variable %s\n", get_linenum(), get_position(), N);
+        fprintf(dbg_file, "Error at line %d position %d Use of undeclared variable %s\n", get_linenum(), get_position(), N);
+    }
+}
 
+void InitSymantic(void) {
+
+    optional opt = init_sym();
+    if (!opt.e) {
+        fprintf(dbg_file, "Initialization of symbol table failed.\n");
+        exit(1);
+    }
+    else {
+        tab = opt.val;
+    }
+    opt = arr_init(32);
+    if (!opt.e) {
+        fprintf(dbg_file, "Initializiation of operator array failed.\n");
+        exit(1);
+    }
+    else {
+        operators = opt.val;
+    }
+    opt = arr_init(32);
+    if (!opt.e) {
+        fprintf(dbg_file, "Initilization of operand array failed.\n");
+        exit(1);
+    }
+    else {
+        operands = opt.val;
+    }
 }
 
 

@@ -11,6 +11,8 @@ extern void error(char *msg);
 
 extern void start(char *filename);
 
+extern void stop(table *t, FILE *o);
+
 extern int accept(token_t t);
 
 extern int expect(token_t t);

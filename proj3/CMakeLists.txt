@@ -7,6 +7,7 @@ set(SOURCE_FILES
     syn.c
     sym.c
     lex.c
+    eval.c
     array.c
     hashmap.c
     set.c

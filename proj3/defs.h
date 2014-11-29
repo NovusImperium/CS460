@@ -19,6 +19,17 @@ typedef struct {
 } optional;
 #endif  // OPTIONAL
 
+#ifndef VALUE_TYPE
+#define VALUE_TYPE
+typedef struct {
+    bool flag;
+    union {
+        long long ival;
+        double dval;
+    };
+} value;
+#endif  // VALUE_TYPE
+
 #ifndef CONTAINER_ERR_TYPES
 #define CONTAINER_ERR_TYPES
 typedef enum {

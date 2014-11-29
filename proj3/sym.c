@@ -7,20 +7,16 @@
 
 struct sym {
     char *id;
-    bool flag;
-    union {
-        long long ival;
-        double dval;
-    };
+    value val;
 };
 
 static set *s;
 static FILE *out;
 
-// hash function for char*
+// hash function for sym*
 static inline unsigned hash(void *);
 
-// equality comparison function for char*
+// equality comparison function for sym*
 static inline bool cmp(void *, void *);
 
 static inline void *sort(void *a);
@@ -35,22 +31,15 @@ inline optional get_sym(table *t, char *id) {
     return hashmap_get(t, id);
 }
 
-inline bool insert_sym(table *t, char *id, optional val) {
+inline bool insert_sym(table *t, char *id, value val) {
     sym *s = malloc(sizeof(sym));
     s->id = id;
-    if ((s->flag = val.e)) {
-        s->ival = *(long long *) val.val;
-    } else {
-        s->dval = *(double *) val.val;
-    }
+    s->val = val;
     return hashmap_insert(t, s, id);
 }
 
-inline optional get_value(sym *s) {
-    optional opt;
-    opt.e = s->flag;
-    opt.val = (void *) &s->ival;
-    return opt;
+inline value get_value(sym *s) {
+    return s->val;
 }
 
 inline char *get_id(sym *s) {
@@ -72,7 +61,7 @@ inline void write_syms(table *t, FILE *o) {
 }
 
 static inline unsigned hash(void *a) {
-    char *str = (char *) a;
+    char *str = ((sym *) a)->id;
     unsigned h = 0;
 
     int c;
@@ -84,7 +73,7 @@ static inline unsigned hash(void *a) {
 }
 
 static inline bool cmp(void *a, void *b) {
-    return strcmp((char *) a, (char *) b) == 0;
+    return strcmp(((sym *) a)->id, ((sym *) b)->id) == 0;
 }
 
 static inline void *sort(void *a) {
@@ -92,16 +81,13 @@ static inline void *sort(void *a) {
     return a;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "CannotResolve"
-
 static inline void *print(void *a) {
     sym *sm = (sym *) a;
     char *val;
-    if (sm->flag) {
-        asprintf(&val, "%d", sm->ival);
+    if (sm->val.flag) {
+        asprintf(&val, "%ll", sm->val.ival);
     } else {
-        asprintf(&val, "%f", sm->dval);
+        asprintf(&val, "%f", sm->val.dval);
     }
     fprintf(out, "%s = %s", sm->id, val);
 
@@ -109,5 +95,3 @@ static inline void *print(void *a) {
     free(a);
     return null;
 }
-
-#pragma clang diagnostic pop

@@ -6,8 +6,6 @@
 #include "syn.h"
 #include "SetLimits.h"
 
-#include <stdio.h>
-
 int main(int argc, char *argv[]) {
     SetLimits();
     if (argc < 2) {
