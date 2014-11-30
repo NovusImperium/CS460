@@ -64,6 +64,13 @@ void VariableFound(char *N) {
     }
 }
 
+void OperatorFound(OpCode_type op){
+
+  arr_push(operators, op);
+
+}
+
+
 void InitSymantic(void) {
 
     optional opt = init_sym();
@@ -91,6 +98,8 @@ void InitSymantic(void) {
         operands = opt.val;
     }
 }
+
+
 
 
 //The code below is borrowed from http://www.strchr.com/expression_evaluator
