@@ -35,6 +35,8 @@ void NumLitFound(char *N);
 
 void VariableFound(char *N);
 
+void OperatorFound(OpCode_type op);
+
 void InitSymantic(void);
 
 #endif  // EVAL_H
