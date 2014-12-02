@@ -44,6 +44,7 @@ inline optional hashmap_init(unsigned s, unsigned (*hash)(void *), bool (*cmp)(v
         }
     }
 
+    h->s = s;
     h->hash = hash;
     h->cmp = cmp;
     h->n = 0;
@@ -72,7 +73,13 @@ inline optional hashmap_get(hashmap *h, void *i) {
     unsigned idx;
     array *a = h->map[hsh];
     unsigned s = arr_size(a);
-    for (idx = 0; idx < s && !h->cmp(arr_get(a, idx).val, i); idx++) {}
+    for (idx = 0; idx < s ; idx++) {
+        optional opt = arr_get(a, idx);
+        if (opt.e && h->cmp(opt.val, i) == 0) {
+            break;
+        }
+    }
+
 
     return arr_get(a, idx);
 }
@@ -83,7 +90,12 @@ inline bool hashmap_insert(hashmap *h, void *t, void *i) {
     unsigned idx;
     array *a = h->map[hsh];
     unsigned s = arr_size(a);
-    for (idx = 0; idx < s && !h->cmp(arr_get(a, idx).val, i); idx++) {}
+    for (idx = 0; idx < s ; idx++) {
+        optional opt = arr_get(a, idx);
+        if (opt.e && h->cmp(opt.val, i) == 0) {
+            break;
+        }
+    }
 
     if (idx < s) {
         free(arr_get(a, idx).val);

@@ -11,7 +11,156 @@ FILE *lst_file; //lst is the list of errors
 FILE *sym_file; //symbols from symbol table
 char *errmsg;
 table *tab;
-extern int *Optable;
+
+static int preOpTable[47] = {
+        OPERR,  //ERROR,
+        OPERR,  //IDENT,
+        OPERR,  //INTTYPE,
+        OPERR,  //DBLTYPE,
+        OPERR,  //NUMLIT,
+        UPLUS,  //PLUS,
+        UMINUS, //MINUS,
+        OPERR,  //MULT,
+        OPERR,  //DIV,
+        OPERR,  //MOD,
+        OPERR,  //EXP,
+        NEGATION, //NOT,
+        OPERR,  //AND,
+        OPERR,  //OR,
+        OPERR,  //XOR,
+        OPERR,  //ASSIGN,
+        OPERR,  //LT,
+        OPERR,  //GT,
+        OPERR,  //SHIFTL,
+        OPERR,  //SHIFTR,
+        PREPP,  //PLUSPLUS,
+        OPERR,  //PLUSEQ,
+        PREMM,  //MINUSMINUS,
+        OPERR,  //MINUSEQ,
+        OPERR,  //MULTEQ,
+        OPERR,  //DIVEQ,
+        OPERR,  //MODEQ,
+        OPERR,  //EXPEQ,
+        OPERR,  //NOTEQ,
+        OPERR,  //LOGAND,
+        OPERR,  //ANDEQ,
+        OPERR,  //LOGOR,
+        OPERR,  //OREQ,
+        OPERR,  //XOREQ,
+        OPERR,  //EQUALTO,
+        OPERR,  //SHIFTLEQ,
+        OPERR,  //LTE,
+        OPERR,  //SHIFTREQ,
+        OPERR,  //GTE,
+        OPERR,  //TILDE,
+        OPERR,  //RPAREN,
+        OPERR,  //LPAREN,
+        OPERR,  //SEMI,
+        OPERR,  //QUEST,
+        OPERR,  //COLON,
+        OPERR,  //COMMA,
+        OPERR,  //EOFT
+};
+
+static int postOpTable[] = {
+        OPERR,  //ERROR,
+        OPERR,  //IDENT,
+        OPERR,  //INTTYPE,
+        OPERR,  //DBLTYPE,
+        OPERR,  //NUMLIT,
+        OPERR,  //PLUS,
+        OPERR,  //MINUS,
+        OPERR,  //MULT,
+        OPERR,  //DIV,
+        OPERR,  //MOD,
+        OPERR,  //EXP,
+        OPERR,  //NOT,
+        OPERR,  //AND,
+        OPERR,  //OR,
+        OPERR,  //XOR,
+        OPERR,  //ASSIGN,
+        OPERR,  //LT,
+        OPERR,  //GT,
+        OPERR,  //SHIFTL,
+        OPERR,  //SHIFTR,
+        POSTPP, //PLUSPLUS,
+        OPERR,  //PLUSEQ,
+        POSTMM, //MINUSMINUS,
+        OPERR,  //MINUSEQ,
+        OPERR,  //MULTEQ,
+        OPERR,  //DIVEQ,
+        OPERR,  //MODEQ,
+        OPERR,  //EXPEQ,
+        OPERR,  //NOTEQ,
+        OPERR,  //LOGAND,
+        OPERR,  //ANDEQ,
+        OPERR,  //LOGOR,
+        OPERR,  //OREQ,
+        OPERR,  //XOREQ,
+        OPERR,  //EQUALTO,
+        OPERR,  //SHIFTLEQ,
+        OPERR,  //LTE,
+        OPERR,  //SHIFTREQ,
+        OPERR,  //GTE,
+        OPERR,  //TILDE,
+        OPERR,  //RPAREN,
+        OPERR,  //LPAREN,
+        OPERR,  //SEMI,
+        OPERR,  //QUEST,
+        OPERR,  //COLON,
+        OPERR,  //COMMA,
+        OPERR,  //EOFT
+};
+
+static int binOpTable[] = {
+        OPERR,  //ERROR,
+        OPERR,  //IDENT,
+        OPERR,  //INTTYPE,
+        OPERR,  //DBLTYPE,
+        OPERR,  //NUMLIT,
+        BPLUS,  //PLUS,
+        BMINUS, //MINUS,
+        MULTIPLY,  //MULT,
+        DIVIDE,  //DIV,
+        REMAINDER, //MOD,
+        POWER,  //EXP,
+        OPERR, //NOT,
+        BITAND,  //AND,
+        BITOR,  //OR,
+        BITXOR,  //XOR,
+        ASSIGNMENT,  //ASSIGN,
+        LESSTHAN,  //LT,
+        GREATERTHAN,  //GT,
+        SHIFTLEFT,  //SHIFTL,
+        SHIFTRIGHT,  //SHIFTR,
+        OPERR,  //PLUSPLUS,
+        PLUSEQUAL,  //PLUSEQ,
+        OPERR,  //MINUSMINUS,
+        MINUSEQUAL,  //MINUSEQ,
+        MULTEQUAL,  //MULTEQ,
+        DIVEQUAL,  //DIVEQ,
+        REMEQUAL,  //MODEQ,
+        POWEREQUAL,  //EXPEQ,
+        NOTEQUAL,  //NOTEQ,
+        LOGICALAND,  //LOGAND,
+        BITANDEQUAL,  //ANDEQ,
+        LOGICALOR,  //LOGOR,
+        BITOREQUAL,  //OREQ,
+        BITXOREQUAL,  //XOREQ,
+        EQUAL,  //EQUALTO,
+        SHIFTLEFTEQUAL,  //SHIFTLEQ,
+        LESSTHANEQ,  //LTE,
+        SHIFTRIGHTEQUAL,  //SHIFTREQ,
+        GREATERTHANEQ,  //GTE,
+        OPERR,  //TILDE,
+        OPERR,  //RPAREN,
+        OPERR,  //LPAREN,
+        OPERR,  //SEMI,
+        TERNQUESTION,  //QUEST,
+        TERNCOLON,  //COLON,
+        OPERR,  //COMMA,
+        OPERR,  //EOFT
+};
 
 void start(char *filename) {
     char *filex = ".";
@@ -46,7 +195,7 @@ void start(char *filename) {
         sym_file = fopen(symbolfile, "w");
 
         init_lex(filename);
-	InitSymantic();
+        InitSymantic();
         tok = get_token();
         currentlex = get_lexeme();
         while (tok == ERROR) {
@@ -95,7 +244,6 @@ void program(void) {
     //Check for firsts of decl
     if (tok == INTTYPE || tok == DBLTYPE) {
         currentType = tok;
-	NewDeclaration(tab, currentlex);
         fprintf(dbg_file, "In program entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
         decl();
     }
@@ -133,7 +281,7 @@ void decl(void) {
     if (tok == IDENT) {
         fprintf(dbg_file, "In decl returning IDENT tok = %s lexeme = %s\n", token_names[tok], currentlex);
         //ADD THE VARIABLE TO THE SYMBOL TABLE HERE....
-	VariableFound(tab, currentlex);
+        NewDeclaration(tab, currentlex);
         accept(tok);
     }
     else {
@@ -154,9 +302,9 @@ void more_decls(void) {
     else if (tok == COMMA) {
         accept(tok);
         if (tok == IDENT) {
-	  VariableFoound(currentlex);
-	  accept(tok);
-	  fprintf(dbg_file, "In more_decls entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
+            NewDeclaration(tab, currentlex);
+            accept(tok);
+            fprintf(dbg_file, "In more_decls entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
             decl_tail();
         }
         else {
@@ -170,9 +318,8 @@ void more_decls(void) {
 void ntype(void) {
     //Check for terminal symbol in ntype
     if (tok == INTTYPE || tok == DBLTYPE) {
-      NewDeclaration(tab, currentlex);
-      fprintf(dbg_file, "In ntype returning tok = %s lexeme = %s\n", token_names[tok], currentlex);
-      accept(tok);
+        fprintf(dbg_file, "In ntype returning tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        accept(tok);
     }
     else {
         error(currentlex);
@@ -185,9 +332,8 @@ void more_stmts(void) {
     }
         //Check for firsts of decl
     else if (tok == INTTYPE || tok == DBLTYPE) {
-      NewDeclaration(tab, currentlex);
-      fprintf(dbg_file, "In more_stmts entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
-      decl();
+        fprintf(dbg_file, "In more_stmts entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        decl();
     }
     else {
         fprintf(dbg_file, "In more_stmts entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
@@ -210,8 +356,8 @@ void more_stmts(void) {
 void decl_tail(void) {
     //Check for ASSIGN terminal symbol in decl_tail
     if (tok == ASSIGN) {
-      OperatorFound(ASSIGNMENT);
-      fprintf(dbg_file, "In decl_tail accepting ASSIGN tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        OperatorFound(ASSIGNMENT);
+        fprintf(dbg_file, "In decl_tail accepting ASSIGN tok = %s lexeme = %s\n", token_names[tok], currentlex);
         accept(tok);
     }
     else {}
@@ -222,14 +368,14 @@ void decl_tail(void) {
 void term(void) {
     //Check for LPAREN before stmt in term
     if (tok == LPAREN) {
-      OperatorFound(SCOPESTART);
+        OperatorFound(SCOPESTART);
         accept(tok);
         fprintf(dbg_file, "In term entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
         stmt();
         //Check for RPAREN terminal symbol after return from stmt in term
         if (tok == RPAREN) {
-	  OperatorFound(SCOPEEND);
-	  accept(tok);
+            OperatorFound(SCOPEEND);
+            accept(tok);
         }
         else {
             error(currentlex);
@@ -249,7 +395,7 @@ void pre(void) {
     //Check for terminal Symbols in pre
     if (tok == MINUSMINUS || tok == MINUS || tok == NOT || tok == PLUS || tok == PLUSPLUS ||
             tok == TILDE) {
-      OperatorFound(preOpTable[tok]);
+        OperatorFound(preOpTable[tok]);
         fprintf(dbg_file, "In pre entering pre tok = %s lexeme = %s\n", token_names[tok], currentlex);
         accept(tok);
         pre();
@@ -265,7 +411,7 @@ void stmt_tail(void) {
             tok == LTE || tok == MINUS || tok == MINUSEQ || tok == MOD || tok == MODEQ || tok == MULT || tok == MULTEQ ||
             tok == NOTEQ || tok == OR || tok == OREQ || tok == PLUS || tok == PLUSEQ || tok == SHIFTL || tok == SHIFTLEQ ||
             tok == SHIFTR || tok == SHIFTREQ || tok == XOR || tok == XOREQ) {
-      OperatorFound(binOpTable[tok]);
+        OperatorFound(binOpTable[tok]);
         fprintf(dbg_file, "In stmt_tail entering binop tok = %s lexeme = %s\n", token_names[tok], currentlex);
         binop();
         fprintf(dbg_file, "In stmt_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
@@ -288,12 +434,12 @@ void var(void) {
     if (tok == IDENT || tok == NUMLIT) {
         //TEST TO SEE IF THE SYMBOL IS IN THE SYMBOL TABLE.  IF NOT ADD IT IN....
         //IF TOKEN IS NUMNUT IT IS A NUMLIT WITH A DECIMAL POINT IN IT
-      if(tok == IDENT)
-	VariableFound(currentlex);
-      else
-	NumlitFound(currentlex);
-      fprintf(dbg_file, "In var accepting token tok = %s lex = %s\n", token_names[tok], currentlex);
-      accept(tok);
+        if (tok == IDENT)
+            VariableFound(currentlex);
+        else
+            NumLitFound(currentlex);
+        fprintf(dbg_file, "In var accepting token tok = %s lex = %s\n", token_names[tok], currentlex);
+        accept(tok);
     }
     else {
         fprintf(dbg_file, "In var sending error tok = %s lex = %s\n", token_names[tok], currentlex);
@@ -304,8 +450,8 @@ void var(void) {
 void post(void) {
     //Check for terminal symbol for post
     if (tok == PLUSPLUS || tok == MINUSMINUS) {
-      OperatorFound(postOpTable[tok]);
-      accept(tok);
+        OperatorFound(postOpTable[tok]);
+        accept(tok);
     }
 }
 
@@ -317,8 +463,8 @@ void binop(void) {
             tok == MULT || tok == MULTEQ || tok == NOTEQ || tok == OR || tok == OREQ || tok == PLUS ||
             tok == PLUSEQ || tok == SHIFTL || tok == SHIFTLEQ || tok == SHIFTR || tok == SHIFTREQ ||
             tok == XOR || tok == XOREQ) {
-      OperatorFound(binOpTable[tok]);
-      accept(tok);
+        OperatorFound(binOpTable[tok]);
+        accept(tok);
     }
     else {
         error(currentlex);

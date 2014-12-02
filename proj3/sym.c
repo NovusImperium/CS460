@@ -6,7 +6,7 @@
 #include <malloc.h>
 
 struct sym {
-    char *id;
+    char id[32];
     value val;
 };
 
@@ -33,7 +33,8 @@ inline optional get_sym(table *t, char *id) {
 
 inline bool insert_sym(table *t, char *id, value val) {
     sym *s = malloc(sizeof(sym));
-    s->id = id;
+    memset(s,0,sizeof(sym));
+    strcpy(s->id, id);
     s->val = val;
     return hashmap_insert(t, s, id);
 }
@@ -61,10 +62,10 @@ inline void write_syms(table *t, FILE *o) {
 }
 
 static inline unsigned hash(void *a) {
-    char *str = ((sym *) a)->id;
-    unsigned h = 0;
+    register char *str = ((sym*)a)->id;
+    register unsigned h = 0;
 
-    int c;
+    register int c;
     while ((c = *str++)) {
         h = ((h << 5) + h) ^ c;
     }
@@ -73,7 +74,9 @@ static inline unsigned hash(void *a) {
 }
 
 static inline bool cmp(void *a, void *b) {
-    return strcmp(((sym *) a)->id, ((sym *) b)->id) == 0;
+    char *c1 = (char*)a, *c2 = (char*)b;
+    sym *s1 = (sym*)a, *s2 = (sym*)b;
+    return strcmp(c1, c2) == 0;
 }
 
 static inline void *sort(void *a) {
@@ -89,7 +92,7 @@ static inline void *print(void *a) {
     } else {
         asprintf(&val, "%f", sm->val.dval);
     }
-    fprintf(out, "%s = %s", sm->id, val);
+    fprintf(out, "%s = %s\n", sm->id, val);
 
     free(val);
     free(a);
