@@ -2,7 +2,7 @@
 #include "defs.h"
 #include "array.h"
 
-typedef struct hashmap table;
+typedef struct table table;
 typedef struct sym sym;
 
 // creates and initializes the symbol table
