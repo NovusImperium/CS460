@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(proj3)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm")
 set(SOURCE_FILES
     defs.h
     dfa.c
@@ -15,3 +16,4 @@ set(SOURCE_FILES
     Project3.c
     )
 add_executable(proj3 ${SOURCE_FILES})
+

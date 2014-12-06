@@ -101,7 +101,7 @@ inline void write_syms(table *t, FILE *o) {
     if (opt.e) {
         out = o;
         s = opt.val;
-        hashmap_foreach(t, sort);
+        hashmap_foreach(t->syms, sort);
         set_foreach(s, print);
         set_free(s);
     }

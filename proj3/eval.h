@@ -72,7 +72,7 @@ static int operatorPrecidence[] = {
   15, // TERNQUESTION, 
   15 // TERNCOLON
 
-}
+};
 
 
 void SaveDeclType(token_t T);
@@ -85,6 +85,6 @@ void VariableFound(char *var);
 
 void OperatorFound(OpCode_type op);
 
-void InitSymantic(void);
+void InitSemantic(void);
 
 #endif  // EVAL_H

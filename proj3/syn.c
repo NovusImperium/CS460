@@ -195,7 +195,7 @@ void start(char *filename) {
         sym_file = fopen(symbolfile, "w");
 
         init_lex(filename);
-        InitSymantic();
+        InitSemantic();
         tok = get_token();
         currentlex = get_lexeme();
         while (tok == ERROR) {

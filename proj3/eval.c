@@ -1,6 +1,6 @@
+#include <math.h>
 #include "eval.h"
 #include "syn.h"
-#include <cmath>
 
 extern FILE *sym_file;
 extern FILE *dbg_file;
@@ -61,13 +61,12 @@ void VariableFound(char *var) {
     }
 }
 
-void OperatorFound(OpCode_type op){
-
-  if(sizeof(operators) == 0)
-    arr_push(operators, (void*)op);
+void OperatorFound(OpCode_type op) {
+    if (arr_size(operators) == 0)
+        arr_push(operators, (void *) op);
 }
 
-void InitSymantic(void) {
+void InitSemantic(void) {
     optional opt = init_sym();
     if (!opt.e) {
         fprintf(dbg_file, "Initialization of symbol table failed.\n");
@@ -93,768 +92,620 @@ void InitSymantic(void) {
     }
 }
 
-value PPPre(sym *left, sym *right){
+value PPPre(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);;
-  if(val.flag = lval.flag){
-    val.ival = lval.ival + 1;
+    value val;
+    value lval = get_value(left);;
+    if ((val.flag = lval.flag)) {
+        val.ival = lval.ival + 1;
+    } else {
+        fprintf(sym_file, "Error operator ++ must have int lvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator ++ must have int lvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value PPPost(sym *left, sym *right){
+value PPPost(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  if(val.flag = lval.flag){
-    val.ival = lval.ival + 1;
+    value val;
+    value lval = get_value(left);
+    if ((val.flag = lval.flag)) {
+        val.ival = lval.ival + 1;
+    } else {
+        fprintf(sym_file, "Error operator ++ must have int lvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator ++ must have int lvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value MMPre(sym *left, sym *right){
+value MMPre(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  if(val.flag = lval.flag){
-    val.ival = lval.ival - 1;
+    value val;
+    value lval = get_value(left);
+    if ((val.flag = lval.flag)) {
+        val.ival = lval.ival - 1;
+    } else {
+        fprintf(sym_file, "Error operator -- must have int lvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator -- must have int lvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value MMPost(sym *left, sym *right){
+value MMPost(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  if(val.flag = lval.flag){
-    val.ival = lval.ival - 1;
+    value val;
+    value lval = get_value(left);
+    if ((val.flag = lval.flag)) {
+        val.ival = lval.ival - 1;
+    } else {
+        fprintf(sym_file, "Error operator -- must have int lvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator -- must have int lvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
 
+value UPlus(sym *left, sym *right) {
 
-value UPlus(sym *left, sym *right){
-  
-  value val = get_value(left);
-  return val;
+    value val = get_value(left);
+    return val;
 
 }
 
-value UMinus(sym *left, sym *right){
+value UMinus(sym *left, sym *right) {
 
-  value val;
-  vlaue lval = get_value(left);
-  if(val.flag = left.flag){
-    val.ival = lval.ival * -1;
+    value val;
+    value lval = get_value(left);
+    if ((val.flag = lval.flag)) {
+        val.ival = lval.ival * -1;
+    } else {
+        val.dval = lval.dval * -1;
+    }
+
     return val;
-  }
-  else{
-    val.dval = lval.dval * -1;
-    return val;
-  }
 }
 
-value Negate(sym *left, sym *right){
-  
-  value val;
-  value lval = get_value(left);
-  val.flag = true;
-  val.ival = lval.ival == 0 ? 1 : 0;
-  return val;
+value Negate(sym *left, sym *right) {
+
+    value val;
+    value lval = get_value(left);
+    val.flag = true;
+    val.ival = lval.ival == 0 ? 1 : 0;
+    return val;
 }
 
-value Mult(sym *left, sym *right){
-  
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+value Mult(sym *left, sym *right) {
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival * rval.ival;
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
+
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival * rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.dval = lval.ival * rval.dval;
+    } else if (!lval.flag && rval.flag) {
+        val.dval = lval.dval * rval.ival;
+    } else {
+        val.dval = lval.dval * rval.dval;
+    }
+
     return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.dval = lval.ival * rval.dval;
-    return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.dval = lval.dval * rval.ival;
-    return val;
-  }
-  else{
-    val.dval = lval.dval * rval.dval;
-    return val;
-  }
 }
 
-value Div(sym *left, sym *right){
+value Div(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(rval.flag && rval.ival == 0 || !rval.flag && rval.dval == 0.0){
-    fprintf(sym_file, "Error Div by 0\n");
-    stop(tab, sym_file);
-  }
+    if (rval.flag && rval.ival == 0 || !rval.flag && rval.dval == 0.0) {
+        fprintf(sym_file, "Error Div by 0\n");
+        stop(tab, sym_file);
+    }
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival/rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival / rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.dval = lval.dval / rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.dval = lval.ival / rval.dval;
+    } else {
+        val.dval = lval.dval / rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.dval = lval.dval/ival;
-    return val;
-  }
-  else if(lval.flag && ! rval.flag){
-    val.dval = lval.ival/rval.dval;
-    return val;
-  }
-  else{
-    val.dval = lval.dval/rval.dval;
-    return val;
-  }
 }
 
-value Rem(sym *left, sym *right){
+value Rem(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival%rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival % rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator % requires int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator % requires int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value BPlus(sym *left, sym *right){
+value BPlus(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival + rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival + rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.dval = lval.dval + rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.dval = lval.ival + rval.dval;
+    } else {
+        val.dval = lval.dval + rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.dval = lval.dval + rval.ival;
-    return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.dval = lval.ival + rval.dval;
-    return val;
-  }
-  else{
-    val.dval = lval.dval + rval.dval;
-    return val;
-  }
 }
 
-value BMinus(sym *left, sym *right){
+value BMinus(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value right = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival - rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival - rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.dval = lval.dval - rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.dval = lval.ival - rval.dval;
+    } else {
+        val.dval = lval.dval - rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.dval = lval.dval - rval.ival;
-    return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.dval = lval.ival - rval.dval;
-    return val;
-  }
-  else{
-    val.dval = lval.dval - rval.dval;
-    return val;
-  }
 }
 
-value LShift(sym *left, sym *right){
+value LShift(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival << rval.ival;
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival << rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator << requires int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator << requires int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value RShift(sym *left, sym *right){
+value RShift(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value right = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival >> rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival >> rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator >> requires int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator >> requires int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value LT(sym *left, sym *right){
+value LessThan(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  vlaue rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  if(lval.flag && rval.flag){
-    val.ival = lval.ival < rval.ival;
+    val.flag = true;
+    if (lval.flag && rval.flag) {
+        val.ival = lval.ival < rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.ival = lval.dval < rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.ival = lval.ival < rval.dval;
+    } else {
+        val.ival = lval.dval < rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.ivalue = lval.dval < rval.ival;
-    return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.ival = lval.ival < rval.dval;
-    return val;
-  }
-  else{
-    val.ival = lval.dval < rval.dval;
-    return val;
-  }
 }
 
-value LTE(sym *left, sym *right){
+value LessThanEq(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  if(lval.flag && rval.flag){
-    val.ival = lval.ival <= rval.ival;
+    val.flag = true;
+    if (lval.flag && rval.flag) {
+        val.ival = lval.ival <= rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.ival = lval.dval <= rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.ival = lval.ival <= rval.dval;
+    } else {
+        val.ival = lval.dval <= rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.ivalue = lval.dval <= rval.ival;
-    return val;
-  }
-  else if(lval.flag && ! rval.flag){
-    val.ival = lval.ival <= rval.dval;
-    return val;
-  }
-  else{
-    val.ival = lval.dval <= rval.dval;
-    return val;
-  }
 }
 
-value GT(sym *left, sym *right){
+value GreaterThan(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  if(lval.flag && rval.flag){
-    val.ival = lval.ival > rval.ival;
+    val.flag = true;
+    if (lval.flag && rval.flag) {
+        val.ival = lval.ival > rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.ival = lval.dval > rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.ival = lval.ival > rval.dval;
+    } else {
+        val.ival = lval.dval > rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.ivalue = lval.dval > rval.ival;
-    return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.ival = lval.ival > rval.dval;
-    return val;
-  }
-  else{
-    val.ival = lval.dval > rval.dval;
-    return val;
-  }
 }
 
-value GTE(sym *left, sym *right){
+value GreaterThanEq(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  if(lval.flag && rval.flag){
-    val.ival = lval.ival >= rval.ival;
+    val.flag = true;
+    if (lval.flag && rval.flag) {
+        val.ival = lval.ival >= rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.ival = lval.dval >= rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.ival = lval.ival >= rval.dval;
+    } else {
+        val.ival = lval.dval >= rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.ivalue = lval.dval >= rval.ival;
-    return val;
-  }
-  else if(lval.flag && ! rval.flag){
-    val.ival = lval.ival >= rval.dval;
-    return val;
-  }
-  else{
-    val.ival = lval.dval >= rval.dval;
-    return val;
-  }
 }
 
-value EqualTo(sym *left, sym *right){
+value EqualTo(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  if(lval.flag && rval.flag){
-    val.ival = lval.ival == rval.ival;
-    return val
-  }
-  else if(!lval.flag && rval.flag){
-    val.ivalue = lval.dval == rval.ival;
+    val.flag = true;
+    if (lval.flag && rval.flag) {
+        val.ival = lval.ival == rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.ival = lval.dval == rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.ival = lval.ival == rval.dval;
+    } else {
+        val.ival = lval.dval == rval.dval;
+    }
+
     return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.ival = lval.ival == rval.dval;
-    return val;
-  }
-  else{
-    val.ival = lval.dval == rval.dval;
-    return val;
-  }
 }
 
-value NotEQ(sym *left, sym *right){
+value NotEQ(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  if(lval.flag && rval.flag){
-    val.ival = lval.ival != rval.ival;
+    val.flag = true;
+    if (lval.flag && rval.flag) {
+        val.ival = lval.ival != rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        val.ival = lval.dval != rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        val.ival = lval.ival != rval.dval;
+    } else {
+        val.ival = lval.dval != rval.dval;
+    }
+
     return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.ivalue = lval.dval != rval.ival;
-    return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.ival = lval.ival != rval.dval;
-    return val;
-  }
-  else{
-    val.ival = lval.dval != rval.dval;
-    return val;
-  }
 }
 
-value BitAnd(sym *left, sym *right){
+value BitAnd(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival & rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival & rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator & requires an int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator & requires an int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value BitXor(sym *left, sym *right){
+value BitXor(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival ^ rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival ^ rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator ^ requires an int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator ^ requires an int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value BitOr(sym *left, sym *right){
+value BitOr(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = lval.ival | rval.ival;
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = lval.ival | rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator | requires an int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     return val;
-  }
-  else{
-    fprintf(sym_file, "Error operator | requires an int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value LogAnd(sym *left, sym *right){
+value LogAnd(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  val.ival = lval.ival && rval.ival;
-  return val;
+    val.flag = true;
+    val.ival = lval.ival && rval.ival;
+    return val;
 }
 
-value LogOr(sym *left, sym *right){
+value LogOr(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  val.flag = true;
-  val.ival = lval.ival || rval.ival;
-  return val;
+    val.flag = true;
+    val.ival = lval.ival || rval.ival;
+    return val;
 }
 
-value Assign(sym *left, sym *right){
+value Assign(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival = rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival = rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        lval.dval = rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        lval.ival = (long long int) rval.dval;
+    } else {
+        lval.dval = rval.dval;
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else if(!lval.flag && rval.flag){
-    lval.dval = rval.ival;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else if(lval.flag && !rval.flag){
-    lval.ival = rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else{
-    lval.dval = rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
 }
 
-value PlusEq(sym *left, sym *right){
+value PlusEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival += rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival += rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        lval.dval += rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        lval.ival += rval.dval;
+    } else {
+        lval.dval += rval.dval;
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else if(!lval.flag && rval.flag){
-    lval.dval += rval.ival;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else if(lval.flag && !rval.flag){
-    lval.ival += rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else{
-    lval.dval += rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
 }
 
-value MinEq(sym *left, sym *right){
+value MinEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival -= rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival -= rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        lval.dval -= rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        lval.ival -= rval.dval;
+    } else {
+        lval.dval -= rval.dval;
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else if(!lval.flag && rval.flag){
-    lval.dval -= rval.ival;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else if(lval.flag && !rval.flag){
-    lval.ival -= rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else{
-    lval.dval -= rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
 }
 
-value DivEq(sym *left, sym *right){
+value DivEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(rval.flag && rval.ival == 0 || !rval.flag && rval.dval == 0.0){
-    fprintf(sym_file, "Error Div by 0\n");
-    stop(tab, sym_file);
-  }
+    if (rval.flag && rval.ival == 0 || !rval.flag && rval.dval == 0.0) {
+        fprintf(sym_file, "Error Div by 0\n");
+        stop(tab, sym_file);
+    }
 
-  if(lval.flag && rval.flag){
-    lval.ival /= rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival /= rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        lval.dval /= rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        lval.ival /= rval.dval;
+    } else {
+        lval.dval /= rval.dval;
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else if(!lval.flag && rval.flag){
-    lval.dval /= rval.ival;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else if(lval.flag && !rval.flag){
-    lval.ival /= rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else{
-    lval.dval /= rval.dval;
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
 }
 
-value RemEq(sym *left, sym *right){
+value RemEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival = lval.ival%rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival = lval.ival % rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator % requires int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else{
-    fprintf(sym_file, "Error operator % requires int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value LShiftEq(sym *left, sym *right){
+value LShiftEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
-  if(lval.flag && rval.flag){
-    lval.ival = lval.ival << rval.ival;
+    value lval = get_value(left);
+    value rval = get_value(right);
+    if (lval.flag && rval.flag) {
+        lval.ival = lval.ival << rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator <<= requires int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else{
-    fprintf(sym_file, "Error operator <<= requires int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value RShiftEq(sym *left, sym *right){
+value RShiftEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
-  if(lval.flag && rval.flag){
-    lval.ival = lval.ival >> rval.ival;
+    value lval = get_value(left);
+    value rval = get_value(right);
+    if (lval.flag && rval.flag) {
+        lval.ival = lval.ival >> rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator >>= requires int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else{
-    fprintf(sym_file, "Error operator >>= requires int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value BitAndEq(sym *left, sym *right){
+value BitAndEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival = lval.ival & rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival = lval.ival & rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator &= requires an int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else{
-    fprintf(sym_file, "Error operator &= requires an int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value BitXorEq(sym *left, sym *right){
+value BitXorEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival = lval.ival ^ rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival = lval.ival ^ rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator ^= requires an int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else{
-    fprintf(sym_file, "Error operator ^= requires an int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value BitOrEq(sym *left, sym *right){
+value BitOrEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival = lval.ival | rval.ival;
+    if (lval.flag && rval.flag) {
+        lval.ival = lval.ival | rval.ival;
+    } else {
+        fprintf(sym_file, "Error operator |= requires an int lvalue and int rvalue\n");
+        stop(tab, sym_file);
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else{
-    fprintf(sym_file, "Error operator |= requires an int lvalue and int rvalue\n");
-    stop(tab, sym_file);
-  }
 }
 
-value Pwr(sym *left, sym *right){
+value Pwr(sym *left, sym *right) {
 
-  value val;
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value val;
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(val.flag = lval.flag && rval.flag){
-    val.ival = pow(lval.ival, rval.ival);
+    if ((val.flag = lval.flag && rval.flag)) {
+        val.ival = (long long int) pow((double)lval.ival, (double)rval.ival);
+    } else if (lval.flag && !rval.flag) {
+        val.dval = pow((double)lval.ival, rval.dval);
+    } else if (!lval.flag && rval.flag) {
+        val.dval = pow(lval.dval, (double)rval.ival);
+    } else {
+        val.dval = pow(lval.dval, rval.dval);
+    }
+
     return val;
-  }
-  else if(lval.flag && !rval.flag){
-    val.dval = pow(lval.ival, rval.dval);
-    return val;
-  }
-  else if(!lval.flag && rval.flag){
-    val.dval = pow(lval.dval, rval.ival);
-    return val;
-  }
-  else{
-    val.dval = pow(lval.dval, rval.dval);
-    return val;
-  }
 }
 
-value PwrEq(sym *left, sym *right){
+value PwrEq(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  if(lval.flag && rval.flag){
-    lval.ival = pow(lval.ival, rval.ival);
+    if (lval.flag && rval.flag) {
+        lval.ival = (long long int) pow((double)lval.ival, (double)rval.ival);
+    } else if (lval.flag && !rval.flag) {
+        lval.dval = pow((double)lval.ival, rval.dval);
+    } else if (!lval.flag && rval.flag) {
+        lval.dval = pow(lval.dval, (double)rval.ival);
+    } else {
+        lval.dval = pow(lval.dval, rval.dval);
+    }
+
     insert_sym(tab, get_id(left), lval);
     return lval;
-  }
-  else if(lval.flag && !rval.flag){
-    lval.dval = pow(lval.ival, rval.dval);
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else if(!lval.flag && rval.flag){
-    lval.dval = pow(lval.dval, rval.ival);
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
-  else{
-    lval.dval = pow(lval.dval, rval.dval);
-    insert_sym(tab, get_id(left), lval);
-    return lval;
-  }
 }
 
-//The code below is borrowed from http://www.strchr.com/expression_evaluator
-//I am using it to get the flow of how the evaluator should work.
-
-/*
-double ParseAtom(char*& expr) {
-  // Read the number from string
-  char* end_ptr;
-  double res = strtod(expr, &end_ptr);
-  // Advance the pointer and return the result
-  expr = end_ptr;
-  return res;
-}
-
-// Parse multiplication and division
-double ParseFactors(char*& expr) {
-  double num1 = ParseAtom(expr);
-  for(;;) {
-    // Save the operation
-    char op = *expr;
-    if(op != '/' && op != '*')
-      return num1;
-    expr++;
-    double num2 = ParseAtom(expr);
-    // Perform the saved operation
-    if(op == '/')
-      num1 /= num2;
-    else
-      num1 *= num2;
-  }
-}
-
-// Parse addition and subtraction
-double ParseSummands(char*& expr) {
-  double num1 = ParseFactors(expr);
-  for(;;) {
-    char op = *expr;
-    if(op != '-' && op != '+')
-      return num1;
-    expr++;
-    double num2 = ParseFactors(expr);
-    if(op == '-')
-      num1 -= num2;
-    else
-      num1 += num2;
-  }
-}
-
-double EvaluateTheExpression(char* expr) {
-  return ParseSummands(expr);
-};
-*/
