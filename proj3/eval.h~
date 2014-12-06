@@ -27,7 +27,7 @@ typedef enum {
     BITXOREQUAL, BITOREQUAL, SCOPESTART, SCOPEEND, POWER, POWEREQUAL, TERNQUESTION, TERNCOLON
 } OpCode_type;
 
-static int operatorPrecidence[] = {    
+int *operatorPrecidence = {    
 
   2, // POSTPP, 
   2, // POSTMM, 
@@ -71,7 +71,6 @@ static int operatorPrecidence[] = {
   15,// POWEREQUAL, 
   15, // TERNQUESTION, 
   15 // TERNCOLON
-
 }
 
 

@@ -1,6 +1,5 @@
 #include "eval.h"
 #include "syn.h"
-#include <cmath>
 
 extern FILE *sym_file;
 extern FILE *dbg_file;
@@ -65,7 +64,9 @@ void OperatorFound(OpCode_type op){
 
   if(sizeof(operators) == 0)
     arr_push(operators, (void*)op);
+
 }
+
 
 void InitSymantic(void) {
     optional opt = init_sym();
@@ -119,6 +120,7 @@ value PPPost(sym *left, sym *right){
     fprintf(sym_file, "Error operator ++ must have int lvalue\n");
     stop(tab, sym_file);
   }
+
 }
 
 value MMPre(sym *left, sym *right){
@@ -133,6 +135,8 @@ value MMPre(sym *left, sym *right){
     fprintf(sym_file, "Error operator -- must have int lvalue\n");
     stop(tab, sym_file);
   }
+
+
 }
 
 value MMPost(sym *left, sym *right){
@@ -272,6 +276,7 @@ value BPlus(sym *left, sym *right){
     val.dval = lval.dval + rval.dval;
     return val;
   }
+
 }
 
 value BMinus(sym *left, sym *right){
@@ -296,6 +301,7 @@ value BMinus(sym *left, sym *right){
     val.dval = lval.dval - rval.dval;
     return val;
   }
+
 }
 
 value LShift(sym *left, sym *right){
@@ -402,6 +408,7 @@ value GT(sym *left, sym *right){
     val.ival = lval.dval > rval.dval;
     return val;
   }
+
 }
 
 value GTE(sym *left, sym *right){
@@ -536,6 +543,7 @@ value LogAnd(sym *left, sym *right){
   val.flag = true;
   val.ival = lval.ival && rval.ival;
   return val;
+
 }
 
 value LogOr(sym *left, sym *right){
@@ -547,6 +555,7 @@ value LogOr(sym *left, sym *right){
   val.flag = true;
   val.ival = lval.ival || rval.ival;
   return val;
+
 }
 
 value Assign(sym *left, sym *right){
@@ -601,6 +610,7 @@ value PlusEq(sym *left, sym *right){
     insert_sym(tab, get_id(left), lval);
     return lval;
   }
+
 }
 
 value MinEq(sym *left, sym *right){
@@ -628,6 +638,7 @@ value MinEq(sym *left, sym *right){
     insert_sym(tab, get_id(left), lval);
     return lval;
   }
+
 }
 
 value DivEq(sym *left, sym *right){
@@ -660,6 +671,7 @@ value DivEq(sym *left, sym *right){
     insert_sym(tab, get_id(left), lval);
     return lval;
   }
+
 }
 
 value RemEq(sym *left, sym *right){
@@ -806,6 +818,10 @@ value PwrEq(sym *left, sym *right){
     return lval;
   }
 }
+
+
+
+
 
 //The code below is borrowed from http://www.strchr.com/expression_evaluator
 //I am using it to get the flow of how the evaluator should work.
