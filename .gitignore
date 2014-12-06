@@ -11,6 +11,7 @@ output
 *.txt
 *.callgrind
 *.debug
+*~
 build/
 gill*/
 pickup/

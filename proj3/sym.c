@@ -82,7 +82,7 @@ inline bool insert_sym(table *t, char *id, value val) {
     memset(s,0,sizeof(sym));
     strcpy(s->id, id);
     s->val = val;
-    return hashmap_insert(t, s, id);
+    return hashmap_insert(t->syms, s, id);
 }
 
 inline value get_value(sym *s) {
