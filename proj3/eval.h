@@ -27,6 +27,8 @@ typedef enum {
     BITXOREQUAL, BITOREQUAL, SCOPESTART, SCOPEEND, POWER, POWEREQUAL, TERNQUESTION, TERNCOLON
 } OpCode_type;
 
+typedef value (*eval_func)(sym *l, sym *r);
+
 static int operatorPrecidence[] = {    
 
   2, // POSTPP, 

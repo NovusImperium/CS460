@@ -92,10 +92,76 @@ void InitSemantic(void) {
     }
 }
 
+static const eval_func eval_funcs[] = {
+
+  PPPre, // POSTPP,
+  MMPost, // POSTMM,
+  PPPre, // PREPP,
+  MMPre, // PREMM,
+  UPlus, // UPLUS,
+  UMinus, // UMINUS,
+  Negate, // NEGATION,
+  Mult, // MULTIPLY,
+  Div, // DIVIDE,
+  Rem, // REMAINDER,
+  BPlus, // BPLUS,
+  BMinus, // BMINUS,
+  LShift, // SHIFTLEFT,
+  RShift, // SHIFTRIGHT,
+  LessThan, // LESSTHAN,
+  LessThanEq, // LESSTHANEQ,
+  GreaterThan, // GREATERTHAN,
+  GreaterThanEq, // GREATERTHANEQ,
+  EqualTo, // EQUAL,
+  NotEQ, // NOTEQUAL,
+  BitAnd, // BITAND,
+  BitXor, // BITXOR,
+  BitOr, // BITOR,
+  LogAnd, // LOGICALAND
+  LogOr, // LOGICALOR,
+  Assign, // ASSIGNMENT
+  PlusEq, // PLUSEQUAL,
+  MinEq, // MINUSEQUAL,
+  MulEq, // MULTEQUAL,
+  DivEq, // DIVEQUAL,
+  RemEq, // REMEQUAL,
+  LShiftEq, // SHIFTLEFTEQUAL,
+  RShiftEq, // SHIFTRIGHTEQUAL,
+  BitAndEq, // BITANDEQUAL,
+  BitXorEq, // BITXOREQUAL,
+  BitOrEq, // BITOREQUAL,
+  ScpStart,  // SCOPESTART,
+  ScpEnd, // SCOPEEND,
+  Pwr, // POWER,
+  PwrEq,// POWEREQUAL,
+  TernQuest, // TERNQUESTION,
+  NULL // TERNCOLON
+
+};
+//TBD the following 3 functions are just useless stubs at the moment
+value ScpStart(sym *left, sym *right){
+
+  value lval = get_value(left);
+  return lval;
+}
+
+value ScpEnd(sym *left, sym *right){
+
+  value lval = get_value(left);
+  return lval;
+}
+
+value TernQuest(sym *left, sym *right){
+  
+  value lval = get_value(left);
+  return lval;
+
+}
+
 value PPPre(sym *left, sym *right) {
 
     value val;
-    value lval = get_value(left);;
+    value lval = get_value(left);
     if ((val.flag = lval.flag)) {
         val.ival = lval.ival + 1;
     } else {
@@ -552,6 +618,26 @@ value MinEq(sym *left, sym *right) {
     insert_sym(tab, get_id(left), lval);
     return lval;
 }
+
+value MulEq(sym *left, sym *right) {
+
+  value lval = get_value(left);
+  value rval = get_value(right);
+
+  if (lval.flag && rval.flag) {
+    lval.ival *= rval.ival;
+  } else if (!lval.flag && rval.flag) {
+    lval.dval *= rval.ival;
+  } else if (lval.flag && !rval.flag) {
+    lval.ival *= rval.dval;
+  } else {
+    lval.dval *= rval.dval;
+  }
+
+  insert_sym(tab, get_id(left), lval);
+  return lval;
+}
+
 
 value DivEq(sym *left, sym *right) {
 
