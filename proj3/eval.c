@@ -61,8 +61,54 @@ void VariableFound(char *var) {
 }
 
 void OperatorFound(OpCode_type op) {
-    if (arr_size(operators) == 0)
+  if (arr_size(operators) == 0){
         arr_push(operators, (void *) op);
+  }
+  while(arr_size(operators) > 0 && operatorPrecidence[arr_peek(operators)] < operatorPrecidence[op])
+    eval_current();
+}
+
+void NewScopeFound(void){
+
+  arr_push(operators, (void *) SCOPESTART);
+
+}
+
+void EndScopeFound(void){
+
+  while(arr_peek(operators) != SCOPESTART){
+    eval_current();
+  }
+  arr_pop(operators);
+}
+
+void eval_current(void){
+  
+  OpCodetype operator = arr_pop(operators);
+  
+  if(op_func_is_LtoR[op]){
+    if(op_func_is_binary[op]){
+      sym *l = arr_pop(operands);
+      sym *r = arr_pop(operands);
+    }
+    else{
+      sym *l = arr_pop(operands);
+      sym *r = null;
+    }
+  }
+  else{
+    if(op_func_is_binary[op]){
+      sym *r = arr_pop(operands);
+      sym *l = arr_pop(operands);
+    }
+    else{
+      sym *l = arr_pop(operands);
+      sym *r = null;
+    }
+  }
+
+  arr_push(operands, op_funcs[operator](l, r));
+
 }
 
 void InitSemantic(void) {

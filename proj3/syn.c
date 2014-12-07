@@ -368,13 +368,13 @@ void decl_tail(void) {
 void term(void) {
     //Check for LPAREN before stmt in term
     if (tok == LPAREN) {
-        OperatorFound(SCOPESTART);
-        accept(tok);
-        fprintf(dbg_file, "In term entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        stmt();
-        //Check for RPAREN terminal symbol after return from stmt in term
+      NewScopeFound();
+      accept(tok);
+      fprintf(dbg_file, "In term entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
+      stmt();
+      //Check for RPAREN terminal symbol after return from stmt in term
         if (tok == RPAREN) {
-            OperatorFound(SCOPEEND);
+	  EndScopeFound();;
             accept(tok);
         }
         else {

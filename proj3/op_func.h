@@ -9,6 +9,8 @@ extern op_func op_funcs[];
 
 extern int operatorPrecedence[];
 
+extern bool op_func_is_binary[];
+
 value PPPre(sym *left, sym *right);
 
 value PPPost(sym *left, sym *right);
