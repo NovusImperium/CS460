@@ -93,73 +93,116 @@ void InitSemantic(void) {
 }
 
 static const eval_func eval_funcs[] = {
-
-  PPPre, // POSTPP,
-  MMPost, // POSTMM,
-  PPPre, // PREPP,
-  MMPre, // PREMM,
-  UPlus, // UPLUS,
-  UMinus, // UMINUS,
-  Negate, // NEGATION,
-  Mult, // MULTIPLY,
-  Div, // DIVIDE,
-  Rem, // REMAINDER,
-  BPlus, // BPLUS,
-  BMinus, // BMINUS,
-  LShift, // SHIFTLEFT,
-  RShift, // SHIFTRIGHT,
-  LessThan, // LESSTHAN,
-  LessThanEq, // LESSTHANEQ,
-  GreaterThan, // GREATERTHAN,
-  GreaterThanEq, // GREATERTHANEQ,
-  EqualTo, // EQUAL,
-  NotEQ, // NOTEQUAL,
-  BitAnd, // BITAND,
-  BitXor, // BITXOR,
-  BitOr, // BITOR,
-  LogAnd, // LOGICALAND
-  LogOr, // LOGICALOR,
-  Assign, // ASSIGNMENT
-  PlusEq, // PLUSEQUAL,
-  MinEq, // MINUSEQUAL,
-  MulEq, // MULTEQUAL,
-  DivEq, // DIVEQUAL,
-  RemEq, // REMEQUAL,
-  LShiftEq, // SHIFTLEFTEQUAL,
-  RShiftEq, // SHIFTRIGHTEQUAL,
-  BitAndEq, // BITANDEQUAL,
-  BitXorEq, // BITXOREQUAL,
-  BitOrEq, // BITOREQUAL,
-  ScpStart,  // SCOPESTART,
-  ScpEnd, // SCOPEEND,
-  Pwr, // POWER,
-  PwrEq,// POWEREQUAL,
-  TernQuest, // TERNQUESTION,
-  NULL // TERNCOLON
-
+        PPPre, // POSTPP,
+        MMPost, // POSTMM,
+        PPPre, // PREPP,
+        MMPre, // PREMM,
+        UPlus, // UPLUS,
+        UMinus, // UMINUS,
+        Negate, // NEGATION,
+        Mult, // MULTIPLY,
+        Div, // DIVIDE,
+        Rem, // REMAINDER,
+        BPlus, // BPLUS,
+        BMinus, // BMINUS,
+        LShift, // SHIFTLEFT,
+        RShift, // SHIFTRIGHT,
+        LessThan, // LESSTHAN,
+        LessThanEq, // LESSTHANEQ,
+        GreaterThan, // GREATERTHAN,
+        GreaterThanEq, // GREATERTHANEQ,
+        EqualTo, // EQUAL,
+        NotEQ, // NOTEQUAL,
+        BitAnd, // BITAND,
+        BitXor, // BITXOR,
+        BitOr, // BITOR,
+        LogAnd, // LOGICALAND
+        LogOr, // LOGICALOR,
+        Assign, // ASSIGNMENT
+        PlusEq, // PLUSEQUAL,
+        MinEq, // MINUSEQUAL,
+        MulEq, // MULTEQUAL,
+        DivEq, // DIVEQUAL,
+        RemEq, // REMEQUAL,
+        LShiftEq, // SHIFTLEFTEQUAL,
+        RShiftEq, // SHIFTRIGHTEQUAL,
+        BitAndEq, // BITANDEQUAL,
+        BitXorEq, // BITXOREQUAL,
+        BitOrEq, // BITOREQUAL,
+        ScpStart,  // SCOPESTART,
+        ScpEnd, // SCOPEEND,
+        Pwr, // POWER,
+        PwrEq,// POWEREQUAL,
+        TernQuest, // TERNQUESTION,
+        null // TERNCOLON
 };
+
+static int operatorPrecedence[] = {
+        2, // POSTPP,
+        2, // POSTMM,
+        3, // PREPP,
+        3, // PREMM,
+        3, // UPLUS,
+        3, // UMINUS,
+        3, // NEGATION,
+        5, // MULTIPLY,
+        5, // DIVIDE,
+        5, // REMAINDER,
+        6, // BPLUS,
+        6, // BMINUS,
+        7, // SHIFTLEFT,
+        7, // SHIFTRIGHT,
+        8, // LESSTHAN,
+        8, // LESSTHANEQ,
+        8, // GREATERTHAN,
+        8, // GREATERTHANEQ,
+        9, // EQUAL,
+        9, // NOTEQUAL,
+        10, // BITAND,
+        11, // BITXOR,
+        12, // BITOR,
+        13, // LOGICALAND,
+        14, // LOGICALOR,
+        15, // ASSIGNMENT,
+        15, // PLUSEQUAL,
+        15, // MINUSEQUAL,
+        15, // MULTEQUAL,
+        15, // DIVEQUAL,
+        15, // REMEQUAL,
+        15, // SHIFTLEFTEQUAL,
+        15, // SHIFTRIGHTEQUAL,
+        15, // BITANDEQUAL,
+        15, // BITXOREQUAL,
+        15, // BITOREQUAL,
+        30,  // SCOPESTART,
+        1, // SCOPEEND,
+        4, // POWER,
+        15,// POWEREQUAL,
+        15, // TERNQUESTION,
+        15 // TERNCOLON
+};
+
 //TBD the following 3 functions are just useless stubs at the moment
-value ScpStart(sym *left, sym *right){
+value ScpStart(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  return lval;
+    value lval = get_value(left);
+    return lval;
 }
 
-value ScpEnd(sym *left, sym *right){
+value ScpEnd(sym *left, sym *right) {
 
-  value lval = get_value(left);
-  return lval;
+    value lval = get_value(left);
+    return lval;
 }
 
-value TernQuest(sym *left, sym *right){
-  
-  value lval = get_value(left);
-  return lval;
+value TernQuest(sym *left, sym *right) {
+
+    value lval = get_value(left);
+    return lval;
 
 }
 
 value PPPre(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     if ((val.flag = lval.flag)) {
@@ -173,7 +216,6 @@ value PPPre(sym *left, sym *right) {
 }
 
 value PPPost(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     if ((val.flag = lval.flag)) {
@@ -187,7 +229,6 @@ value PPPost(sym *left, sym *right) {
 }
 
 value MMPre(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     if ((val.flag = lval.flag)) {
@@ -201,7 +242,6 @@ value MMPre(sym *left, sym *right) {
 }
 
 value MMPost(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     if ((val.flag = lval.flag)) {
@@ -214,16 +254,12 @@ value MMPost(sym *left, sym *right) {
     return val;
 }
 
-
 value UPlus(sym *left, sym *right) {
-
     value val = get_value(left);
     return val;
-
 }
 
 value UMinus(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     if ((val.flag = lval.flag)) {
@@ -236,16 +272,15 @@ value UMinus(sym *left, sym *right) {
 }
 
 value Negate(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     val.flag = true;
     val.ival = lval.ival == 0 ? 1 : 0;
+
     return val;
 }
 
 value Mult(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -264,7 +299,6 @@ value Mult(sym *left, sym *right) {
 }
 
 value Div(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -288,7 +322,6 @@ value Div(sym *left, sym *right) {
 }
 
 value Rem(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -304,7 +337,6 @@ value Rem(sym *left, sym *right) {
 }
 
 value BPlus(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -323,7 +355,6 @@ value BPlus(sym *left, sym *right) {
 }
 
 value BMinus(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -342,7 +373,6 @@ value BMinus(sym *left, sym *right) {
 }
 
 value LShift(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -357,7 +387,6 @@ value LShift(sym *left, sym *right) {
 }
 
 value RShift(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -373,7 +402,6 @@ value RShift(sym *left, sym *right) {
 }
 
 value LessThan(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -393,7 +421,6 @@ value LessThan(sym *left, sym *right) {
 }
 
 value LessThanEq(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -413,7 +440,6 @@ value LessThanEq(sym *left, sym *right) {
 }
 
 value GreaterThan(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -433,7 +459,6 @@ value GreaterThan(sym *left, sym *right) {
 }
 
 value GreaterThanEq(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -453,7 +478,6 @@ value GreaterThanEq(sym *left, sym *right) {
 }
 
 value EqualTo(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -473,7 +497,6 @@ value EqualTo(sym *left, sym *right) {
 }
 
 value NotEQ(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -493,7 +516,6 @@ value NotEQ(sym *left, sym *right) {
 }
 
 value BitAnd(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -509,7 +531,6 @@ value BitAnd(sym *left, sym *right) {
 }
 
 value BitXor(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -525,7 +546,6 @@ value BitXor(sym *left, sym *right) {
 }
 
 value BitOr(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -541,7 +561,6 @@ value BitOr(sym *left, sym *right) {
 }
 
 value LogAnd(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -552,7 +571,6 @@ value LogAnd(sym *left, sym *right) {
 }
 
 value LogOr(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
@@ -563,7 +581,6 @@ value LogOr(sym *left, sym *right) {
 }
 
 value Assign(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -582,7 +599,6 @@ value Assign(sym *left, sym *right) {
 }
 
 value PlusEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -601,7 +617,6 @@ value PlusEq(sym *left, sym *right) {
 }
 
 value MinEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -614,33 +629,31 @@ value MinEq(sym *left, sym *right) {
     } else {
         lval.dval -= rval.dval;
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value MulEq(sym *left, sym *right) {
+    value lval = get_value(left);
+    value rval = get_value(right);
 
-  value lval = get_value(left);
-  value rval = get_value(right);
+    if (lval.flag && rval.flag) {
+        lval.ival *= rval.ival;
+    } else if (!lval.flag && rval.flag) {
+        lval.dval *= rval.ival;
+    } else if (lval.flag && !rval.flag) {
+        lval.ival *= rval.dval;
+    } else {
+        lval.dval *= rval.dval;
+    }
+    insert_sym(tab, get_id(left), lval);
 
-  if (lval.flag && rval.flag) {
-    lval.ival *= rval.ival;
-  } else if (!lval.flag && rval.flag) {
-    lval.dval *= rval.ival;
-  } else if (lval.flag && !rval.flag) {
-    lval.ival *= rval.dval;
-  } else {
-    lval.dval *= rval.dval;
-  }
-
-  insert_sym(tab, get_id(left), lval);
-  return lval;
+    return lval;
 }
 
 
 value DivEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -658,13 +671,12 @@ value DivEq(sym *left, sym *right) {
     } else {
         lval.dval /= rval.dval;
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value RemEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -674,13 +686,12 @@ value RemEq(sym *left, sym *right) {
         fprintf(sym_file, "Error operator % requires int lvalue and int rvalue\n");
         stop(tab, sym_file);
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value LShiftEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
     if (lval.flag && rval.flag) {
@@ -689,13 +700,12 @@ value LShiftEq(sym *left, sym *right) {
         fprintf(sym_file, "Error operator <<= requires int lvalue and int rvalue\n");
         stop(tab, sym_file);
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value RShiftEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
     if (lval.flag && rval.flag) {
@@ -704,13 +714,12 @@ value RShiftEq(sym *left, sym *right) {
         fprintf(sym_file, "Error operator >>= requires int lvalue and int rvalue\n");
         stop(tab, sym_file);
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value BitAndEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -720,13 +729,12 @@ value BitAndEq(sym *left, sym *right) {
         fprintf(sym_file, "Error operator &= requires an int lvalue and int rvalue\n");
         stop(tab, sym_file);
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value BitXorEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -736,13 +744,12 @@ value BitXorEq(sym *left, sym *right) {
         fprintf(sym_file, "Error operator ^= requires an int lvalue and int rvalue\n");
         stop(tab, sym_file);
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value BitOrEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
@@ -752,23 +759,22 @@ value BitOrEq(sym *left, sym *right) {
         fprintf(sym_file, "Error operator |= requires an int lvalue and int rvalue\n");
         stop(tab, sym_file);
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
 
 value Pwr(sym *left, sym *right) {
-
     value val;
     value lval = get_value(left);
     value rval = get_value(right);
 
     if ((val.flag = lval.flag && rval.flag)) {
-        val.ival = (long long int) pow((double)lval.ival, (double)rval.ival);
+        val.ival = (long long int) pow((double) lval.ival, (double) rval.ival);
     } else if (lval.flag && !rval.flag) {
-        val.dval = pow((double)lval.ival, rval.dval);
+        val.dval = pow((double) lval.ival, rval.dval);
     } else if (!lval.flag && rval.flag) {
-        val.dval = pow(lval.dval, (double)rval.ival);
+        val.dval = pow(lval.dval, (double) rval.ival);
     } else {
         val.dval = pow(lval.dval, rval.dval);
     }
@@ -777,21 +783,19 @@ value Pwr(sym *left, sym *right) {
 }
 
 value PwrEq(sym *left, sym *right) {
-
     value lval = get_value(left);
     value rval = get_value(right);
 
     if (lval.flag && rval.flag) {
-        lval.ival = (long long int) pow((double)lval.ival, (double)rval.ival);
+        lval.ival = (long long int) pow((double) lval.ival, (double) rval.ival);
     } else if (lval.flag && !rval.flag) {
-        lval.dval = pow((double)lval.ival, rval.dval);
+        lval.dval = pow((double) lval.ival, rval.dval);
     } else if (!lval.flag && rval.flag) {
-        lval.dval = pow(lval.dval, (double)rval.ival);
+        lval.dval = pow(lval.dval, (double) rval.ival);
     } else {
         lval.dval = pow(lval.dval, rval.dval);
     }
-
     insert_sym(tab, get_id(left), lval);
+
     return lval;
 }
-

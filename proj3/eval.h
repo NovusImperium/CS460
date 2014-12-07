@@ -29,53 +29,7 @@ typedef enum {
 
 typedef value (*eval_func)(sym *l, sym *r);
 
-static int operatorPrecidence[] = {    
-
-  2, // POSTPP, 
-  2, // POSTMM, 
-  3, // PREPP, 
-  3, // PREMM, 
-  3, // UPLUS, 
-  3, // UMINUS, 
-  3, // NEGATION, 
-  5, // MULTIPLY, 
-  5, // DIVIDE,
-  5, // REMAINDER, 
-  6, // BPLUS, 
-  6, // BMINUS, 
-  7, // SHIFTLEFT, 
-  7, // SHIFTRIGHT, 
-  8, // LESSTHAN, 
-  8, // LESSTHANEQ,
-  8, // GREATERTHAN, 
-  8, // GREATERTHANEQ, 
-  9, // EQUAL, 
-  9, // NOTEQUAL, 
-  10, // BITAND, 
-  11, // BITXOR, 
-  12, // BITOR,
-  13, // LOGICALAND, 
-  14, // LOGICALOR, 
-  15, // ASSIGNMENT, 
-  15, // PLUSEQUAL, 
-  15, // MINUSEQUAL, 
-  15, // MULTEQUAL,		       
-  15, // DIVEQUAL, 
-  15, // REMEQUAL, 
-  15, // SHIFTLEFTEQUAL, 
-  15, // SHIFTRIGHTEQUAL, 
-  15, // BITANDEQUAL,
-  15, // BITXOREQUAL, 
-  15, // BITOREQUAL, 
-  30,  // SCOPESTART, 
-  1, // SCOPEEND,
-  4, // POWER, 
-  15,// POWEREQUAL, 
-  15, // TERNQUESTION, 
-  15 // TERNCOLON
-
-};
-
+extern int operatorPrecidence[];
 
 void SaveDeclType(token_t T);
 
@@ -88,5 +42,88 @@ void VariableFound(char *var);
 void OperatorFound(OpCode_type op);
 
 void InitSemantic(void);
+
+value MulEq(sym *left, sym *right);
+
+value BitXorEq(sym *left, sym *right);
+
+//TBD the following 3 functions are just useless stubs at the moment
+value ScpStart(sym *left, sym *right);
+
+value TernQuest(sym *left, sym *right);
+
+value ScpEnd(sym *left, sym *right);
+
+value PPPre(sym *left, sym *right);
+
+value PPPost(sym *left, sym *right);
+
+value MMPre(sym *left, sym *right);
+
+value MMPost(sym *left, sym *right);
+
+value UPlus(sym *left, sym *right);
+
+value UMinus(sym *left, sym *right);
+
+value Negate(sym *left, sym *right);
+
+value Mult(sym *left, sym *right);
+
+value Div(sym *left, sym *right);
+
+value Rem(sym *left, sym *right);
+
+value BPlus(sym *left, sym *right);
+
+value BMinus(sym *left, sym *right);
+
+value LShift(sym *left, sym *right);
+
+value RShift(sym *left, sym *right);
+
+value LessThan(sym *left, sym *right);
+
+value LessThanEq(sym *left, sym *right);
+
+value GreaterThan(sym *left, sym *right);
+
+value GreaterThanEq(sym *left, sym *right);
+
+value EqualTo(sym *left, sym *right);
+
+value NotEQ(sym *left, sym *right);
+
+value BitAnd(sym *left, sym *right);
+
+value BitXor(sym *left, sym *right);
+
+value BitOr(sym *left, sym *right);
+
+value LogAnd(sym *left, sym *right);
+
+value LogOr(sym *left, sym *right);
+
+value Assign(sym *left, sym *right);
+
+value PlusEq(sym *left, sym *right);
+
+value MinEq(sym *left, sym *right);
+
+value DivEq(sym *left, sym *right);
+
+value RemEq(sym *left, sym *right);
+
+value LShiftEq(sym *left, sym *right);
+
+value RShiftEq(sym *left, sym *right);
+
+value BitAndEq(sym *left, sym *right);
+
+value PwrEq(sym *left, sym *right);
+
+value Pwr(sym *left, sym *right);
+
+value BitOrEq(sym *left, sym *right);
 
 #endif  // EVAL_H
