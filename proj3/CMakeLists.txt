@@ -9,6 +9,7 @@ set(SOURCE_FILES
     sym.c
     lex.c
     eval.c
+    op_func.c
     array.c
     hashmap.c
     set.c

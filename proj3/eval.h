@@ -27,56 +27,6 @@ typedef enum {
     BITXOREQUAL, BITOREQUAL, SCOPESTART, SCOPEEND, POWER, POWEREQUAL, TERNQUESTION, TERNCOLON
 } OpCode_type;
 
-typedef value (*eval_func)(sym *l, sym *r);
-
-static int operatorPrecidence[] = {    
-
-  2, // POSTPP, 
-  2, // POSTMM, 
-  3, // PREPP, 
-  3, // PREMM, 
-  3, // UPLUS, 
-  3, // UMINUS, 
-  3, // NEGATION, 
-  5, // MULTIPLY, 
-  5, // DIVIDE,
-  5, // REMAINDER, 
-  6, // BPLUS, 
-  6, // BMINUS, 
-  7, // SHIFTLEFT, 
-  7, // SHIFTRIGHT, 
-  8, // LESSTHAN, 
-  8, // LESSTHANEQ,
-  8, // GREATERTHAN, 
-  8, // GREATERTHANEQ, 
-  9, // EQUAL, 
-  9, // NOTEQUAL, 
-  10, // BITAND, 
-  11, // BITXOR, 
-  12, // BITOR,
-  13, // LOGICALAND, 
-  14, // LOGICALOR, 
-  15, // ASSIGNMENT, 
-  15, // PLUSEQUAL, 
-  15, // MINUSEQUAL, 
-  15, // MULTEQUAL,		       
-  15, // DIVEQUAL, 
-  15, // REMEQUAL, 
-  15, // SHIFTLEFTEQUAL, 
-  15, // SHIFTRIGHTEQUAL, 
-  15, // BITANDEQUAL,
-  15, // BITXOREQUAL, 
-  15, // BITOREQUAL, 
-  30,  // SCOPESTART, 
-  1, // SCOPEEND,
-  4, // POWER, 
-  15,// POWEREQUAL, 
-  15, // TERNQUESTION, 
-  15 // TERNCOLON
-
-};
-
-
 void SaveDeclType(token_t T);
 
 bool NewDeclaration(table *t, char *L);
