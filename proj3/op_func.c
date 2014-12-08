@@ -1,6 +1,5 @@
 #include "op_func.h"
 #include "syn.h"
-#include "defs.h"
 #include <math.h>
 
 extern FILE *sym_file;
@@ -211,7 +210,7 @@ sym *PPPre(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, val)) {
+    if (!update_sym(left, val)) {
         stop(tab, sym_file);
     }
     return left;
@@ -244,7 +243,7 @@ sym *MMPre(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, val)) {
+    if (!update_sym(left, val)) {
         stop(tab, sym_file);
     }
 
@@ -686,7 +685,7 @@ sym *Assign(sym *left, sym *right) {
         lval.dval = rval.flag ? (double) rval.ival : rval.dval;
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -707,7 +706,7 @@ sym *PlusEq(sym *left, sym *right) {
         lval.dval += rval.dval;
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -728,7 +727,7 @@ sym *MinEq(sym *left, sym *right) {
         lval.dval -= rval.dval;
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -749,7 +748,7 @@ sym *MulEq(sym *left, sym *right) {
         lval.dval *= rval.dval;
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -776,7 +775,7 @@ sym *DivEq(sym *left, sym *right) {
         lval.dval /= rval.dval;
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -794,7 +793,7 @@ sym *RemEq(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -811,7 +810,7 @@ sym *LShiftEq(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -828,7 +827,7 @@ sym *RShiftEq(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -846,7 +845,7 @@ sym *BitAndEq(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -864,7 +863,7 @@ sym *BitXorEq(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -882,7 +881,7 @@ sym *BitOrEq(sym *left, sym *right) {
         stop(tab, sym_file);
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 
@@ -925,7 +924,7 @@ sym *PwrEq(sym *left, sym *right) {
         lval.dval = pow(lval.dval, rval.dval);
     }
 
-    if (!update_sym(tab, left, lval)) {
+    if (!update_sym(left, lval)) {
         stop(tab, sym_file);
     }
 

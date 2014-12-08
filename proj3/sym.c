@@ -1,13 +1,10 @@
 #include "sym.h"
-#include "hashmap.h"
 #include "set.h"
-#include "defs.h"
 
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <zlib.h>
 
 struct sym {
     char id[32];
@@ -15,8 +12,8 @@ struct sym {
 };
 
 struct table {
-    hashmap *syms;
-    hashmap *lits;
+    array *syms;
+    array *lits;
     array *tmps;
 };
 
@@ -39,27 +36,28 @@ inline optional init_sym() {
     if ((t = malloc(sizeof(table))) == null) {
         opt.e = false;
         opt.err = malloc_fail;
+        return opt;
     }
 
-    opt = hashmap_init(1024, hash, cmp);
+    opt = arr_init(32);
     if (!opt.e) {
         free(t);
         return opt;
     }
     t->syms = opt.val;
 
-    opt = hashmap_init(1024, hash, cmp);
+    opt = arr_init(32);
     if (!opt.e) {
-        hashmap_free(t->syms);
+        arr_free(t->syms);
         free(t);
         return opt;
     }
     t->lits = opt.val;
 
-    opt = arr_init(1024);
+    opt = arr_init(32);
     if (!opt.e) {
-        hashmap_free(t->syms);
-        hashmap_free(t->lits);
+        arr_free(t->syms);
+        arr_free(t->lits);
         free(t);
         return opt;
     }
@@ -73,44 +71,70 @@ inline optional get_sym(table *t, char *id) {
     if (*id == '$') {
         return arr_get(t->tmps, (unsigned) atoi(&id[1]));
     } else if (isdigit(*id) || *id == '.') {
-        return hashmap_get(t->lits, id);
+        unsigned idx;
+        optional opt;
+        for (idx = 0; idx < arr_size(t->lits); idx++) {
+            if (strcmp(((sym *)(opt = arr_get(t->lits, idx)).val)->id, id) == 0) {
+                return opt;
+            }
+        }
+
+        opt.e = false;
+        opt.err = element_not_found;
+        return opt;
     } else {
-        return hashmap_get(t->syms, id);
+        unsigned idx;
+        optional opt;
+        for (idx = 0; idx < arr_size(t->syms); idx++) {
+            if (cmp((opt = arr_get(t->syms, idx)).val, id)) {
+                return opt;
+            }
+        }
+
+        opt.e = false;
+        opt.err = element_not_found;
+        return opt;
     }
 }
 
 inline optional create_sym(table *t, char *id, value val) {
     optional opt;
     if (isdigit(*id) || *id == '.') {
-        if (!(opt = hashmap_get(t->lits, id)).e) {
-            sym *s = malloc(sizeof(sym));
-            memset(s, 0, sizeof(sym));
-            strcpy(s->id, id);
-            s->val = val;
-            if (!hashmap_insert(t->lits, s, id)) {
-                opt.e = true;
-                opt.val = s;
-            } else {
-                opt.e = false;
-                opt.err = malloc_fail;
+        sym *s = malloc(sizeof(sym));
+        memset(s, 0, sizeof(sym));
+        strcpy(s->id, id);
+        s->val = val;
+        opt.e = true;
+        opt.val = s;
+
+        unsigned idx;
+        unsigned n = arr_size(t->lits);
+        for (idx = 0; idx < n; idx++) {
+            if (strcmp(((sym *)arr_get(t->lits, idx).val)->id, id) == 0) {
+                break;
             }
         }
+        if (idx < n || n == 0) {
+            arr_push(t->lits, s);
+        }
     } else {
-        if (hashmap_get(t->syms, id).e) {
-            opt.e = false;
-            opt.err = malloc_fail;
-        } else {
+        unsigned idx;
+        opt.e = true;
+        for (idx = 0; idx < arr_size(t->syms); idx++) {
+            if (strcmp(((sym *) (opt = arr_get(t->syms, idx)).val)->id, id) == 0) {
+                opt.e = false;
+                opt.err = element_not_found;
+            }
+        }
+
+        if (opt.e) {
             sym *s = malloc(sizeof(sym));
             memset(s, 0, sizeof(sym));
             strcpy(s->id, id);
+
             s->val = val;
-            if (!hashmap_insert(t->syms, s, id)) {
-                opt.e = true;
-                opt.val = s;
-            } else {
-                opt.e = false;
-                opt.err = malloc_fail;
-            }
+            opt.val = s;
+            arr_push(t->syms, s);
         }
     }
 
@@ -134,7 +158,7 @@ inline optional create_temp(table *t, value val) {
     return opt;
 }
 
-inline bool update_sym(table *t, sym *s, value val) {
+inline bool update_sym(sym *s, value val) {
     if (*s->id == '$') {
         s->val = val;
         return true;
@@ -162,12 +186,17 @@ inline void write_syms(table *t, FILE *o) {
     }
 
     out = o;
+    /*
+    hashmap_foreach(t->syms, print);
+    arr_foreach(t->tmps, print);
+    arr_foreach(t->lits, print);
+    */
     optional opt = set_init(cmp);
     if (opt.e) {
         s = opt.val;
 
         fputs("Symbols found: \n", out);
-        hashmap_foreach(t->syms, sort);
+        arr_foreach(t->syms, sort);
         set_foreach(s, print);
         set_free(s);
     }
@@ -187,7 +216,7 @@ inline void write_syms(table *t, FILE *o) {
         s = opt.val;
 
         fputs("Literals found: \n", out);
-        hashmap_foreach(t->lits, sort);
+        arr_foreach(t->lits, sort);
         set_foreach(s, print);
         set_free(s);
     }
@@ -216,11 +245,13 @@ static inline void *sort(void *a) {
 }
 
 static inline void *print(void *a) {
-    sym *sm = (sym *) a;
-    if (sm->val.flag) {
-        fprintf(out, "%s = %ll\n", sm->id, sm->val.ival);
-    } else {
-        fprintf(out, "%s = %f\n", sm->id, sm->val.dval);
+    if (a != null) {
+        sym *sm = (sym *) a;
+        if (sm->val.flag) {
+            fprintf(out, "%s = %ll\n", sm->id, sm->val.ival);
+        } else {
+            fprintf(out, "%s = %f\n", sm->id, sm->val.dval);
+        }
     }
 
     return a;

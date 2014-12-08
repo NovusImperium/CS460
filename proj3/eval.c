@@ -58,7 +58,7 @@ void NumLitFound(char *num) {
 void VariableFound(char *var) {
     optional opt = get_sym(tab, var);
     if (opt.e) {
-        arr_push(operands, var);
+        arr_push(operands, opt.val);
     } else {
         printf("Error at line %d position %d Use of undeclared variable %s\n", get_linenum(), get_position(), var);
         fprintf(sym_file, "Error at line %d position %d Use of undeclared variable %s\n", get_linenum(), get_position(), var);
@@ -67,10 +67,6 @@ void VariableFound(char *var) {
 }
 
 void OperatorFound(OpCode_type op) {
-    if (arr_size(operators) == 0) {
-        arr_push(operators, (void *) op);
-    }
-
     optional opt;
     while (arr_size(operators) > 0 && (opt = arr_peek(operators)).e &&
             operatorPrecedence[(OpCode_type) opt.val] < operatorPrecedence[op]) {
@@ -79,6 +75,8 @@ void OperatorFound(OpCode_type op) {
     if (!opt.e) {
         stop(tab, sym_file);
     }
+
+    arr_push(operators, (void *) op);
 }
 
 void NewScopeFound(void) {

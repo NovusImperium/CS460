@@ -56,6 +56,8 @@ inline optional arr_init(unsigned s) {
         return opt;
     }
 
+    memset(arr->as, 0, s * sizeof(void *));
+
     arr->s = s;
     arr->n = 0;
 
@@ -196,7 +198,7 @@ inline optional arr_get(array *arr, unsigned i) {
     optional opt;
     if (i < arr->n) {
         opt.e = true;
-        opt.val = &arr->as[i];
+        opt.val = arr->as[i];
     } else {
         opt.e = false;
         opt.err = out_of_bounds;

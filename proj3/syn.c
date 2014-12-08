@@ -12,7 +12,7 @@ FILE *sym_file; //symbols from symbol table
 char *errmsg;
 table *tab;
 
-static int preOpTable[47] = {
+static OpCode_type preOpTable[47] = {
         OPERR,  //ERROR,
         OPERR,  //IDENT,
         OPERR,  //INTTYPE,
@@ -62,7 +62,7 @@ static int preOpTable[47] = {
         OPERR,  //EOFT
 };
 
-static int postOpTable[] = {
+static OpCode_type postOpTable[] = {
         OPERR,  //ERROR,
         OPERR,  //IDENT,
         OPERR,  //INTTYPE,
@@ -112,7 +112,7 @@ static int postOpTable[] = {
         OPERR,  //EOFT
 };
 
-static int binOpTable[] = {
+static OpCode_type binOpTable[] = {
         OPERR,  //ERROR,
         OPERR,  //IDENT,
         OPERR,  //INTTYPE,
@@ -173,7 +173,7 @@ void start(char *filename) {
     char symfile[256];
 
     strcpy(in_file, filename);
-    strncpy(dbgfile, filename, posi);
+    strncpy(dbgfile, filename, (size_t) posi);
     strcpy(lstfile, dbgfile);
     strcpy(symfile, dbgfile);
 

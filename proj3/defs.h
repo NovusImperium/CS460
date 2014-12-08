@@ -37,6 +37,7 @@ typedef enum {
     malloc_fail = -10,
     container_empty,
     out_of_bounds,
+    element_not_found,
     invalid_container_type,
 } container_err_t;
 #endif  // CONTAINER_ERR_TYPES

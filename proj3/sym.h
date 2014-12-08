@@ -19,7 +19,7 @@ extern inline optional get_sym(table *t, char *id);
 //  val.flag == true => val.ival
 //  val.flag == false => val.dval
 // returns true iff the symbol already exists and the value types match
-extern inline bool update_sym(table *t, sym *s, value val);
+extern inline bool update_sym(sym *s, value val);
 
 // create and insert a new symbol into the symbol table
 // returns an optional value containing the created symbol if the operation was successful
