@@ -253,6 +253,7 @@ void program(void) {
     }
     //Check for semi following stmt or decl
     if (tok == SEMI) {
+        Evaluate();
         accept(tok);
     } else {
         error(currentlex);
@@ -341,6 +342,7 @@ void more_stmts(void) {
     }
     //Check for semi following stmt or decl
     if (tok == SEMI) {
+        Evaluate();
         accept(tok);
     }
     else {
@@ -368,13 +370,13 @@ void decl_tail(void) {
 void term(void) {
     //Check for LPAREN before stmt in term
     if (tok == LPAREN) {
-      NewScopeFound();
-      accept(tok);
-      fprintf(dbg_file, "In term entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
-      stmt();
-      //Check for RPAREN terminal symbol after return from stmt in term
+        NewScopeFound();
+        accept(tok);
+        fprintf(dbg_file, "In term entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        stmt();
+        //Check for RPAREN terminal symbol after return from stmt in term
         if (tok == RPAREN) {
-	  EndScopeFound();;
+            EndScopeFound();
             accept(tok);
         }
         else {
@@ -434,14 +436,14 @@ void var(void) {
     if (tok == IDENT || tok == NUMLIT) {
         //TEST TO SEE IF THE SYMBOL IS IN THE SYMBOL TABLE.  IF NOT ADD IT IN....
         //IF TOKEN IS NUMNUT IT IS A NUMLIT WITH A DECIMAL POINT IN IT
-        if (tok == IDENT)
+        if (tok == IDENT) {
             VariableFound(currentlex);
-        else
+        } else {
             NumLitFound(currentlex);
+        }
         fprintf(dbg_file, "In var accepting token tok = %s lex = %s\n", token_names[tok], currentlex);
         accept(tok);
-    }
-    else {
+    } else {
         fprintf(dbg_file, "In var sending error tok = %s lex = %s\n", token_names[tok], currentlex);
         error(currentlex);
     }

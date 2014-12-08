@@ -1,13 +1,13 @@
-#include <stdio.h>
 #include "defs.h"
 #include "array.h"
+#include <stdio.h>
 
 typedef struct table table;
 typedef struct sym sym;
 
 // creates and initializes the symbol table
 // returns an optional such that
-//  if opt.e == true => opt.val is valid
+//  if opt.e == true => opt.val is a valid symbol
 extern inline optional init_sym();
 
 // get a symbol entry from the symbol table
@@ -15,16 +15,23 @@ extern inline optional init_sym();
 //  opt.e == true iff the symbol has a valid entry in the table
 extern inline optional get_sym(table *t, char *id);
 
-// insert a symbol into the symbol table
-// val.e == true => *val.val == integer
-// val.e == false => *val.val == double
-// returns true iff the symbol already exists
-extern inline bool insert_sym(table *t, char *id, value val);
+// update a symbol that already exists in the symbol table
+//  val.flag == true => val.ival
+//  val.flag == false => val.dval
+// returns true iff the symbol already exists and the value types match
+extern inline bool update_sym(table *t, sym *s, value val);
+
+// create and insert a new symbol into the symbol table
+// returns an optional value containing the created symbol if the operation was successful
+extern inline optional create_sym(table *t, char *id, value val);
+
+// create and return the a symbol for the next temp symbol
+extern inline optional create_temp(table *t, value val);
 
 // get the value of the symbol entry
+//  val.flag == true => val.ival
+//  val.flag == false => val.dval
 // returns an optional such that:
-//  opt.e == true => *opt.val == integer
-//  opt.e == false => *opt.val == double
 extern inline value get_value(sym *s);
 
 // get the character string that represents the id of the symbol entry

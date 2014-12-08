@@ -1,5 +1,6 @@
 #include "eval.h"
 #include "syn.h"
+#include "op_func.h"
 
 extern FILE *sym_file;
 extern FILE *dbg_file;
@@ -8,45 +9,50 @@ extern token_t currentType;
 static array *operators;
 static array *operands;
 
+static void eval_current(void);
+
 bool NewDeclaration(table *t, char *L) {
-    optional opt = get_sym(t, L);
-    if (opt.e) {
+    value val;
+    if ((val.flag = currentType == INTTYPE)) {
+        val.ival = 0;
+    } else {
+        val.dval = 0.0;
+    }
+
+    optional opt;
+    if (!(opt = create_sym(t, L, val)).e) {
         printf("Error at line %d position %d Redeclaration of %s\n", get_linenum(), get_position(), L);
         fprintf(sym_file, "Error at line %d position %d Redeclaration of %s\n", get_linenum(), get_position(), L);
         stop(t, sym_file);
         return false;
     } else {
-        value val;
-        if ((val.flag = currentType == INTTYPE)) {
-            val.ival = 0;
-        } else {
-            val.dval = 0.0;
-        }
-        return insert_sym(t, L, val);
+        arr_push(operands, opt.val);
+        return true;
     }
 }
 
 void NumLitFound(char *num) {
-    optional opt = get_sym(tab, num);
-    if (opt.e) {
-        arr_push(operands, num);
-    } else {
-        value val;
-        val.flag = true;
-        char *str = num;
-        char c;
-        while ((c = *str++)) {
-            if (c == '.') {
-                val.flag = false;
-                val.dval = atof(num);
-                break;
-            }
+    value val;
+    val.flag = true;
+    char *str = num;
+    char c;
+    while ((c = *str++)) {
+        if (c == '.') {
+            val.flag = false;
+            val.dval = atof(num);
+            break;
         }
-        if (val.flag) {
-            val.ival = atoi(num);
-        }
-        insert_sym(tab, num, val);
     }
+    if (val.flag) {
+        val.ival = atoi(num);
+    }
+
+    optional opt;
+    if (!(opt = create_sym(tab, num, val)).e) {
+        stop(tab, sym_file);
+    }
+
+    arr_push(operands, opt.val);
 }
 
 void VariableFound(char *var) {
@@ -61,53 +67,59 @@ void VariableFound(char *var) {
 }
 
 void OperatorFound(OpCode_type op) {
-  if (arr_size(operators) == 0){
+    if (arr_size(operators) == 0) {
         arr_push(operators, (void *) op);
-  }
-  while(arr_size(operators) > 0 && operatorPrecidence[arr_peek(operators)] < operatorPrecidence[op])
-    eval_current();
+    }
+
+    optional opt;
+    while (arr_size(operators) > 0 && (opt = arr_peek(operators)).e &&
+            operatorPrecedence[(OpCode_type) opt.val] < operatorPrecedence[op]) {
+        eval_current();
+    }
+    if (!opt.e) {
+        stop(tab, sym_file);
+    }
 }
 
-void NewScopeFound(void){
-
-  arr_push(operators, (void *) SCOPESTART);
-
+void NewScopeFound(void) {
+    arr_push(operators, (void *) SCOPESTART);
 }
 
-void EndScopeFound(void){
-
-  while(arr_peek(operators) != SCOPESTART){
-    eval_current();
-  }
-  arr_pop(operators);
+void EndScopeFound(void) {
+    optional opt;
+    while ((opt = arr_peek(operators)).e && opt.val != (void *) SCOPESTART) {
+        eval_current();
+    }
+    arr_pop(operators);
 }
 
-void eval_current(void){
-  
-  OpCodetype operator = arr_pop(operators);
-  
-  if(op_func_is_LtoR[op]){
-    if(op_func_is_binary[op]){
-      sym *l = arr_pop(operands);
-      sym *r = arr_pop(operands);
+void eval_current(void) {
+    optional opt;
+    if (!(opt = arr_pop(operators)).e) {
+        stop(tab, sym_file);
     }
-    else{
-      sym *l = arr_pop(operands);
-      sym *r = null;
-    }
-  }
-  else{
-    if(op_func_is_binary[op]){
-      sym *r = arr_pop(operands);
-      sym *l = arr_pop(operands);
-    }
-    else{
-      sym *l = arr_pop(operands);
-      sym *r = null;
-    }
-  }
+    OpCode_type op = (OpCode_type) opt.val;
 
-  arr_push(operands, op_funcs[operator](l, r));
+    sym *l, *r;
+    if (op_func_is_binary[op]) {
+        if (!(opt = arr_pop(operands)).e) {
+            stop(tab, sym_file);
+        }
+        r = opt.val;
+
+        if (!(opt = arr_pop(operands)).e) {
+            stop(tab, sym_file);
+        }
+        l = opt.val;
+    } else {
+        if (!(opt = arr_pop(operands)).e) {
+            stop(tab, sym_file);
+        }
+        l = opt.val;
+        r = null;
+    }
+
+    arr_push(operands, op_funcs[op](l, r));
 
 }
 
@@ -137,3 +149,8 @@ void InitSemantic(void) {
     }
 }
 
+void Evaluate(void) {
+    while (arr_size(operators) != 0) {
+        eval_current();
+    }
+}

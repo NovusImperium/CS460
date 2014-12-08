@@ -37,8 +37,12 @@ void VariableFound(char *var);
 
 void OperatorFound(OpCode_type op);
 
-void NewScopeDound(void);
+void NewScopeFound(void);
+
+void EndScopeFound(void);
 
 void InitSemantic(void);
+
+void Evaluate(void);
 
 #endif  // EVAL_H

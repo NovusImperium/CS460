@@ -1,11 +1,13 @@
 #include "sym.h"
 #include "hashmap.h"
 #include "set.h"
+#include "defs.h"
 
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <zlib.h>
 
 struct sym {
     char id[32];
@@ -69,7 +71,7 @@ inline optional init_sym() {
 
 inline optional get_sym(table *t, char *id) {
     if (*id == '$') {
-        return arr_get(t->tmps, (unsigned)atoi(&id[1]));
+        return arr_get(t->tmps, (unsigned) atoi(&id[1]));
     } else if (isdigit(*id) || *id == '.') {
         return hashmap_get(t->lits, id);
     } else {
@@ -77,12 +79,73 @@ inline optional get_sym(table *t, char *id) {
     }
 }
 
-inline bool insert_sym(table *t, char *id, value val) {
+inline optional create_sym(table *t, char *id, value val) {
+    optional opt;
+    if (isdigit(*id) || *id == '.') {
+        if (!(opt = hashmap_get(t->lits, id)).e) {
+            sym *s = malloc(sizeof(sym));
+            memset(s, 0, sizeof(sym));
+            strcpy(s->id, id);
+            s->val = val;
+            if (!hashmap_insert(t->lits, s, id)) {
+                opt.e = true;
+                opt.val = s;
+            } else {
+                opt.e = false;
+                opt.err = malloc_fail;
+            }
+        }
+    } else {
+        if (hashmap_get(t->syms, id).e) {
+            opt.e = false;
+            opt.err = malloc_fail;
+        } else {
+            sym *s = malloc(sizeof(sym));
+            memset(s, 0, sizeof(sym));
+            strcpy(s->id, id);
+            s->val = val;
+            if (!hashmap_insert(t->syms, s, id)) {
+                opt.e = true;
+                opt.val = s;
+            } else {
+                opt.e = false;
+                opt.err = malloc_fail;
+            }
+        }
+    }
+
+    return opt;
+}
+
+inline optional create_temp(table *t, value val) {
     sym *s = malloc(sizeof(sym));
-    memset(s,0,sizeof(sym));
-    strcpy(s->id, id);
+    memset(s, 0, sizeof(sym));
+    sprintf(s->id, "$%u", arr_size(t->tmps));
     s->val = val;
-    return hashmap_insert(t->syms, s, id);
+
+    optional opt;
+    if ((opt.e = arr_push(t->tmps, s))) {
+        opt.val = s;
+    } else {
+        opt.err = malloc_fail;
+        free(s);
+    }
+
+    return opt;
+}
+
+inline bool update_sym(table *t, sym *s, value val) {
+    if (*s->id == '$') {
+        s->val = val;
+        return true;
+    } else if (isdigit(*s->id) || *s->id == '.') {
+        return false;
+    } else if (s->val.flag == val.flag) {
+        s->val = val;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 inline value get_value(sym *s) {
@@ -97,18 +160,41 @@ inline void write_syms(table *t, FILE *o) {
     int cmp(void *a, void *b) {
         return strcmp((char *) a, (char *) b);
     }
+
+    out = o;
     optional opt = set_init(cmp);
     if (opt.e) {
-        out = o;
         s = opt.val;
+
+        fputs("Symbols found: \n", out);
         hashmap_foreach(t->syms, sort);
+        set_foreach(s, print);
+        set_free(s);
+    }
+
+    opt = set_init(cmp);
+    if (opt.e) {
+        s = opt.val;
+
+        fputs("Temporaries used: \n", out);
+        arr_foreach(t->tmps, sort);
+        set_foreach(s, print);
+        set_free(s);
+    }
+
+    opt = set_init(cmp);
+    if (opt.e) {
+        s = opt.val;
+
+        fputs("Literals found: \n", out);
+        hashmap_foreach(t->lits, sort);
         set_foreach(s, print);
         set_free(s);
     }
 }
 
 static inline unsigned hash(void *a) {
-    register char *str = ((sym*)a)->id;
+    register char *str = ((sym *) a)->id;
     register unsigned h = 0;
 
     register int c;
@@ -120,7 +206,7 @@ static inline unsigned hash(void *a) {
 }
 
 static inline bool cmp(void *a, void *b) {
-    char *c1 = (char*)a, *c2 = (char*)b;
+    char *c1 = (char *) a, *c2 = (char *) b;
     return strcmp(c1, c2) == 0;
 }
 
@@ -131,15 +217,11 @@ static inline void *sort(void *a) {
 
 static inline void *print(void *a) {
     sym *sm = (sym *) a;
-    char *val;
     if (sm->val.flag) {
-        asprintf(&val, "%ll", sm->val.ival);
+        fprintf(out, "%s = %ll\n", sm->id, sm->val.ival);
     } else {
-        asprintf(&val, "%f", sm->val.dval);
+        fprintf(out, "%s = %f\n", sm->id, sm->val.dval);
     }
-    fprintf(out, "%s = %s\n", sm->id, val);
 
-    free(val);
-    free(a);
-    return null;
+    return a;
 }
