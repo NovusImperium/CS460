@@ -1,6 +1,7 @@
 #include "eval.h"
 #include "syn.h"
 #include "op_func.h"
+#include "defs.h"
 
 extern FILE *sym_file;
 extern FILE *dbg_file;
@@ -151,4 +152,6 @@ void Evaluate(void) {
     while (arr_size(operators) != 0) {
         eval_current();
     }
+    arr_reset(operands);
+    arr_reset(operators);
 }

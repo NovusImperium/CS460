@@ -8,6 +8,9 @@ typedef struct array array;
 // initialize the item array with max length of m
 extern inline optional arr_init(unsigned s);
 
+// removes all items from the array
+extern inline void arr_reset(array *arr);
+
 // create and return a new copy of the item array with size 'm', init new item array if 'arr' is null
 extern inline optional arr_copy(array *arr, unsigned s);
 

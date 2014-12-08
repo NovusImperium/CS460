@@ -225,3 +225,8 @@ inline bool arr_insert(array *arr, void *a, unsigned i) {
     }
     return false;
 }
+
+void arr_reset(array *arr) {
+    memset(arr->as, 0, arr->n * sizeof(void *));
+    arr->n = 0;
+}

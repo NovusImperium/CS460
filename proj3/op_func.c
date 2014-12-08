@@ -8,6 +8,7 @@ extern table *tab;
 extern token_t currentType;
 
 bool op_func_is_binary[] = {
+        false, // OPERR
         false, // POSTPP,
         false, // POSTMM,
         false, // PREPP,
@@ -53,6 +54,7 @@ bool op_func_is_binary[] = {
 };
 
 bool op_func_is_LtoR[] = {
+        false, // OPERR
         true, // POSTPP,
         true, // POSTMM,
         false, // PREPP,
@@ -98,6 +100,7 @@ bool op_func_is_LtoR[] = {
 };
 
 int operatorPrecedence[] = {
+        0, // OPERR
         2, // POSTPP,
         2, // POSTMM,
         3, // PREPP,
@@ -143,6 +146,7 @@ int operatorPrecedence[] = {
 };
 
 op_func op_funcs[] = {
+        null,   // OPERR
         PPPost, // POSTPP,
         MMPost, // POSTMM,
         PPPre, // PREPP,

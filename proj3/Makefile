@@ -15,7 +15,7 @@ CC=gcc
 CFLAGS=-c -MMD
 CXX=g++
 CXXFLAGS=-c -std=c++11 -MMD
-LDFLAGS=
+LDFLAGS=-lm
 DFLAGS=-g
 D_LDFLAGS=-lprofiler
 
@@ -28,8 +28,8 @@ MAIN = Project3.c
 COMMON_SOURCES = 
 COMMON_HEADERS = 
 # all sources req'd for target exe
-TARGET_SOURCES = syn.c hashmap.c sym.c set.c array.c dfa.c lex.c SetLimits.c $(MAIN)
-TARGET_HEADERS = syn.h hashmap.h sym.h set.h array.h defs.h dfa.h lex.h SetLimits.h
+TARGET_SOURCES = syn.c sym.c set.c eval.c op_func.c array.c dfa.c lex.c SetLimits.c $(MAIN)
+TARGET_HEADERS = syn.h sym.h set.h eval.h op_func.h array.h defs.h dfa.h lex.h SetLimits.h
 # all sources req's for test exe
 INPUT_SOURCES = 
 INPUT_HEADERS = 

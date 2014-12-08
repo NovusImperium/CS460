@@ -450,10 +450,10 @@ inline int dfa_pipe(char *str, token_t *t) {
         *t = OREQ;
         return 1;
     } else if (str[1] == '|') {
-        *t = OR;
+        *t = LOGOR;
         return 1;
     } else {
-        *t = LOGOR;
+        *t = OR;
         return 0;
     }
 }
