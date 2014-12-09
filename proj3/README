@@ -1,0 +1,11 @@
+CS 460 Fall 2014
+Project 3, Semantic Analyzer and expression Evaluator
+Authors: Aman Gill and Lowell Olson
+
+What our program can do.
+
+1) Correctly identify lexical, syntactic and semantic errors for our grammar.
+2) Build a symbol table.
+3) Incorrectly evaluate the expressions.
+
+We are currently having problems with the evaluation portion of the program.
