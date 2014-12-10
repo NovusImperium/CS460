@@ -390,7 +390,7 @@ sym *BPlus(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+      stop(tab, sym_file);
     }
     return opt.val;
 }
