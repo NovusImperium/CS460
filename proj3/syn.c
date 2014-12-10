@@ -243,9 +243,9 @@ int accept(token_t t) {
 void program(void) {
     //Check for firsts of decl
     if (tok == INTTYPE || tok == DBLTYPE) {
-        currentType = tok;
-        fprintf(dbg_file, "In program entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        decl();
+      currentType = tok;
+      fprintf(dbg_file, "In program entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
+      decl();
     }
     else {
         fprintf(dbg_file, "In program entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
@@ -277,13 +277,13 @@ void stmt(void) {
 void decl(void) {
     fprintf(dbg_file, "In decl entering ntype tok = %s lexeme = %s\n", token_names[tok], currentlex);
     ntype();
-
+    
     //Check for IDENT following ntype
     if (tok == IDENT) {
         fprintf(dbg_file, "In decl returning IDENT tok = %s lexeme = %s\n", token_names[tok], currentlex);
         //ADD THE VARIABLE TO THE SYMBOL TABLE HERE....
         NewDeclaration(tab, currentlex);
-        accept(tok);
+	accept(tok);
     }
     else {
         error(currentlex);
@@ -303,13 +303,13 @@ void more_decls(void) {
     else if (tok == COMMA) {
         accept(tok);
         if (tok == IDENT) {
-            NewDeclaration(tab, currentlex);
-            accept(tok);
-            fprintf(dbg_file, "In more_decls entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
-            decl_tail();
+	  NewDeclaration(tab, currentlex);
+	  accept(tok);
+	  fprintf(dbg_file, "In more_decls entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
+	  decl_tail();
         }
         else {
-            error(currentlex);
+	  error(currentlex);
         }
     }
     fprintf(dbg_file, "In more_decls entering more_decls tok = %s lexeme = %s\n", token_names[tok], currentlex);
@@ -333,12 +333,13 @@ void more_stmts(void) {
     }
         //Check for firsts of decl
     else if (tok == INTTYPE || tok == DBLTYPE) {
-        fprintf(dbg_file, "In more_stmts entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        decl();
+      currentType = tok;
+      fprintf(dbg_file, "In more_stmts entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
+      decl();
     }
     else {
-        fprintf(dbg_file, "In more_stmts entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        stmt();
+      fprintf(dbg_file, "In more_stmts entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
+      stmt();
     }
     //Check for semi following stmt or decl
     if (tok == SEMI) {
@@ -346,25 +347,25 @@ void more_stmts(void) {
       Evaluate();
     }
     else {
-        error(currentlex);
+      error(currentlex);
     }
     if (tok == EOFT) {
-        return;
+      return;
     }
     fprintf(dbg_file, "In more_stmts entering more_stmts tok = %s lexeme = %s\n", token_names[tok], currentlex);
     more_stmts();
 }
 
 void decl_tail(void) {
-    //Check for ASSIGN terminal symbol in decl_tail
-    if (tok == ASSIGN) {
-        OperatorFound(ASSIGNMENT);
-        fprintf(dbg_file, "In decl_tail accepting ASSIGN tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        accept(tok);
-    }
-    else {}
-    fprintf(dbg_file, "In decl_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
-    stmt();
+  //Check for ASSIGN terminal symbol in decl_tail
+  if (tok == ASSIGN) {
+    OperatorFound(ASSIGNMENT);
+    fprintf(dbg_file, "In decl_tail accepting ASSIGN tok = %s lexeme = %s\n", token_names[tok], currentlex);
+    accept(tok);
+  }
+  else {}
+  fprintf(dbg_file, "In decl_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
+  stmt();
 }
 
 void term(void) {

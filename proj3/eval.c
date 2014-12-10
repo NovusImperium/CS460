@@ -14,10 +14,12 @@ static void eval_current(void);
 
 bool NewDeclaration(table *t, char *L) {
     value val;
-    if ((val.flag = currentType == INTTYPE)) {
+    if (currentType == INTTYPE) {
+      val.flag = 1;
       val.ival = 0;
     } else {
-        val.dval = 0.0;
+      val.flag = 0;
+      val.dval = 0.0;
     }
 
     optional opt;

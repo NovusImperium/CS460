@@ -2,6 +2,7 @@
 #define ARRAY
 
 #include "defs.h"
+#include "stdio.h"
 
 typedef struct array array;
 

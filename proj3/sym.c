@@ -248,9 +248,9 @@ static inline void *print(void *a) {
     if (a != null) {
         sym *sm = (sym *) a;
         if (sm->val.flag) {
-            fprintf(out, "%s = %ll\n", sm->id, sm->val.ival);
+            fprintf(out, "%s = %d\n", sm->id, sm->val.ival);
         } else {
-            fprintf(out, "%s = %f\n", sm->id, sm->val.dval);
+            fprintf(out, "%s = %4.2f\n", sm->id, sm->val.dval);
         }
     }
 
