@@ -193,32 +193,32 @@ inline void write_syms(table *t, FILE *o) {
     */
     optional opt = set_init(cmp);
     if (opt.e) {
-        s = opt.val;
-
-        fputs("Symbols found: \n", out);
-        arr_foreach(t->syms, sort);
-        set_foreach(s, print);
-        set_free(s);
+      s = opt.val;
+      
+      fputs("Symbols found: \n", out);
+      arr_foreach(t->syms, sort);
+      set_foreach(s, print);
+      set_free(s);
     }
 
     opt = set_init(cmp);
     if (opt.e) {
-        s = opt.val;
-
-        fputs("Temporaries used: \n", out);
-        arr_foreach(t->tmps, sort);
-        set_foreach(s, print);
-        set_free(s);
+      s = opt.val;
+      
+      fputs("Temporaries used: \n", out);
+      arr_foreach(t->tmps, sort);
+      set_foreach(s, print);
+      set_free(s);
     }
-
+    
     opt = set_init(cmp);
     if (opt.e) {
-        s = opt.val;
-
-        fputs("Literals found: \n", out);
-        arr_foreach(t->lits, sort);
-        set_foreach(s, print);
-        set_free(s);
+      s = opt.val;
+      
+      fputs("Literals found: \n", out);
+      arr_foreach(t->lits, sort);
+      set_foreach(s, print);
+      set_free(s);
     }
 }
 

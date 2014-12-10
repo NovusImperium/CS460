@@ -15,7 +15,7 @@ static void eval_current(void);
 bool NewDeclaration(table *t, char *L) {
     value val;
     if ((val.flag = currentType == INTTYPE)) {
-        val.ival = 0;
+      val.ival = 0;
     } else {
         val.dval = 0.0;
     }

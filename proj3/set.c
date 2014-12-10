@@ -134,9 +134,9 @@ static inline void node_free(node *n) {
 }
 
 static inline void node_foreach(node *n, void *(*func)(void *)) {
-    if (n != null) {
-        node_foreach(n->l, func);
-        n->t = func(n->t);
-        node_foreach(n->r, func);
-    }
+  if (n != null) {
+    node_foreach(n->l, func);
+    n->t = func(n->t);
+    node_foreach(n->r, func);
+  }
 }

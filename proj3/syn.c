@@ -253,8 +253,8 @@ void program(void) {
     }
     //Check for semi following stmt or decl
     if (tok == SEMI) {
-        Evaluate();
-        accept(tok);
+      accept(tok);
+      Evaluate();
     } else {
         error(currentlex);
     }
@@ -342,8 +342,8 @@ void more_stmts(void) {
     }
     //Check for semi following stmt or decl
     if (tok == SEMI) {
-        Evaluate();
-        accept(tok);
+      accept(tok);
+      Evaluate();
     }
     else {
         error(currentlex);
@@ -406,9 +406,9 @@ void pre(void) {
 }
 
 void stmt_tail(void) {
-    if (tok == SEMI) {
-    }
-    else if (tok == AND || tok == ANDEQ || tok == ASSIGN || tok == DIV || tok == DIVEQ || tok == EQUALTO ||
+  // if (tok == SEMI) {
+  //}
+  if (tok == AND || tok == ANDEQ || tok == ASSIGN || tok == DIV || tok == DIVEQ || tok == EQUALTO ||
             tok == EXP || tok == EXPEQ || tok == GT || tok == GTE || tok == LOGAND || tok == LOGOR || tok == LT ||
             tok == LTE || tok == MINUS || tok == MINUSEQ || tok == MOD || tok == MODEQ || tok == MULT || tok == MULTEQ ||
             tok == NOTEQ || tok == OR || tok == OREQ || tok == PLUS || tok == PLUSEQ || tok == SHIFTL || tok == SHIFTLEQ ||
