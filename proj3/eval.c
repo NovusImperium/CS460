@@ -116,6 +116,9 @@ inline void VariableFound(char *var) {
 }
 
 inline void OperatorFound(OpCode_type op) {
+    if (op_func_is_binary[op]) {
+        printf("add operator %s\n", opcode_str[op]);
+    }
     optional opt;
     while (arr_size(operators) > 0 && (opt = arr_peek(operators)).e &&
             operatorPrecedence[(OpCode_type) opt.val] < operatorPrecedence[op]) {

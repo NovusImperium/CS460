@@ -26,9 +26,9 @@ static inline unsigned hash(void *);
 // equality comparison function for sym*
 static inline bool cmp(void *, void *);
 
-static inline void *sort(void *a);
+static inline void *sort(void *);
 
-static inline void *print(void *a);
+static inline void *print(void *);
 
 inline optional init_sym() {
     table *t;

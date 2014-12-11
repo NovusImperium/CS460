@@ -414,7 +414,7 @@ void stmt_tail(void) {
             tok == LTE || tok == MINUS || tok == MINUSEQ || tok == MOD || tok == MODEQ || tok == MULT || tok == MULTEQ ||
             tok == NOTEQ || tok == OR || tok == OREQ || tok == PLUS || tok == PLUSEQ || tok == SHIFTL || tok == SHIFTLEQ ||
             tok == SHIFTR || tok == SHIFTREQ || tok == XOR || tok == XOREQ) {
-        OperatorFound(binOpTable[tok]);
+        //OperatorFound(binOpTable[tok]);
         fprintf(dbg_file, "In stmt_tail entering binop tok = %s lexeme = %s\n", token_names[tok], currentlex);
         binop();
         fprintf(dbg_file, "In stmt_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
