@@ -208,9 +208,21 @@ inline void write_syms(table *t, FILE *o) {
     if (opt.e) {
       s = opt.val;
       
-      fputs("Symbols found: \n", out);
+      fputs("Symbol Table Variables: \n", out);
       arr_foreach(t->syms, sort);
         set_foreach(s, print);
+	fputs("\n", out);
+      set_free(s);
+    }
+
+    opt = set_init(cmp);
+    if (opt.e) {
+      s = opt.val;
+
+      fputs("Symbol Table Numbers: \n", out);
+      arr_foreach(t->lits, sort);
+      set_foreach(s, print);
+      fputs("\n", out);
       set_free(s);
     }
 
@@ -218,30 +230,22 @@ inline void write_syms(table *t, FILE *o) {
     if (opt.e) {
       s = opt.val;
       
-      fputs("Temporaries used: \n", out);
+      fputs("Symbol Table Temporaries: \n", out);
       arr_foreach(t->tmps, sort);
         set_foreach(s, print);
+	fputs("\n", out);
       set_free(s);
     }
-    
-    opt = set_init(cmp);
-    if (opt.e) {
-      s = opt.val;
-      
-      fputs("Literals found: \n", out);
-      arr_foreach(t->lits, sort);
-        set_foreach(s, print);
-      set_free(s);
-    }
+
 }
 
 inline void *print(void *a) {
     if (a != null) {
         sym *sm = (sym *) a;
         if (sm->val.flag) {
-            fprintf(out, "%s = %lld\n", sm->id, sm->val.ival);
+	  fprintf(out, "\t%s \t\t%lld\n", sm->id, sm->val.ival);
         } else {
-            fprintf(out, "%s = %4.2f\n", sm->id, sm->val.dval);
+            fprintf(out, "\t%s \t\t%4.2f\n", sm->id, sm->val.dval);
         }
     }
 
