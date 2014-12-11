@@ -180,6 +180,19 @@ inline char *get_id(sym *s) {
     return s->id;
 }
 
+inline void *print_sym(void *a) {
+    if (a != null) {
+        sym *sm = (sym *) a;
+        if (sm->val.flag) {
+            printf("%s = %lld\n", sm->id, sm->val.ival);
+        } else {
+            printf("%s = %4.2f\n", sm->id, sm->val.dval);
+        }
+    }
+
+    return a;
+}
+
 inline void write_syms(table *t, FILE *o) {
     int cmp(void *a, void *b) {
         return strcmp((char *) a, (char *) b);
@@ -187,7 +200,7 @@ inline void write_syms(table *t, FILE *o) {
 
     out = o;
     /*
-    hashmap_foreach(t->syms, print);
+    hashmap_foreach(t->syms, print_sym);
     arr_foreach(t->tmps, print);
     arr_foreach(t->lits, print);
     */
@@ -197,7 +210,7 @@ inline void write_syms(table *t, FILE *o) {
       
       fputs("Symbols found: \n", out);
       arr_foreach(t->syms, sort);
-      set_foreach(s, print);
+        set_foreach(s, print);
       set_free(s);
     }
 
@@ -207,7 +220,7 @@ inline void write_syms(table *t, FILE *o) {
       
       fputs("Temporaries used: \n", out);
       arr_foreach(t->tmps, sort);
-      set_foreach(s, print);
+        set_foreach(s, print);
       set_free(s);
     }
     
@@ -217,9 +230,22 @@ inline void write_syms(table *t, FILE *o) {
       
       fputs("Literals found: \n", out);
       arr_foreach(t->lits, sort);
-      set_foreach(s, print);
+        set_foreach(s, print);
       set_free(s);
     }
+}
+
+inline void *print(void *a) {
+    if (a != null) {
+        sym *sm = (sym *) a;
+        if (sm->val.flag) {
+            fprintf(out, "%s = %lld\n", sm->id, sm->val.ival);
+        } else {
+            fprintf(out, "%s = %4.2f\n", sm->id, sm->val.dval);
+        }
+    }
+
+    return a;
 }
 
 static inline unsigned hash(void *a) {
@@ -244,15 +270,3 @@ static inline void *sort(void *a) {
     return a;
 }
 
-static inline void *print(void *a) {
-    if (a != null) {
-        sym *sm = (sym *) a;
-        if (sm->val.flag) {
-            fprintf(out, "%s = %d\n", sm->id, sm->val.ival);
-        } else {
-            fprintf(out, "%s = %4.2f\n", sm->id, sm->val.dval);
-        }
-    }
-
-    return a;
-}

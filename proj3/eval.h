@@ -52,20 +52,20 @@ typedef enum {
     TERNCOLON
 } OpCode_type;
 
-bool NewDeclaration(table *t, char *L);
+extern inline bool NewDeclaration(table *t, char *L);
 
-void NumLitFound(char *num);
+extern inline void NumLitFound(char *num);
 
-void VariableFound(char *var);
+extern inline void VariableFound(char *var);
 
-void OperatorFound(OpCode_type op);
+extern inline void OperatorFound(OpCode_type op);
 
-void NewScopeFound(void);
+extern inline void NewScopeFound(void);
 
-void EndScopeFound(void);
+extern inline void EndScopeFound(void);
 
-void InitSemantic(void);
+extern inline void InitSemantic(void);
 
-void Evaluate(void);
+extern inline void Evaluate(void);
 
 #endif  // EVAL_H

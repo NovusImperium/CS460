@@ -37,5 +37,8 @@ extern inline value get_value(sym *s);
 // get the character string that represents the id of the symbol entry
 extern inline char *get_id(sym *s);
 
+// print a single symbol
+extern inline void *print_sym(void *a);
+
 // writes the symbol entries in alphabetical order to the given file pointer
 extern inline void write_syms(table *t, FILE *out);

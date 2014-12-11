@@ -129,9 +129,9 @@ inline optional arr_pop(array *arr) {
         opt.val = arr->as[arr->n];
         arr->as[arr->n] = null;
 
-        if (arr->n < (arr->s / 4)) {
+        /*if (arr->n < (arr->s / 4)) {
             resize(arr, arr->s / 2);
-        }
+        ]*/
     } else {
         opt.e = false;
         opt.err = out_of_bounds;
