@@ -114,7 +114,7 @@ inline optional create_sym(table *t, char *id, value val) {
                 break;
             }
         }
-        if (idx < n || n == 0) {
+        if (idx >= n) {
             arr_push(t->lits, s);
         }
     } else {
@@ -144,7 +144,7 @@ inline optional create_sym(table *t, char *id, value val) {
 inline optional create_temp(table *t, value val) {
     sym *s = malloc(sizeof(sym));
     memset(s, 0, sizeof(sym));
-    sprintf(s->id, "$%u", arr_size(t->tmps));
+    sprintf(s->id, "$%03u", arr_size(t->tmps));
     s->val = val;
 
     optional opt;
