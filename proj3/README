@@ -6,6 +6,7 @@ What our program can do.
 
 1) Correctly identify lexical, syntactic and semantic errors for our grammar.
 2) Build a symbol table.
-3) Incorrectly evaluate the expressions.
-
-We are currently having problems with the evaluation portion of the program.
+3) Correctly evaluate the expressions.
+4) Write the dbg, lst, and sym files with all dats, with
+the exception of the operators in the sym file.
+5) Still working on the output of the operators.

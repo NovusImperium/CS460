@@ -32,6 +32,8 @@ static inline void *print(void *);
 
 static inline void *print_temps(void *);
 
+static inline void *print_operators(void *);
+
 inline optional init_sym() {
     table *t;
     optional opt;
@@ -242,7 +244,7 @@ inline void write_syms(table *t, FILE *o) {
     opt = set_init(cmp);
     if(opt.e){
       s = opt.val;
-
+      int i = 0;
       fputs("Symbol Table Operators: \n", out);
       //This is where we need to output the operators
       //Example: ++      POSTPP        1           1       LEFT_TO_RIGHT        INTEGER       NONE
