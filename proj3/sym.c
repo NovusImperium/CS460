@@ -30,6 +30,8 @@ static inline void *sort(void *);
 
 static inline void *print(void *);
 
+static inline void *print_temps(void *);
+
 inline optional init_sym() {
     table *t;
     optional opt;
@@ -210,48 +212,67 @@ inline void write_syms(table *t, FILE *o) {
       
       fputs("Symbol Table Variables: \n", out);
       arr_foreach(t->syms, sort);
-        set_foreach(s, print);
-	fputs("\n", out);
+      set_foreach(s, print);
+      fputs("\n", out);
       set_free(s);
     }
-
+    
     opt = set_init(cmp);
     if (opt.e) {
       s = opt.val;
-
+      
       fputs("Symbol Table Numbers: \n", out);
       arr_foreach(t->lits, sort);
       set_foreach(s, print);
       fputs("\n", out);
       set_free(s);
     }
-
+    
     opt = set_init(cmp);
     if (opt.e) {
       s = opt.val;
       
       fputs("Symbol Table Temporaries: \n", out);
       arr_foreach(t->tmps, sort);
-        set_foreach(s, print);
-	fputs("\n", out);
+      set_foreach(s, print_temps);
+      fputs("\n", out);
       set_free(s);
     }
 
+    opt = set_init(cmp);
+    if(opt.e){
+      s = opt.val;
+
+      fputs("Symbol Table Operators: \n", out);
+      //This is where we need to output the operators
+      //Example: ++      POSTPP        1           1       LEFT_TO_RIGHT        INTEGER       NONE
+    }  
 }
 
 inline void *print(void *a) {
     if (a != null) {
         sym *sm = (sym *) a;
         if (sm->val.flag) {
-	  fprintf(out, "\t%s \t\t%lld\n", sm->id, sm->val.ival);
+	  fprintf(out, "\t%s \t\t\t%lld\n", sm->id, sm->val.ival);
         } else {
-            fprintf(out, "\t%s \t\t%4.2f\n", sm->id, sm->val.dval);
+	  fprintf(out, "\t%s \t\t\t%4.2f\n", sm->id, sm->val.dval);
         }
     }
-
     return a;
 }
 
+inline void *print_temps(void *a){
+    if (a != null){
+    sym *sm = (sym *) a;
+     if (sm->val.flag){
+       fprintf(out, "\t%s\tINTTYPE\t\t%lld\n", sm->id, sm->val.ival);
+     }else{
+       fprintf(out, "\t%s\tDOUBLE\t\t%4.2f\n", sm->id, sm->val.dval);
+     }
+  }
+  return a;
+}
+ 
 static inline unsigned hash(void *a) {
     register char *str = ((sym *) a)->id;
     register unsigned h = 0;
