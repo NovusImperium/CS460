@@ -52,7 +52,8 @@ static char *opcode_str[] = {
         "POWER",
         "POWEREQUAL",
         "TERNQUESTION",
-        "TERNCOLON"
+        "TERNCOLON",
+        "BITFLIP"
 };
 
 static inline void eval_current(void);

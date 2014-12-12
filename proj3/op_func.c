@@ -1,5 +1,6 @@
 #include "op_func.h"
 #include "syn.h"
+#include "defs.h"
 #include <math.h>
 
 extern FILE *sym_file;
@@ -188,7 +189,9 @@ int operatorPrecedence[] = {
         4, // POWER,
         15,// POWEREQUAL,
         15, // TERNQUESTION,
-        15 // TERNCOLON
+        15, // TERNCOLON
+        3, // BITFLIP,
+        15, // BITFLIPEQ
 };
 
 op_func op_funcs[] = {
@@ -234,7 +237,8 @@ op_func op_funcs[] = {
         Pwr, // POWER,
         PwrEq,// POWEREQUAL,
         TernQuest, // TERNQUESTION,
-        NULL // TERNCOLON
+        NULL, // TERNCOLON
+        BitFlip, // BITFLIP,
 };
 
 //TBD the following 3 functions are just useless stubs at the moment
@@ -979,4 +983,23 @@ sym *PwrEq(sym *left, sym *right) {
     }
 
     return left;
+}
+
+sym *BitFlip(sym *left, sym *right) {
+    value lval = get_value(left);
+
+    if (lval.flag) {
+        value val;
+        val.flag = true;
+        val.ival = ~lval.ival;
+        optional opt;
+        if ((opt = create_temp(tab, val)).e) {
+            return opt.val;
+        } else {
+            stop();
+        }
+    } else {
+        fprintf(sym_file, "Error operator ~ requires an int lvalue\n");
+        stop();
+    }
 }

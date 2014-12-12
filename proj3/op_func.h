@@ -98,4 +98,6 @@ sym *PwrEq(sym *left, sym *right);
 
 sym *TernQuest(sym *left, sym *right);
 
+sym *BitFlip(sym *left, sym *right);
+
 #endif  // OP_FUNC

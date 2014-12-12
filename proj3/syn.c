@@ -52,7 +52,7 @@ static OpCode_type preOpTable[47] = {
         OPERR,  //LTE,
         OPERR,  //SHIFTREQ,
         OPERR,  //GTE,
-        OPERR,  //TILDE,
+        BITFLIP,  //TILDE,
         OPERR,  //RPAREN,
         OPERR,  //LPAREN,
         OPERR,  //SEMI,

@@ -49,7 +49,8 @@ typedef enum {
     POWER,
     POWEREQUAL,
     TERNQUESTION,
-    TERNCOLON
+    TERNCOLON,
+    BITFLIP
 } OpCode_type;
 
 extern inline bool NewDeclaration(table *t, char *L);
