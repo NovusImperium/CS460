@@ -9,9 +9,11 @@ extern op_func op_funcs[];
 
 extern int operatorPrecedence[];
 
-extern bool op_func_is_binary[];
+extern bool op_is_binary[];
 
-extern bool op_func_is_LtoR[];
+extern bool op_is_LtoR[];
+
+extern bool op_is_assign[];
 
 sym *PPPre(sym *left, sym *right);
 

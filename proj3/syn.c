@@ -156,36 +156,40 @@ static OpCode_type binOpTable[] = {
         OPERR,  //RPAREN,
         OPERR,  //LPAREN,
         OPERR,  //SEMI,
-        TERNQUESTION,  //QUEST,
-        TERNCOLON,  //COLON,
+        OPERR,  //QUEST,
+        OPERR,  //COLON,
         OPERR,  //COMMA,
         OPERR,  //EOFT
 };
 
 void start(char *filename) {
     char *filex = ".";
-    char extension[256];
-    long posi = strcspn(filename, filex);
-    char extention[3];
-    char in_file[256];
-    char dbgfile[256];
-    char lstfile[256];
-    char symfile[256];
+    size_t posi = strcspn(filename, filex);
+    char extension[4];
+    char in_file[32];
+    char dbgfile[32];
+    char lstfile[32];
+    char symfile[32];
+
+    memset(in_file, 0, 32);
+    memset(dbgfile, 0, 32);
+    memset(lstfile, 0, 32);
+    memset(symfile, 0, 32);
 
     strcpy(in_file, filename);
     strncpy(dbgfile, filename, (size_t) posi);
     strcpy(lstfile, dbgfile);
     strcpy(symfile, dbgfile);
 
-
-    long i;
-
+    /*
+    size_t i;
     for (i = posi; i < strlen(in_file); i++) {
-        strcat(extention, &in_file[i + 1]);
+        strcat(extension, &in_file[i + 1]);
     }
+    */
+    strncpy(extension, &in_file[posi + 1], 3);
 
-    if (strncmp(extention, "in", 1) == 0) {
-
+    if (strncmp(extension, "in", 1) == 0) {
         char *debugfile = strcat(dbgfile, ".dbg");
         char *listfile = strcat(lstfile, ".lst");
         char *symbolfile = strcat(symfile, ".sym");
@@ -203,21 +207,20 @@ void start(char *filename) {
         }
         fprintf(dbg_file, "In start current token = %s, character or string = %s\n", token_names[tok], currentlex);
         program();
-    }
-    else {
+    } else {
         printf("Infile must have .in extension\n");
         exit(1);
     }
 }
 
-void stop(table *t, FILE *o) {
+void stop() {
     end_lex();
-    write_syms(t, o);
+    write_syms(tab, sym_file);
     fprintf(lst_file, "%d Syntactic errors found.\n", errors);
     fclose(dbg_file);
     fclose(lst_file);
     fclose(sym_file);
-    exit(1);
+    exit(0);
 }
 
 void error(char *msg) {
@@ -243,25 +246,24 @@ int accept(token_t t) {
 void program(void) {
     //Check for firsts of decl
     if (tok == INTTYPE || tok == DBLTYPE) {
-      currentType = tok;
-      fprintf(dbg_file, "In program entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
-      decl();
-    }
-    else {
+        currentType = tok;
+        fprintf(dbg_file, "In program entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        decl();
+    } else {
         fprintf(dbg_file, "In program entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
         stmt();
     }
     //Check for semi following stmt or decl
     if (tok == SEMI) {
-      accept(tok);
-      Evaluate();
+        accept(tok);
+        Evaluate();
     } else {
         error(currentlex);
     }
     fprintf(dbg_file, "In program entering more_stmts tok = %s lexeme = %s\n", token_names[tok], currentlex);
     more_stmts();
     if (tok == EOFT)
-        stop(tab, sym_file);
+        stop();
     else {
         error(currentlex);
     }
@@ -277,15 +279,14 @@ void stmt(void) {
 void decl(void) {
     fprintf(dbg_file, "In decl entering ntype tok = %s lexeme = %s\n", token_names[tok], currentlex);
     ntype();
-    
+
     //Check for IDENT following ntype
     if (tok == IDENT) {
         fprintf(dbg_file, "In decl returning IDENT tok = %s lexeme = %s\n", token_names[tok], currentlex);
         //ADD THE VARIABLE TO THE SYMBOL TABLE HERE....
         NewDeclaration(tab, currentlex);
-	accept(tok);
-    }
-    else {
+        accept(tok);
+    } else {
         error(currentlex);
     }
     fprintf(dbg_file, "In decl entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
@@ -299,17 +300,16 @@ void decl(void) {
 void more_decls(void) {
     if (tok != COMMA) {
         return;
-    }
-    else if (tok == COMMA) {
+    } else if (tok == COMMA) {
         accept(tok);
+        Evaluate();
         if (tok == IDENT) {
-	  NewDeclaration(tab, currentlex);
-	  accept(tok);
-	  fprintf(dbg_file, "In more_decls entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
-	  decl_tail();
-        }
-        else {
-	  error(currentlex);
+            NewDeclaration(tab, currentlex);
+            accept(tok);
+            fprintf(dbg_file, "In more_decls entering decl_tail tok = %s lexeme = %s\n", token_names[tok], currentlex);
+            decl_tail();
+        } else {
+            error(currentlex);
         }
     }
     fprintf(dbg_file, "In more_decls entering more_decls tok = %s lexeme = %s\n", token_names[tok], currentlex);
@@ -321,8 +321,7 @@ void ntype(void) {
     if (tok == INTTYPE || tok == DBLTYPE) {
         fprintf(dbg_file, "In ntype returning tok = %s lexeme = %s\n", token_names[tok], currentlex);
         accept(tok);
-    }
-    else {
+    } else {
         error(currentlex);
     }
 }
@@ -330,42 +329,36 @@ void ntype(void) {
 void more_stmts(void) {
     if (tok == EOFT) {
         return;
-    }
-        //Check for firsts of decl
-    else if (tok == INTTYPE || tok == DBLTYPE) {
-      currentType = tok;
-      fprintf(dbg_file, "In more_stmts entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
-      decl();
-    }
-    else {
-      fprintf(dbg_file, "In more_stmts entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
-      stmt();
+    } else if (tok == INTTYPE || tok == DBLTYPE) {
+        currentType = tok;
+        fprintf(dbg_file, "In more_stmts entering decl tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        decl();
+    } else {
+        fprintf(dbg_file, "In more_stmts entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        stmt();
     }
     //Check for semi following stmt or decl
     if (tok == SEMI) {
-      accept(tok);
-      Evaluate();
+        accept(tok);
+        Evaluate();
+    } else {
+        error(currentlex);
     }
-    else {
-      error(currentlex);
+    if (tok != EOFT) {
+        fprintf(dbg_file, "In more_stmts entering more_stmts tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        more_stmts();
     }
-    if (tok == EOFT) {
-      return;
-    }
-    fprintf(dbg_file, "In more_stmts entering more_stmts tok = %s lexeme = %s\n", token_names[tok], currentlex);
-    more_stmts();
 }
 
 void decl_tail(void) {
-  //Check for ASSIGN terminal symbol in decl_tail
-  if (tok == ASSIGN) {
-    OperatorFound(ASSIGNMENT);
-    fprintf(dbg_file, "In decl_tail accepting ASSIGN tok = %s lexeme = %s\n", token_names[tok], currentlex);
-    accept(tok);
-  }
-  else {}
-  fprintf(dbg_file, "In decl_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
-  stmt();
+    //Check for ASSIGN terminal symbol in decl_tail
+    if (tok == ASSIGN) {
+        OperatorFound(ASSIGNMENT);
+        fprintf(dbg_file, "In decl_tail accepting ASSIGN tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        accept(tok);
+    }
+    fprintf(dbg_file, "In decl_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
+    stmt();
 }
 
 void term(void) {
@@ -396,52 +389,64 @@ void term(void) {
 
 void pre(void) {
     //Check for terminal Symbols in pre
-    if (tok == MINUSMINUS || tok == MINUS || tok == NOT || tok == PLUS || tok == PLUSPLUS ||
-            tok == TILDE) {
+    if (preOpTable[tok]) {
         OperatorFound(preOpTable[tok]);
         fprintf(dbg_file, "In pre entering pre tok = %s lexeme = %s\n", token_names[tok], currentlex);
         accept(tok);
         pre();
     }
-    else {}
 }
 
 void stmt_tail(void) {
-  // if (tok == SEMI) {
-  //}
-  if (tok == AND || tok == ANDEQ || tok == ASSIGN || tok == DIV || tok == DIVEQ || tok == EQUALTO ||
-            tok == EXP || tok == EXPEQ || tok == GT || tok == GTE || tok == LOGAND || tok == LOGOR || tok == LT ||
-            tok == LTE || tok == MINUS || tok == MINUSEQ || tok == MOD || tok == MODEQ || tok == MULT || tok == MULTEQ ||
-            tok == NOTEQ || tok == OR || tok == OREQ || tok == PLUS || tok == PLUSEQ || tok == SHIFTL || tok == SHIFTLEQ ||
-            tok == SHIFTR || tok == SHIFTREQ || tok == XOR || tok == XOREQ) {
-        //OperatorFound(binOpTable[tok]);
-        fprintf(dbg_file, "In stmt_tail entering binop tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        binop();
-        fprintf(dbg_file, "In stmt_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
-        stmt();
-    }
-    else if (tok == QUEST) {
+    if (tok == QUEST) {
         fprintf(dbg_file, "In stme_tail entering stme tok == %s lexeme = %s\n", token_names[tok], currentlex);
         accept(tok);
-        stmt();
+        if (ConditionalFound()) {
+            stmt();
+            if (tok == COLON) {
+                accept(tok);
+                while (tok != EOFT && tok != SEMI) {
+                    accept(tok);
+                }
+                Evaluate();
+            } else {
+                fprintf(dbg_file, "Unclosed conditional found\n");
+                stop();
+            }
+        } else {
+            while (tok != COLON) {
+                if (tok == EOFT || tok == SEMI) {
+                    errors++;
+                    fprintf(dbg_file, "Unclosed conditional found\n");
+                    stop();
+                } else {
+                    accept(tok);
+                }
+            }
+            accept(tok);
+            stmt();
+        }
         if (tok == COLON) {
             fprintf(dbg_file, "In stmt_tail entering stmt tok == %s lexeme = %s\n,", token_names[tok], currentlex);
             accept(tok);
             stmt();
         }
+    } else if (binOpTable[tok]) {
+        fprintf(dbg_file, "In stmt_tail entering binop tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        binop();
+        fprintf(dbg_file, "In stmt_tail entering stmt tok = %s lexeme = %s\n", token_names[tok], currentlex);
+        stmt();
     }
 }
 
 void var(void) {
     //Check for terminal symbols for var
-    if (tok == IDENT || tok == NUMLIT) {
-        //TEST TO SEE IF THE SYMBOL IS IN THE SYMBOL TABLE.  IF NOT ADD IT IN....
-        //IF TOKEN IS NUMNUT IT IS A NUMLIT WITH A DECIMAL POINT IN IT
-        if (tok == IDENT) {
-            VariableFound(currentlex);
-        } else {
-            NumLitFound(currentlex);
-        }
+    if (tok == IDENT) {
+        VariableFound(currentlex);
+        fprintf(dbg_file, "In var accepting token tok = %s lex = %s\n", token_names[tok], currentlex);
+        accept(tok);
+    } else if (tok == NUMLIT) {
+        NumLitFound(currentlex);
         fprintf(dbg_file, "In var accepting token tok = %s lex = %s\n", token_names[tok], currentlex);
         accept(tok);
     } else {
@@ -452,7 +457,7 @@ void var(void) {
 
 void post(void) {
     //Check for terminal symbol for post
-    if (tok == PLUSPLUS || tok == MINUSMINUS) {
+    if (postOpTable[tok]) {
         OperatorFound(postOpTable[tok]);
         accept(tok);
     }
@@ -460,12 +465,7 @@ void post(void) {
 
 void binop(void) {
     //Check for terminal symbol for binop
-    if (tok == AND || tok == ANDEQ || tok == ASSIGN || tok == DIV || tok == DIVEQ || tok == EQUALTO ||
-            tok == EXP || tok == EXPEQ || tok == GT || tok == GTE || tok == LOGAND || tok == LOGOR ||
-            tok == LT || tok == LTE || tok == MINUS || tok == MINUSEQ || tok == MOD || tok == MODEQ ||
-            tok == MULT || tok == MULTEQ || tok == NOTEQ || tok == OR || tok == OREQ || tok == PLUS ||
-            tok == PLUSEQ || tok == SHIFTL || tok == SHIFTLEQ || tok == SHIFTR || tok == SHIFTREQ ||
-            tok == XOR || tok == XOREQ) {
+    if (binOpTable[tok]) {
         OperatorFound(binOpTable[tok]);
         accept(tok);
     }

@@ -78,7 +78,7 @@ inline optional get_sym(table *t, char *id) {
         unsigned idx;
         optional opt;
         for (idx = 0; idx < arr_size(t->lits); idx++) {
-            if (strcmp(((sym *)(opt = arr_get(t->lits, idx)).val)->id, id) == 0) {
+            if (strcmp(((sym *) (opt = arr_get(t->lits, idx)).val)->id, id) == 0) {
                 return opt;
             }
         }
@@ -114,7 +114,7 @@ inline optional create_sym(table *t, char *id, value val) {
         unsigned idx;
         unsigned n = arr_size(t->lits);
         for (idx = 0; idx < n; idx++) {
-            if (strcmp(((sym *)arr_get(t->lits, idx).val)->id, id) == 0) {
+            if (strcmp(((sym *) arr_get(t->lits, idx).val)->id, id) == 0) {
                 break;
             }
         }
@@ -148,7 +148,7 @@ inline optional create_sym(table *t, char *id, value val) {
 inline optional create_temp(table *t, value val) {
     sym *s = malloc(sizeof(sym));
     memset(s, 0, sizeof(sym));
-    sprintf(s->id, "$%03u", arr_size(t->tmps));
+    sprintf(s->id, "$%u", arr_size(t->tmps));
     s->val = val;
 
     optional opt;
@@ -163,10 +163,7 @@ inline optional create_temp(table *t, value val) {
 }
 
 inline bool update_sym(sym *s, value val) {
-    if (*s->id == '$') {
-        s->val = val;
-        return true;
-    } else if (isdigit(*s->id) || *s->id == '.') {
+    if (*s->id == '$' || isdigit(*s->id) || *s->id == '.') {
         return false;
     } else if (s->val.flag == val.flag) {
         s->val = val;
@@ -203,78 +200,63 @@ inline void write_syms(table *t, FILE *o) {
     }
 
     out = o;
-    /*
-    hashmap_foreach(t->syms, print_sym);
-    arr_foreach(t->tmps, print);
-    arr_foreach(t->lits, print);
-    */
     optional opt = set_init(cmp);
     if (opt.e) {
-      s = opt.val;
-      
-      fputs("Symbol Table Variables: \n", out);
-      arr_foreach(t->syms, sort);
-      set_foreach(s, print);
-      fputs("\n", out);
-      set_free(s);
+        s = opt.val;
+
+        fputs("Symbols found: \n", out);
+        arr_foreach(t->syms, sort);
+        set_foreach(s, print);
+        set_free(s);
     }
-    
+
+    fputs("Temporaries used: \n", out);
+    arr_foreach(t->tmps, print);
+
     opt = set_init(cmp);
     if (opt.e) {
-      s = opt.val;
-      
-      fputs("Symbol Table Numbers: \n", out);
-      arr_foreach(t->lits, sort);
-      set_foreach(s, print);
-      fputs("\n", out);
-      set_free(s);
-    }
-    
-    opt = set_init(cmp);
-    if (opt.e) {
-      s = opt.val;
-      
-      fputs("Symbol Table Temporaries: \n", out);
-      arr_foreach(t->tmps, sort);
-      set_foreach(s, print_temps);
-      fputs("\n", out);
-      set_free(s);
+        s = opt.val;
+
+        fputs("Literals found: \n", out);
+        arr_foreach(t->lits, sort);
+        set_foreach(s, print);
+        set_free(s);
     }
 
     opt = set_init(cmp);
-    if(opt.e){
-      s = opt.val;
-      int i = 0;
-      fputs("Symbol Table Operators: \n", out);
-      //This is where we need to output the operators
-      //Example: ++      POSTPP        1           1       LEFT_TO_RIGHT        INTEGER       NONE
-    }  
+    if (opt.e) {
+        s = opt.val;
+        int i = 0;
+        fputs("Symbol Table Operators: \n", out);
+        //This is where we need to output the operators
+        //Example: ++      POSTPP        1           1       LEFT_TO_RIGHT        INTEGER       NONE
+    }
 }
 
 inline void *print(void *a) {
     if (a != null) {
         sym *sm = (sym *) a;
         if (sm->val.flag) {
-	  fprintf(out, "\t%s \t\t\t%lld\n", sm->id, sm->val.ival);
+            fprintf(out, "\t%s \tINTTYPE\t%lld\n", sm->id, sm->val.ival);
         } else {
-	  fprintf(out, "\t%s \t\t\t%4.2f\n", sm->id, sm->val.dval);
+            fprintf(out, "\t%s \tDBLTYPE\t%4.2f\n", sm->id, sm->val.dval);
         }
     }
     return a;
 }
 
-inline void *print_temps(void *a){
-    if (a != null){
-    sym *sm = (sym *) a;
-     if (sm->val.flag){
-       fprintf(out, "\t%s\tINTTYPE\t\t%lld\n", sm->id, sm->val.ival);
-     }else{
-       fprintf(out, "\t%s\tDOUBLE\t\t%4.2f\n", sm->id, sm->val.dval);
-     }
-  }
-  return a;
+inline void *print_temps(void *a) {
+    if (a != null) {
+        sym *sm = (sym *) a;
+        if (sm->val.flag) {
+            fprintf(out, "\t%s\tINTTYPE\t\t%lld\n", sm->id, sm->val.ival);
+        } else {
+            fprintf(out, "\t%s\tDOUBLE\t\t%4.2f\n", sm->id, sm->val.dval);
+        }
+    }
+    return a;
 }
- 
+
 static inline unsigned hash(void *a) {
     register char *str = ((sym *) a)->id;
     register unsigned h = 0;

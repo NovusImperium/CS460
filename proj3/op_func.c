@@ -7,7 +7,7 @@ extern FILE *dbg_file;
 extern table *tab;
 extern token_t currentType;
 
-bool op_func_is_binary[] = {
+bool op_is_binary[] = {
         false, // OPERR
         false, // POSTPP,
         false, // POSTMM,
@@ -53,7 +53,7 @@ bool op_func_is_binary[] = {
         false // TERNCOLON
 };
 
-bool op_func_is_LtoR[] = {
+bool op_is_LtoR[] = {
         false, // OPERR
         true, // POSTPP,
         true, // POSTMM,
@@ -94,6 +94,52 @@ bool op_func_is_LtoR[] = {
         false, // SCOPESTART,
         false, // SCOPEEND,
         true, // POWER,
+        false, // POWEREQUAL,
+        false, // TERNQUESTION,
+        false // TERNCOLON
+};
+
+bool op_is_assign[] = {
+        false, // OPERR
+        false, // POSTPP,
+        false, // POSTMM,
+        false, // PREPP,
+        false, // PREMM,
+        false, // UPLUS,
+        false, // UMINUS,
+        false, // NEGATION,
+        false, // MULTIPLY,
+        false, // DIVIDE,
+        false, // REMAINDER,
+        false, // BPLUS,
+        false, // BMINUS,
+        false, // SHIFTLEFT,
+        false, // SHIFTRIGHT,
+        false, // LESSTHAN,
+        false, // LESSTHANEQ,
+        false, // GREATERTHAN,
+        false, // GREATERTHANEQ,
+        false, // EQUAL,
+        false, // NOTEQUAL,
+        false, // BITAND,
+        false, // BITXOR,
+        false, // BITOR,
+        false, // LOGICALAND,
+        false, // LOGICALOR,
+        true, // ASSIGNMENT,
+        true, // PLUSEQUAL,
+        true, // MINUSEQUAL,
+        true, // MULTEQUAL,
+        true, // DIVEQUAL,
+        true, // REMEQUAL,
+        true, // SHIFTLEFTEQUAL,
+        true, // SHIFTRIGHTEQUAL,
+        true, // BITANDEQUAL,
+        true, // BITXOREQUAL,
+        true, // BITOREQUAL,
+        false, // SCOPESTART,
+        false, // SCOPEEND,
+        false, // POWER,
         true, // POWEREQUAL,
         false, // TERNQUESTION,
         false // TERNCOLON
@@ -137,7 +183,7 @@ int operatorPrecedence[] = {
         15, // BITANDEQUAL,
         15, // BITXOREQUAL,
         15, // BITOREQUAL,
-        0,  // SCOPESTART,
+        30,  // SCOPESTART,
         0, // SCOPEEND,
         4, // POWER,
         15,// POWEREQUAL,
@@ -211,11 +257,11 @@ sym *PPPre(sym *left, sym *right) {
         val.ival = lval.ival + 1;
     } else {
         fprintf(sym_file, "Error operator ++ must have int lvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, val)) {
-        stop(tab, sym_file);
+        stop();
     }
     return left;
 }
@@ -227,12 +273,12 @@ sym *PPPost(sym *left, sym *right) {
         val.ival = lval.ival + 1;
     } else {
         fprintf(sym_file, "Error operator ++ must have int lvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -244,11 +290,11 @@ sym *MMPre(sym *left, sym *right) {
         val.ival = lval.ival - 1;
     } else {
         fprintf(sym_file, "Error operator -- must have int lvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, val)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -261,12 +307,12 @@ sym *MMPost(sym *left, sym *right) {
         val.ival = lval.ival - 1;
     } else {
         fprintf(sym_file, "Error operator -- must have int lvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -287,7 +333,7 @@ sym *UMinus(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -300,7 +346,7 @@ sym *Negate(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -322,7 +368,7 @@ sym *Mult(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -334,7 +380,7 @@ sym *Div(sym *left, sym *right) {
 
     if (rval.flag && rval.ival == 0 || !rval.flag && rval.dval == 0.0) {
         fprintf(sym_file, "Error Div by 0\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if ((val.flag = lval.flag && rval.flag)) {
@@ -349,7 +395,7 @@ sym *Div(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -363,12 +409,12 @@ sym *Rem(sym *left, sym *right) {
         val.ival = lval.ival % rval.ival;
     } else {
         fprintf(sym_file, "Error operator % requires int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -390,7 +436,7 @@ sym *BPlus(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-      stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -412,7 +458,7 @@ sym *BMinus(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -425,12 +471,12 @@ sym *LShift(sym *left, sym *right) {
         val.ival = lval.ival << rval.ival;
     } else {
         fprintf(sym_file, "Error operator << requires int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -444,12 +490,12 @@ sym *RShift(sym *left, sym *right) {
         val.ival = lval.ival >> rval.ival;
     } else {
         fprintf(sym_file, "Error operator >> requires int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -472,7 +518,7 @@ sym *LessThan(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -495,7 +541,7 @@ sym *LessThanEq(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -518,7 +564,7 @@ sym *GreaterThan(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -541,7 +587,7 @@ sym *GreaterThanEq(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -564,7 +610,7 @@ sym *EqualTo(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -587,7 +633,7 @@ sym *NotEQ(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -601,12 +647,12 @@ sym *BitAnd(sym *left, sym *right) {
         val.ival = lval.ival & rval.ival;
     } else {
         fprintf(sym_file, "Error operator & requires an int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -620,12 +666,12 @@ sym *BitXor(sym *left, sym *right) {
         val.ival = lval.ival ^ rval.ival;
     } else {
         fprintf(sym_file, "Error operator ^ requires an int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -639,12 +685,12 @@ sym *BitOr(sym *left, sym *right) {
         val.ival = lval.ival | rval.ival;
     } else {
         fprintf(sym_file, "Error operator | requires an int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -659,7 +705,7 @@ sym *LogAnd(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -674,7 +720,7 @@ sym *LogOr(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -690,7 +736,7 @@ sym *Assign(sym *left, sym *right) {
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -711,7 +757,7 @@ sym *PlusEq(sym *left, sym *right) {
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -732,7 +778,7 @@ sym *MinEq(sym *left, sym *right) {
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -753,7 +799,7 @@ sym *MulEq(sym *left, sym *right) {
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -766,7 +812,7 @@ sym *DivEq(sym *left, sym *right) {
 
     if (rval.flag && rval.ival == 0 || !rval.flag && rval.dval == 0.0) {
         fprintf(sym_file, "Error Div by 0\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (lval.flag && rval.flag) {
@@ -780,7 +826,7 @@ sym *DivEq(sym *left, sym *right) {
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -794,11 +840,11 @@ sym *RemEq(sym *left, sym *right) {
         lval.ival = lval.ival % rval.ival;
     } else {
         fprintf(sym_file, "Error operator % requires int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -811,11 +857,11 @@ sym *LShiftEq(sym *left, sym *right) {
         lval.ival = lval.ival << rval.ival;
     } else {
         fprintf(sym_file, "Error operator <<= requires int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -828,11 +874,11 @@ sym *RShiftEq(sym *left, sym *right) {
         lval.ival = lval.ival >> rval.ival;
     } else {
         fprintf(sym_file, "Error operator >>= requires int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -846,11 +892,11 @@ sym *BitAndEq(sym *left, sym *right) {
         lval.ival = lval.ival & rval.ival;
     } else {
         fprintf(sym_file, "Error operator &= requires an int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -864,11 +910,11 @@ sym *BitXorEq(sym *left, sym *right) {
         lval.ival = lval.ival ^ rval.ival;
     } else {
         fprintf(sym_file, "Error operator ^= requires an int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -882,11 +928,11 @@ sym *BitOrEq(sym *left, sym *right) {
         lval.ival = lval.ival | rval.ival;
     } else {
         fprintf(sym_file, "Error operator |= requires an int lvalue and int rvalue\n");
-        stop(tab, sym_file);
+        stop();
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;
@@ -909,7 +955,7 @@ sym *Pwr(sym *left, sym *right) {
 
     optional opt;
     if (!(opt = create_temp(tab, val)).e) {
-        stop(tab, sym_file);
+        stop();
     }
     return opt.val;
 }
@@ -929,7 +975,7 @@ sym *PwrEq(sym *left, sym *right) {
     }
 
     if (!update_sym(left, lval)) {
-        stop(tab, sym_file);
+        stop();
     }
 
     return left;

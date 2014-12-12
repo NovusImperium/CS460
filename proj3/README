@@ -7,6 +7,6 @@ What our program can do.
 1) Correctly identify lexical, syntactic and semantic errors for our grammar.
 2) Build a symbol table.
 3) Correctly evaluate the expressions.
-4) Write the dbg, lst, and sym files with all dats, with
-the exception of the operators in the sym file.
-5) Still working on the output of the operators.
+4) Correctly initialize a list of variables
+5) Correctly evaluate a ternary conditional (nested conditions have undefined behavior)
+6) Write the dbg, lst, and sym files with all dats, with the exception of the operators in the sym file.

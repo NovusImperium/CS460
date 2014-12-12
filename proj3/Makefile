@@ -65,7 +65,7 @@ PROF_TXT = profile.txt
 
 ## define the sources and name of the tarball to turn in
 # all files that are to be included in the tarball
-TURNIN_FILES = Makefile $(COMMON_SOURCES) $(COMMON_HEADERS) $(TARGET_SOURCES) $(TARGET_HEADERS)
+TURNIN_FILES = Makefile README $(COMMON_SOURCES) $(COMMON_HEADERS) $(TARGET_SOURCES) $(TARGET_HEADERS)
 
 # the name of the file to turn in (taken from the main file)
 FILE = gill$(HWNUM)
